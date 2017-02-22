@@ -2,8 +2,6 @@
 
 import java.util.Scanner;
 
-import javax.naming.directory.SearchResult;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -86,6 +84,7 @@ public class Jwxt {
 				param = "";
 			}
 		}
+		scanner.close();
 	}
 	
 	public static void PrintHelp(boolean mini) {
