@@ -7,4 +7,4 @@ The project is developed under JDK1.8, using eclipse and apparently it is still 
 Thanks for the following project:<br>
 httpcomponents-client<br>
 jsoup<br>
-GSON<>br
+GSON<br>
