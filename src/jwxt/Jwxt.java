@@ -14,8 +14,12 @@ public class Jwxt {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		CourseData course = new CourseData("11611716", "dzy125474");
 		Scanner scanner = new Scanner(System.in);
+		System.out.print("Please input your username: ");
+		String username = scanner.nextLine();
+		System.out.print("Please input your password: ");
+		String password = scanner.nextLine();
+		CourseData course = new CourseData(username, password);		
 		String string = "initial_8dzulAHI44TITVTP";
 		String param = "";
 		while (!string.equals("exit")) {
