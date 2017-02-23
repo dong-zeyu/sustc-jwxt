@@ -43,10 +43,10 @@ public class NetworkConnetion {
 	private String TGC = "";
 		
 	public NetworkConnetion() {
-		SSLSetup();//建立通过SSL的httpclient
+		setupSSL();//建立通过SSL的httpclient
 	}
 	
-	private void SSLSetup() {
+	private void setupSSL() {
 		cookieStore = new BasicCookieStore();
 		try {
 			SSLContext sslContext;
@@ -67,7 +67,7 @@ public class NetworkConnetion {
 		}
 	}
 
-	private boolean CASLogin() {
+	private boolean loginCAS() {
 		boolean re = false;
 		HttpGet get = new HttpGet(url_cas);	
 		CloseableHttpResponse response = null;
@@ -114,11 +114,11 @@ public class NetworkConnetion {
 		return re;
 	}
 	
-	private boolean JwxtJSessionVerify() {
+	private boolean jwxtJSessionVerify() {
 		HttpGet get = new HttpGet(url + "/jsxsd/" + "?" + ticket);
 		boolean re = false;
 		CloseableHttpResponse response;
-		if (CASLogin()) {
+		if (loginCAS()) {
 			try {
 				response = httpclient.execute(get);
 				if (response.getStatusLine().getStatusCode() == 200 || 
@@ -139,7 +139,7 @@ public class NetworkConnetion {
 		return re;
 	}
 	
-	public CloseableHttpResponse DataFetcher(int type, String suburl, String[] postdata) {//post data has the form: name=value
+	public CloseableHttpResponse dataFetcher(int type, String suburl, String[] postdata) {//post data has the form: name=value
 		CloseableHttpResponse response = null;
 //		opr.addHeader(new BasicHeader("X-Requested-With", "XMLHttpRequest"));//unused
 		try {
@@ -179,21 +179,21 @@ public class NetworkConnetion {
 		else if (response.getStatusLine().getStatusCode() == 403 || 
 				(response.getStatusLine().getStatusCode() == 302 && 
 				response.getHeaders("Location")[0].getValue().startsWith("https://cas.sustc.edu.cn"))) {
-			Login();
-			return DataFetcher(type, suburl, postdata);
+			login();
+			return dataFetcher(type, suburl, postdata);
 		}
 		return response;
 	}
 	
-	protected boolean Login() {
+	protected boolean login() {
 		clear();
-		if (JwxtJSessionVerify()) {
+		if (jwxtJSessionVerify()) {
 			return true;
 		}
 		return false;
 	}
 	
-	private void clear() {
+	protected void clear() {
 		lt = "";
 		execution = "";	
 		ticket = "";
@@ -201,7 +201,7 @@ public class NetworkConnetion {
 		cookieStore.clear();
 	}
 	
-	public boolean IsLogIn() {
+	public boolean isLogIn() {
 		if (TGC == "") {
 			return false;
 		}
@@ -209,4 +209,3 @@ public class NetworkConnetion {
 	}
 	
 }
-

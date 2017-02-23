@@ -20,9 +20,6 @@ public class Jwxt {
 		String param = "";
 		while (!string.equals("exit")) {
 			switch (string) {
-			case "test" :
-				System.out.println(param);
-				break;
 			case "login" :
 				try {
 					course.login(param.split(":")[0], param.split(":")[1]);
@@ -41,7 +38,7 @@ public class Jwxt {
 				break;
 			case "search" :
 				if (!param.equals("")) {
-					course.Search(param);
+					course.search(param);
 					for (int i = 0; i < CourseData.courserepo.length; i++) {
 						String repo = CourseData.courserepo[i];
 						System.out.println(repo + ":");
@@ -69,14 +66,14 @@ public class Jwxt {
 				}
 				break;
 			case "initial_8dzulAHI44TITVTP" :
-				PrintHelp(true);
+				printHelp(true);
 				break;
 			case "help":
-				PrintHelp(false);
+				printHelp(false);
 				break;
 			case "update":
 				System.out.println("[Main] Updating...");
-				if (course.UpdateData()) {
+				if (course.updateData()) {
 					System.out.println("[Main] Succeed");
 				}
 				else {
@@ -110,7 +107,7 @@ public class Jwxt {
 		scanner.close();
 	}
 	
-	public static void PrintHelp(boolean mini) {
+	public static void printHelp(boolean mini) {
 		if (mini) {
 //			System.out.println("This is a mini useless help.");
 			System.out.print(

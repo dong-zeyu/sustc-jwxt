@@ -62,22 +62,22 @@ public class CourseData extends NetworkConnetion {
 		url = "http://jwxt.sustc.edu.cn";
 		username = user;
 		password = pass;
-	    if (WriteCourse(coursestorge, false) && WriteCourse(selectedstorge, false)) {
+	    if (writeCourse(coursestorge, false) && writeCourse(selectedstorge, false)) {
 	    	System.out.println("[CourseCenter] Load storage.");
 	   	}
 	   	else {
 	   		System.out.println("[CourseCenter] Not all storages are found, get them.");
-	   		if (UpdateData()) {
+	   		if (updateData()) {
 	   			System.out.println("[CourseCenter] Setup course storage successfully.");
 	   		}
     	}
 	}
 	
-	private boolean GetIn() {//获取选课权限
+	private boolean getIn() {//获取选课权限
 		CloseableHttpResponse response = null;
-		if (IsLogIn()) {
+		if (isLogIn()) {
 			try {
-					response = DataFetcher(NetworkConnetion.GET, Xsxk, null);
+					response = dataFetcher(NetworkConnetion.GET, Xsxk, null);
 					if (EntityUtils.toString(response.getEntity())
 							.contains("当前未开放选课")) {
 						System.out.println("[CourseCenter] 尚未开放选课");
@@ -97,8 +97,8 @@ public class CourseData extends NetworkConnetion {
 			return true;
 		} else {
 				System.out.println("[CourseCenter] Login...");
-				if (Login()) {
-					return GetIn();
+				if (login()) {
+					return getIn();
 				}
 				else {
 					System.out.println("[CourseCenter] Login Failed due to some reason. Please check your username and password");
@@ -107,13 +107,13 @@ public class CourseData extends NetworkConnetion {
 		return false;
 	}
 	
-	private JsonArray GetCourseData(String repo) { //获取课程数据
+	private JsonArray getCourseData(String repo) { //获取课程数据
 		try {
-			GetIn();
+			getIn();
 			CloseableHttpResponse response;
 			JsonParser parse;
 			JsonObject source;
-			response = DataFetcher(NetworkConnetion.POST, 
+			response = dataFetcher(NetworkConnetion.POST, 
 					"/jsxsd/xsxkkc/xsxk" + repo + "?kcxx=&skls=&skxq=&skjc=&sfym=false&sfct=false",
 					new String[] { "iDisplayStart=0", 
 			"iDisplayLength=0" });
@@ -122,7 +122,7 @@ public class CourseData extends NetworkConnetion {
 				source = (JsonObject) parse
 					.parse(new StringReader(EntityUtils.toString(response.getEntity()))); //创建jsonObject对象
 				response.close();//获取总课程数
-				response = DataFetcher(NetworkConnetion.POST, 
+				response = dataFetcher(NetworkConnetion.POST, 
 						"/jsxsd/xsxkkc/xsxk" + repo + DefaultQuery, new String[] {
 								"iDisplayStart=0", 
 								"iDisplayLength=" + source.get("iTotalRecords").getAsString() });
@@ -140,10 +140,10 @@ public class CourseData extends NetworkConnetion {
 		return null;
 	}
 	
-	private JsonArray GetSelectedData() { //更新已选课程数据
-		GetIn();
+	private JsonArray getSelectedData() { //更新已选课程数据
+		getIn();
 		CloseableHttpResponse response;
-		response = DataFetcher(NetworkConnetion.GET, Xkjglb, null);
+		response = dataFetcher(NetworkConnetion.GET, Xkjglb, null);
 		JsonArray array = new JsonArray();
 		try {
 			String string = EntityUtils.toString(response.getEntity());
@@ -168,7 +168,7 @@ public class CourseData extends NetworkConnetion {
 		return null;
 	}
 	
-	private boolean WriteCourse(String FilePath, boolean work) { //写入到文件
+	private boolean writeCourse(String FilePath, boolean work) { //写入到文件
 		File file =new File(FilePath);
 		try {
 		if (work) {
@@ -210,24 +210,24 @@ public class CourseData extends NetworkConnetion {
 		return false;
 	}
 	
-	public boolean UpdateData() {//更新课程数据
-		if (!GetIn()) {
+	public boolean updateData() {//更新课程数据
+		if (!getIn()) {
 			System.out.println("[CourseCenter] Update Failed: Can't Login.");
 			return false;
 		}
-		selected = GetSelectedData();
+		selected = getSelectedData();
 		for (int i = 0; i < courserepo.length; i++) {
-			course.add(courserepo[i], GetCourseData(courserepo[i]));		
+			course.add(courserepo[i], getCourseData(courserepo[i]));		
 		}
-		if(WriteCourse(coursestorge, true) && WriteCourse(selectedstorge, true)) {
+		if(writeCourse(coursestorge, true) && writeCourse(selectedstorge, true)) {
 			return true;
 		}
 		return false;
 	}
 	
-	public boolean Select(String base, String id) {
-		GetIn();
-		HttpResponse response = DataFetcher(NetworkConnetion.GET, 
+	public boolean select(String base, String id) {
+		getIn();
+		HttpResponse response = dataFetcher(NetworkConnetion.GET, 
 				base + "?jx0404id=" + id + "&xkzy=&trjf=", null);
 		JsonParser jsonParser = new JsonParser();
 		try {
@@ -237,8 +237,8 @@ public class CourseData extends NetworkConnetion {
 			while (!source.get("success").getAsBoolean()) {
 				System.out.printf("[CourseCenter] Failed: %s\n", source.get("message").getAsString());
 				Thread.sleep(10000);
-				GetIn();
-				response = DataFetcher(NetworkConnetion.GET, 
+				getIn();
+				response = dataFetcher(NetworkConnetion.GET, 
 						opFawxk + "?jx0404id=" + id + "&xkzy=&trjf=", null);
 				source = (JsonObject) jsonParser
 						.parse(new StringReader(EntityUtils.toString(response.getEntity())));//创建jsonObject对象
@@ -253,9 +253,9 @@ public class CourseData extends NetworkConnetion {
 		return false;
 	}
 	
-	public boolean Quit(String id) {
-		GetIn();
-		HttpResponse response = DataFetcher(NetworkConnetion.GET, 
+	public boolean quit(String id) {
+		getIn();
+		HttpResponse response = dataFetcher(NetworkConnetion.GET, 
 				XstkOper + "?jx0404id=" + id, null);
 		JsonParser jsonParser = new JsonParser();
 		try {
@@ -274,7 +274,7 @@ public class CourseData extends NetworkConnetion {
 		return false;
 	}
 	
-	public void Search(String name) {
+	public void search(String name) {
 		JsonObject result = new JsonObject();
 		for (int i = 0; i < courserepo.length; i++) {
 			if (course.get(courserepo[i]).isJsonArray()) {
@@ -298,7 +298,7 @@ public class CourseData extends NetworkConnetion {
 	public boolean login(String user, String pass) {
 		username = user;
 		password = pass;
-		Login();
+		login();
 		return false;	
 	}
 	
