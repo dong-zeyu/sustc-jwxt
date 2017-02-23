@@ -1,3 +1,2 @@
 *.json
-*.cer
-*.html
+bin/.gitignore
