@@ -7,9 +7,7 @@ import com.google.gson.JsonObject;
 
 import http.CourseData;
 
-public class Jwxt {	
-	static JsonObject searchResult = null;
-	
+public class Jwxt {		
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Scanner scanner = new Scanner(System.in);
@@ -22,7 +20,16 @@ public class Jwxt {
 		String param = "";
 		while (!string.equals("exit")) {
 			switch (string) {
+			case "test" :
+				System.out.println(param);
+				break;
 			case "login" :
+				try {
+					course.login(param.split(":")[0], param.split(":")[1]);
+				} catch (IndexOutOfBoundsException e1) {
+					// TODO Auto-generated catch block
+					System.out.println("Format error: pleas use 'login user:pass' to re-login");
+				}
 				break;
 			case "remove" :
 				break;
@@ -34,11 +41,11 @@ public class Jwxt {
 				break;
 			case "search" :
 				if (!param.equals("")) {
-					searchResult = course.Search(param);
+					course.Search(param);
 					for (int i = 0; i < CourseData.courserepo.length; i++) {
 						String repo = CourseData.courserepo[i];
 						System.out.println(repo + ":");
-						JsonArray array = searchResult.get(repo).getAsJsonArray();
+						JsonArray array = course.searchResult.get(repo).getAsJsonArray();
 						for (int j = 0; j < array.size(); j++) {
 							JsonObject object = array.get(j).getAsJsonObject();
 							String skls = "";
@@ -85,6 +92,7 @@ public class Jwxt {
 			System.out.print(">");
 			string = scanner.nextLine();
 			if (string.contains(" ")) {
+				string = string.replaceAll("\\s+", " ");
 				try {
 					param = string.split(" ")[1];
 					string = string.split(" ")[0];
@@ -108,7 +116,7 @@ public class Jwxt {
 			System.out.print(
 					  "\nUsage: command [parameter]\n"
 					+ "command: update search add remove list select help exit\n\n"
-					+ "If you input error username and password try 'login user:pass' to re-login"
+					+ "If you input error username and password try 'login user:pass' to re-login\n"
 					+ "type 'help' for more information\n"
 					);
 		}

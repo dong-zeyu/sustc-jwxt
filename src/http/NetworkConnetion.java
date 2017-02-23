@@ -31,12 +31,12 @@ import org.jsoup.nodes.Document;
 public class NetworkConnetion {
 	private CloseableHttpClient httpclient;
 	private final String url_cas = "https://cas.sustc.edu.cn/cas/login?service=http://jwxt.sustc.edu.cn/jsxsd/";
-	private final String url_jwxt = "http://jwxt.sustc.edu.cn";
+	protected String url = "";
 	private CookieStore cookieStore;
 	public static final int GET = 1;
 	public static final int POST =2;
-	private String username = "";
-	private String password = "";
+	protected String username = "";
+	protected String password = "";
 	private String lt = "";
 	private String execution = "";	
 	private String ticket = "";
@@ -94,7 +94,7 @@ public class NetworkConnetion {
 					ticket = response1.getHeaders("Location")[0].getValue().split("\\?")[1];
 					System.out.println("[NetWork] Login Succeed!");
 					System.out.println("[NetWork] " + ticket
-							.replaceAll("-(.*?)-cas", "-***********-cas")
+//							.replaceAll("-(.*?)-cas", "-***********-cas")
 							);
 					re = true;
 				}
@@ -115,7 +115,7 @@ public class NetworkConnetion {
 	}
 	
 	private boolean JwxtJSessionVerify() {
-		HttpGet get = new HttpGet(url_jwxt + "/jsxsd/" + "?" + ticket);
+		HttpGet get = new HttpGet(url + "/jsxsd/" + "?" + ticket);
 		boolean re = false;
 		CloseableHttpResponse response;
 		if (CASLogin()) {
@@ -144,12 +144,12 @@ public class NetworkConnetion {
 //		opr.addHeader(new BasicHeader("X-Requested-With", "XMLHttpRequest"));//unused
 		try {
 			if (type == GET) {
-				HttpGet opr = new HttpGet(url_jwxt + suburl);
+				HttpGet opr = new HttpGet(url + suburl);
 				opr.addHeader(new BasicHeader("Connection", "Keep-Alive"));
 				response = httpclient.execute(opr);
 			}
 			else if (type == POST) {
-				HttpPost opr = new HttpPost(url_jwxt + suburl);
+				HttpPost opr = new HttpPost(url + suburl);
 				opr.addHeader(new BasicHeader("Connection", "Keep-Alive"));
 				if (postdata != null) {
 					List<NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -179,16 +179,14 @@ public class NetworkConnetion {
 		else if (response.getStatusLine().getStatusCode() == 403 || 
 				(response.getStatusLine().getStatusCode() == 302 && 
 				response.getHeaders("Location")[0].getValue().startsWith("https://cas.sustc.edu.cn"))) {
-			Login(username,password);
+			Login();
 			return DataFetcher(type, suburl, postdata);
 		}
 		return response;
 	}
 	
-	public boolean Login(String usr, String pass) {
+	protected boolean Login() {
 		clear();
-		username = usr;
-		password = pass;
 		if (JwxtJSessionVerify()) {
 			return true;
 		}
@@ -196,8 +194,6 @@ public class NetworkConnetion {
 	}
 	
 	private void clear() {
-		username = "";
-		password = "";
 		lt = "";
 		execution = "";	
 		ticket = "";

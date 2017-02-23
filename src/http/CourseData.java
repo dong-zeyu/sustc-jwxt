@@ -22,16 +22,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
-public class CourseData {
-	NetworkConnetion connection;
+public class CourseData extends NetworkConnetion {
 	JsonObject course;
 	JsonArray selected;
+	public JsonObject searchResult;
 	
 	private final String coursestorge = "course.json";
 	private final String selectedstorge = "selected.json";
-	
-	private String username;
-	private String password;
 	
 	private final String Xsxk = "/jsxsd/xsxk/xsxk_index?jx0502zbid=054B5FA7E55F44E0BB3D24DB3BC561D5";	//主页，用于打开主页权限
 //	private final String Xkjglb = "/jsxsd/xsxkjg/xsxkBxqjhxk";	//已选课程----I non't know why I write this, but I'll keep it before I confirm it is unused.
@@ -61,7 +58,8 @@ public class CourseData {
 	public CourseData(String user, String pass) {
 		course = new JsonObject();
 		selected = new JsonArray();
-		connection = new NetworkConnetion();
+		searchResult = new JsonObject();
+		url = "http://jwxt.sustc.edu.cn";
 		username = user;
 		password = pass;
 	    if (WriteCourse(coursestorge, false) && WriteCourse(selectedstorge, false)) {
@@ -77,9 +75,9 @@ public class CourseData {
 	
 	private boolean GetIn() {//获取选课权限
 		CloseableHttpResponse response = null;
-		if (connection.IsLogIn()) {
+		if (IsLogIn()) {
 			try {
-					response = connection.DataFetcher(NetworkConnetion.GET, Xsxk, null);
+					response = DataFetcher(NetworkConnetion.GET, Xsxk, null);
 					if (EntityUtils.toString(response.getEntity())
 							.contains("当前未开放选课")) {
 						System.out.println("[CourseCenter] 尚未开放选课");
@@ -99,7 +97,7 @@ public class CourseData {
 			return true;
 		} else {
 				System.out.println("[CourseCenter] Login...");
-				if (connection.Login(username, password)) {
+				if (Login()) {
 					return GetIn();
 				}
 				else {
@@ -115,7 +113,7 @@ public class CourseData {
 			CloseableHttpResponse response;
 			JsonParser parse;
 			JsonObject source;
-			response = connection.DataFetcher(NetworkConnetion.POST, 
+			response = DataFetcher(NetworkConnetion.POST, 
 					"/jsxsd/xsxkkc/xsxk" + repo + "?kcxx=&skls=&skxq=&skjc=&sfym=false&sfct=false",
 					new String[] { "iDisplayStart=0", 
 			"iDisplayLength=0" });
@@ -124,7 +122,7 @@ public class CourseData {
 				source = (JsonObject) parse
 					.parse(new StringReader(EntityUtils.toString(response.getEntity()))); //创建jsonObject对象
 				response.close();//获取总课程数
-				response = connection.DataFetcher(NetworkConnetion.POST, 
+				response = DataFetcher(NetworkConnetion.POST, 
 						"/jsxsd/xsxkkc/xsxk" + repo + DefaultQuery, new String[] {
 								"iDisplayStart=0", 
 								"iDisplayLength=" + source.get("iTotalRecords").getAsString() });
@@ -145,7 +143,7 @@ public class CourseData {
 	private JsonArray GetSelectedData() { //更新已选课程数据
 		GetIn();
 		CloseableHttpResponse response;
-		response = connection.DataFetcher(NetworkConnetion.GET, Xkjglb, null);
+		response = DataFetcher(NetworkConnetion.GET, Xkjglb, null);
 		JsonArray array = new JsonArray();
 		try {
 			String string = EntityUtils.toString(response.getEntity());
@@ -229,7 +227,7 @@ public class CourseData {
 	
 	public boolean Select(String base, String id) {
 		GetIn();
-		HttpResponse response = connection.DataFetcher(NetworkConnetion.GET, 
+		HttpResponse response = DataFetcher(NetworkConnetion.GET, 
 				base + "?jx0404id=" + id + "&xkzy=&trjf=", null);
 		JsonParser jsonParser = new JsonParser();
 		try {
@@ -240,7 +238,7 @@ public class CourseData {
 				System.out.printf("[CourseCenter] Failed: %s\n", source.get("message").getAsString());
 				Thread.sleep(10000);
 				GetIn();
-				response = connection.DataFetcher(NetworkConnetion.GET, 
+				response = DataFetcher(NetworkConnetion.GET, 
 						opFawxk + "?jx0404id=" + id + "&xkzy=&trjf=", null);
 				source = (JsonObject) jsonParser
 						.parse(new StringReader(EntityUtils.toString(response.getEntity())));//创建jsonObject对象
@@ -257,7 +255,7 @@ public class CourseData {
 	
 	public boolean Quit(String id) {
 		GetIn();
-		HttpResponse response = connection.DataFetcher(NetworkConnetion.GET, 
+		HttpResponse response = DataFetcher(NetworkConnetion.GET, 
 				XstkOper + "?jx0404id=" + id, null);
 		JsonParser jsonParser = new JsonParser();
 		try {
@@ -276,7 +274,7 @@ public class CourseData {
 		return false;
 	}
 	
-	public JsonObject Search(String name) {
+	public void Search(String name) {
 		JsonObject result = new JsonObject();
 		for (int i = 0; i < courserepo.length; i++) {
 			if (course.get(courserepo[i]).isJsonArray()) {
@@ -294,7 +292,14 @@ public class CourseData {
 				result.add(courserepo[i], new JsonArray());
 			}
 		}
-		return result;
+		searchResult = result;
+	}
+	
+	public boolean login(String user, String pass) {
+		username = user;
+		password = pass;
+		Login();
+		return false;	
 	}
 	
 }
