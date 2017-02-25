@@ -138,7 +138,7 @@ public class Jwxt {
 					+ "\tFawxk\t跨专业选课\n"
 					+ "\tGgxxkxk\t共选课选课\n"
 					+ "\n"
-					+ "Note: \ta) only after 'search' can you ran 'add' from search result!\n"
+					+ "Note: \ta) only after running 'search' can you run 'add' to add from search result!\n"
 					+ 		"\tb) after you exit the program, the your course list will be auto save to file.\n"
 					+ "Example:\n"
 					+ "\tsearch 陈懿茂\n"
