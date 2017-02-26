@@ -138,7 +138,6 @@ public class NetworkConnetion {
 		return re;
 	}
 	
-	
 	public CloseableHttpResponse dataFetcher(int type, String suburl, String[] postdata) {//post data has the form: name=value
 		CloseableHttpResponse response = null;
 //		opr.addHeader(new BasicHeader("X-Requested-With", "XMLHttpRequest"));//unused
@@ -190,7 +189,6 @@ public class NetworkConnetion {
 		return response;
 	}
 	
-	
 	protected boolean login() {
 		System.out.println("[NetWork] Login...");
 		clear();
@@ -205,7 +203,6 @@ public class NetworkConnetion {
 		return false;
 	}
 	
-	
 	protected void clear() {
 		lt = "";
 		execution = "";	
@@ -213,7 +210,6 @@ public class NetworkConnetion {
 		TGC = "";
 		cookieStore.clear();
 	}
-	
 	
 	public boolean isLogIn() {
 		if (TGC == "") {
