@@ -69,7 +69,10 @@ public class CourseData extends NetworkConnetion {
 	   		System.out.println("[CourseCenter] Not all storages are found, get them.");
 	   		if (updateData()) {
 	   			System.out.println("[CourseCenter] Setup course storage successfully.");
-	   		}
+	   		} else {
+				System.out.println("[CourseCenter] Can't get storage, exit immediately!");
+				System.exit(-1);
+			}
     	}
 	}
 	
@@ -101,7 +104,7 @@ public class CourseData extends NetworkConnetion {
 					return getIn();
 				}
 				else {
-					System.out.println("[CourseCenter] Login Failed due to some reason. Please check your username and password");
+					System.out.println("[CourseCenter] Login Failed due to some reason. Please check your username and password and confirm you have access to the internet.");
 				}
 		}
 		return false;

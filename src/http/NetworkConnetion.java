@@ -108,8 +108,9 @@ public class NetworkConnetion {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
+			System.out.println("[NetWork] NetWork error!");
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		return re;
 	}
