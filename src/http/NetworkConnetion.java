@@ -67,17 +67,19 @@ public class NetworkConnetion {
 		}
 	}
 
-	private boolean loginCAS() {
+	private boolean loginCAS() throws IOException {
 		boolean re = false;
-		HttpGet get = new HttpGet(url_cas);	
+		String cas = url_cas + "?service=" + url;
+		HttpGet get = new HttpGet(cas);	
 		CloseableHttpResponse response = null;
 		try {
 			response = httpclient.execute(get);
 			if (response.getStatusLine().getStatusCode() == 200) {//返回认证页面
 				Document document = Jsoup.parse(EntityUtils.toString(response.getEntity()));
+				response.close();
 				lt = document.getElementsByAttributeValue("name", "lt").attr("value");
 				execution = document.getElementsByAttributeValue("name", "execution").attr("value");
-				HttpPost post = new HttpPost(url_cas);
+				HttpPost post = new HttpPost(cas);
 				CloseableHttpResponse response1 = null;
 				post.addHeader(new BasicHeader("Content-Type", "application/x-www-form-urlencoded"));		
 				List <NameValuePair> nvps = new ArrayList <NameValuePair>();
@@ -99,7 +101,7 @@ public class NetworkConnetion {
 					re = true;
 				}
 				else{
-					System.out.println("[NetWork] Login Failed!");
+					System.out.println("[NetWork] Login Failed due to some reason. Please check your username and password.");
 					re = false;
 				}
 				response1.close();
@@ -107,15 +109,11 @@ public class NetworkConnetion {
 		}catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
-			System.out.println("[NetWork] NetWork error!");
-			// TODO Auto-generated catch block
-//			e.printStackTrace();
 		}
 		return re;
 	}
 	
-	private boolean jwxtJSessionVerify() {
+	private boolean jwxtJSessionVerify() throws IOException {
 		HttpGet get = new HttpGet(url + "/jsxsd/" + "?" + ticket);
 		boolean re = false;
 		CloseableHttpResponse response;
@@ -124,7 +122,7 @@ public class NetworkConnetion {
 				response = httpclient.execute(get);
 				if (response.getStatusLine().getStatusCode() == 200 || 
 						(response.getStatusLine().getStatusCode() == 302 && 
-						!(response.getHeaders("Location")[0].getValue().startsWith("https://cas.sustc.edu.cn")))) {
+						!(response.getHeaders("Location")[0].getValue().startsWith(url_cas)))) {
 					System.out.println("[NetWork] Verify OK");
 					re = true;
 				}
@@ -140,9 +138,13 @@ public class NetworkConnetion {
 		return re;
 	}
 	
+	
 	public CloseableHttpResponse dataFetcher(int type, String suburl, String[] postdata) {//post data has the form: name=value
 		CloseableHttpResponse response = null;
 //		opr.addHeader(new BasicHeader("X-Requested-With", "XMLHttpRequest"));//unused
+		if (!isLogIn()) {
+			return null;
+		}
 		try {
 			if (type == GET) {
 				HttpGet opr = new HttpGet(url + suburl);
@@ -179,20 +181,30 @@ public class NetworkConnetion {
 		}
 		else if (response.getStatusLine().getStatusCode() == 403 || 
 				(response.getStatusLine().getStatusCode() == 302 && 
-				response.getHeaders("Location")[0].getValue().startsWith("https://cas.sustc.edu.cn"))) {
-			login();
+				response.getHeaders("Location")[0].getValue().startsWith(url_cas))) {
+			if (!login()) {
+				return null;
+			}
 			return dataFetcher(type, suburl, postdata);
 		}
 		return response;
 	}
 	
+	
 	protected boolean login() {
+		System.out.println("[NetWork] Login...");
 		clear();
-		if (jwxtJSessionVerify()) {
-			return true;
+		try {
+			if (jwxtJSessionVerify()) {
+				return true;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("[NetWork] Network error! Please check you have access to the Internet.");
 		}
 		return false;
 	}
+	
 	
 	protected void clear() {
 		lt = "";
@@ -201,6 +213,7 @@ public class NetworkConnetion {
 		TGC = "";
 		cookieStore.clear();
 	}
+	
 	
 	public boolean isLogIn() {
 		if (TGC == "") {

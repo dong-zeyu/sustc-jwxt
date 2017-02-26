@@ -99,12 +99,11 @@ public class CourseData extends NetworkConnetion {
 			}
 			return true;
 		} else {
-				System.out.println("[CourseCenter] Login...");
 				if (login()) {
 					return getIn();
 				}
 				else {
-					System.out.println("[CourseCenter] Login Failed due to some reason. Please check your username and password and confirm you have access to the internet.");
+					System.out.println("[CourseCenter] Can't get course center access: Login Failed!");
 				}
 		}
 		return false;
@@ -215,7 +214,7 @@ public class CourseData extends NetworkConnetion {
 	
 	public boolean updateData() {//更新课程数据
 		if (!getIn()) {
-			System.out.println("[CourseCenter] Update Failed: Can't Login.");
+			System.out.println("[CourseCenter] Update Failed: Can't get course center access.");
 			return false;
 		}
 		selected = getSelectedData();
