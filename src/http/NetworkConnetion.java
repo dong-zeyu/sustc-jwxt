@@ -93,7 +93,7 @@ public class NetworkConnetion {
 				response1 = httpclient.execute(post);
 				if(response1 != null && response1.getStatusLine().getStatusCode() == 302){
 					TGC = response1.getHeaders("Set-Cookie")[1].getValue().split(";")[0];
-					ticket = response1.getHeaders("Location")[0].getValue().split("\\?")[1];
+					ticket = response1.getHeaders("Location")[0].getValue().split("&")[1];
 					System.out.println("[NetWork] Login Succeed!");
 					System.out.println("[NetWork] " + ticket
 //							.replaceAll("-(.*?)-cas", "-***********-cas")
@@ -101,7 +101,6 @@ public class NetworkConnetion {
 					re = true;
 				}
 				else{
-					System.out.println("[NetWork] Login Failed due to some reason. Please check your username and password.");
 					re = false;
 				}
 				response1.close();
@@ -141,7 +140,7 @@ public class NetworkConnetion {
 	public CloseableHttpResponse dataFetcher(int type, String suburl, String[] postdata) {//post data has the form: name=value
 		CloseableHttpResponse response = null;
 //		opr.addHeader(new BasicHeader("X-Requested-With", "XMLHttpRequest"));//unused
-		if (!isLogIn()) {
+		if (!(isLogIn() || login())) {
 			return null;
 		}
 		try {
@@ -199,7 +198,9 @@ public class NetworkConnetion {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.out.println("[NetWork] Network error! Please check you have access to the Internet.");
+			return false;
 		}
+		System.out.println("[NetWork] Login Failed. Please check your username and password.");
 		return false;
 	}
 	
