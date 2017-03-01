@@ -22,7 +22,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
-public class CourseData extends NetworkConnetion {
+public class CourseData extends NetworkConnection {
 	JsonObject course;
 	JsonArray selected;
 	public JsonObject searchResult;
@@ -80,7 +80,7 @@ public class CourseData extends NetworkConnetion {
 		CloseableHttpResponse response = null;
 		if (isLogin) {
 			try {
-					response = dataFetcher(NetworkConnetion.GET, Xsxk, null);
+					response = dataFetcher(NetworkConnection.GET, Xsxk, null);
 					if (EntityUtils.toString(response.getEntity())
 							.contains("当前未开放选课")) {
 						System.out.println("[CourseCenter] 尚未开放选课");
@@ -114,7 +114,7 @@ public class CourseData extends NetworkConnetion {
 			CloseableHttpResponse response;
 			JsonParser parse;
 			JsonObject source;
-			response = dataFetcher(NetworkConnetion.POST, 
+			response = dataFetcher(NetworkConnection.POST, 
 					"/jsxsd/xsxkkc/xsxk" + repo + "?kcxx=&skls=&skxq=&skjc=&sfym=false&sfct=false",
 					new String[] { "iDisplayStart=0", 
 			"iDisplayLength=0" });
@@ -123,7 +123,7 @@ public class CourseData extends NetworkConnetion {
 				source = (JsonObject) parse
 					.parse(new StringReader(EntityUtils.toString(response.getEntity()))); //创建jsonObject对象
 				response.close();//获取总课程数
-				response = dataFetcher(NetworkConnetion.POST, 
+				response = dataFetcher(NetworkConnection.POST, 
 						"/jsxsd/xsxkkc/xsxk" + repo + DefaultQuery, new String[] {
 								"iDisplayStart=0", 
 								"iDisplayLength=" + source.get("iTotalRecords").getAsString() });
@@ -143,7 +143,7 @@ public class CourseData extends NetworkConnetion {
 	
 	private JsonArray getSelectedData() { //更新已选课程数据
 		CloseableHttpResponse response;
-		response = dataFetcher(NetworkConnetion.GET, Xkjglb, null);
+		response = dataFetcher(NetworkConnection.GET, Xkjglb, null);
 		JsonArray array = new JsonArray();
 		try {
 			String string = EntityUtils.toString(response.getEntity());
@@ -227,7 +227,7 @@ public class CourseData extends NetworkConnetion {
 	
 	public boolean select(String base, String id) {
 		getIn();
-		HttpResponse response = dataFetcher(NetworkConnetion.GET, 
+		HttpResponse response = dataFetcher(NetworkConnection.GET, 
 				base + "?jx0404id=" + id + "&xkzy=&trjf=", null);
 		JsonParser jsonParser = new JsonParser();
 		try {
@@ -238,7 +238,7 @@ public class CourseData extends NetworkConnetion {
 				System.out.printf("[CourseCenter] Failed: %s\n", source.get("message").getAsString());
 				Thread.sleep(10000);
 				getIn();
-				response = dataFetcher(NetworkConnetion.GET, 
+				response = dataFetcher(NetworkConnection.GET, 
 						opFawxk + "?jx0404id=" + id + "&xkzy=&trjf=", null);
 				source = (JsonObject) jsonParser
 						.parse(new StringReader(EntityUtils.toString(response.getEntity())));//创建jsonObject对象
@@ -255,7 +255,7 @@ public class CourseData extends NetworkConnetion {
 	
 	public boolean quit(String id) {
 		getIn();
-		CloseableHttpResponse response = dataFetcher(NetworkConnetion.GET, 
+		CloseableHttpResponse response = dataFetcher(NetworkConnection.GET, 
 				XstkOper + "?jx0404id=" + id, null);
 		JsonParser jsonParser = new JsonParser();
 		try {

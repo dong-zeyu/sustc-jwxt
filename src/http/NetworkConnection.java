@@ -28,7 +28,7 @@ import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-public class NetworkConnetion {
+public class NetworkConnection {
 	private CloseableHttpClient httpclient;
 	private final String url_cas = "https://cas.sustc.edu.cn/cas/login?service=http://jwxt.sustc.edu.cn/jsxsd/";
 	protected String url = "";
@@ -40,7 +40,7 @@ public class NetworkConnetion {
 	private String ticket = "";
 	public boolean isLogin = false;
 		
-	public NetworkConnetion() {
+	public NetworkConnection() {
 		setupSSL();//建立通过SSL的httpclient
 	}
 	
