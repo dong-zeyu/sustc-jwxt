@@ -36,11 +36,9 @@ public class NetworkConnetion {
 	public static final int GET = 1;
 	public static final int POST =2;
 	protected String username = "";
-	protected String password = "";
-	private String lt = "";
-	private String execution = "";	
+	protected String password = "";	
 	private String ticket = "";
-	private String TGC = "";
+	public boolean isLogin = false;
 		
 	public NetworkConnetion() {
 		setupSSL();//建立通过SSL的httpclient
@@ -77,8 +75,8 @@ public class NetworkConnetion {
 			if (response.getStatusLine().getStatusCode() == 200) {//返回认证页面
 				Document document = Jsoup.parse(EntityUtils.toString(response.getEntity()));
 				response.close();
-				lt = document.getElementsByAttributeValue("name", "lt").attr("value");
-				execution = document.getElementsByAttributeValue("name", "execution").attr("value");
+				String lt = document.getElementsByAttributeValue("name", "lt").attr("value");
+				String execution = document.getElementsByAttributeValue("name", "execution").attr("value");
 				HttpPost post = new HttpPost(cas);
 				CloseableHttpResponse response1 = null;
 				post.addHeader(new BasicHeader("Content-Type", "application/x-www-form-urlencoded"));		
@@ -92,7 +90,6 @@ public class NetworkConnetion {
 				post.setEntity(new UrlEncodedFormEntity(nvps));
 				response1 = httpclient.execute(post);
 				if(response1 != null && response1.getStatusLine().getStatusCode() == 302){
-					TGC = response1.getHeaders("Set-Cookie")[1].getValue().split(";")[0];
 					ticket = response1.getHeaders("Location")[0].getValue().split("&")[1];
 					System.out.println("[NetWork] Login Succeed!");
 					System.out.println("[NetWork] " + ticket
@@ -140,7 +137,7 @@ public class NetworkConnetion {
 	public CloseableHttpResponse dataFetcher(int type, String suburl, String[] postdata) {//post data has the form: name=value
 		CloseableHttpResponse response = null;
 //		opr.addHeader(new BasicHeader("X-Requested-With", "XMLHttpRequest"));//unused
-		if (!(isLogIn() || login())) {
+		if (!(isLogin || login())) {
 			return null;
 		}
 		try {
@@ -193,6 +190,7 @@ public class NetworkConnetion {
 		clear();
 		try {
 			if (jwxtJSessionVerify()) {
+				isLogin = true;
 				return true;
 			}
 		} catch (IOException e) {
@@ -204,19 +202,9 @@ public class NetworkConnetion {
 		return false;
 	}
 	
-	protected void clear() {
-		lt = "";
-		execution = "";	
+	protected void clear() {	
 		ticket = "";
-		TGC = "";
 		cookieStore.clear();
-	}
-	
-	public boolean isLogIn() {
-		if (TGC == "") {
-			return false;
-		}
-		return true;
 	}
 	
 }

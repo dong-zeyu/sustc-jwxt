@@ -78,7 +78,7 @@ public class CourseData extends NetworkConnetion {
 	
 	private boolean getIn() {//获取选课权限
 		CloseableHttpResponse response = null;
-		if (isLogIn()) {
+		if (isLogin) {
 			try {
 					response = dataFetcher(NetworkConnetion.GET, Xsxk, null);
 					if (EntityUtils.toString(response.getEntity())
@@ -111,7 +111,6 @@ public class CourseData extends NetworkConnetion {
 	
 	private JsonArray getCourseData(String repo) { //获取课程数据
 		try {
-			getIn();
 			CloseableHttpResponse response;
 			JsonParser parse;
 			JsonObject source;
@@ -143,7 +142,6 @@ public class CourseData extends NetworkConnetion {
 	}
 	
 	private JsonArray getSelectedData() { //更新已选课程数据
-		getIn();
 		CloseableHttpResponse response;
 		response = dataFetcher(NetworkConnetion.GET, Xkjglb, null);
 		JsonArray array = new JsonArray();
@@ -257,17 +255,19 @@ public class CourseData extends NetworkConnetion {
 	
 	public boolean quit(String id) {
 		getIn();
-		HttpResponse response = dataFetcher(NetworkConnetion.GET, 
+		CloseableHttpResponse response = dataFetcher(NetworkConnetion.GET, 
 				XstkOper + "?jx0404id=" + id, null);
 		JsonParser jsonParser = new JsonParser();
 		try {
 			String string = EntityUtils.toString(response.getEntity());
-			JsonObject source = (JsonObject) jsonParser
-					.parse(new StringReader(string));//创建jsonObject对象
+			response.close();
+			JsonObject source = (JsonObject) jsonParser.parse(new StringReader(string));//创建jsonObject对象
 			if (source.get("success").getAsBoolean()) {
 				System.out.println("[CourseCenter] Succeed: 退课成功");
+				return true;
 			} else {
 				System.out.printf("[CourseCenter] Failed: %s", source.get("message").getAsString());
+				return false;
 			}
 		} catch (JsonIOException | JsonSyntaxException | ParseException | IOException e) {
 			// TODO Auto-generated catch block
@@ -300,7 +300,9 @@ public class CourseData extends NetworkConnetion {
 	public boolean login(String user, String pass) {
 		username = user;
 		password = pass;
-		login();
+		if (login()) {
+			return true;
+		}
 		return false;	
 	}
 	
