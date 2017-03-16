@@ -78,7 +78,7 @@ public class CourseData extends NetworkConnection {
 	
 	private boolean getIn() {//获取选课权限
 		CloseableHttpResponse response = null;
-		if (isLogin) {
+		if (isLogin()) {
 			try {
 					response = dataFetcher(NetworkConnection.GET, Xsxk, null);
 					if (EntityUtils.toString(response.getEntity())

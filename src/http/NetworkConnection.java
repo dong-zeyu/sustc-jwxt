@@ -38,7 +38,7 @@ public class NetworkConnection {
 	protected String username = "";
 	protected String password = "";	
 	private String ticket = "";
-	public boolean isLogin = false;
+	private boolean isLogin = false;
 		
 	public NetworkConnection() {
 		setupSSL();//建立通过SSL的httpclient
@@ -200,6 +200,10 @@ public class NetworkConnection {
 		}
 		System.out.println("[NetWork] Login Failed. Please check your username and password.");
 		return false;
+	}
+	
+	public boolean isLogin() {
+		return isLogin;
 	}
 	
 	protected void clear() {	
