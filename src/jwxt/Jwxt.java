@@ -73,11 +73,16 @@ public class Jwxt {
 				break;
 			case "update":
 				System.out.println("[Main] Updating...");
-				if (course.updateData()) {
-					System.out.println("[Main] Succeed");
-				}
-				else {
-					System.out.println("[Main] Failed due to some reason.");
+				try {
+					if (course.updateData()) {
+						System.out.println("[Main] Succeed");
+					}
+					else {
+						System.out.println("[Main] Failed due to some reason.");
+					}
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					System.out.println("[Main] Faild: " + e1.getMessage());
 				}
 				break;
 			default:
@@ -111,7 +116,7 @@ public class Jwxt {
 		if (mini) {
 //			System.out.println("This is a mini useless help.");
 			System.out.print(
-					  "\nUsage: command [parameter]\n"
+					  "\nUsage: command parameter\n"
 					+ "command: update search add remove list select help exit\n\n"
 					+ "If you input error username and password try 'login user:pass' to re-login\n"
 					+ "type 'help' for more information\n"

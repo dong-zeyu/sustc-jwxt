@@ -30,11 +30,12 @@ public class CourseData extends NetworkConnection {
 	private final String coursestorge = "course.json";
 	private final String selectedstorge = "selected.json";
 	
-	private final String Xsxk = "/jsxsd/xsxk/xsxk_index?jx0502zbid=054B5FA7E55F44E0BB3D24DB3BC561D5";	//主页，用于打开主页权限
-//	private final String Xkjglb = "/jsxsd/xsxkjg/xsxkBxqjhxk";	//已选课程----I non't know why I write this, but I'll keep it before I confirm it is unused.
-	private final String Xkjglb = "/jsxsd/xsxkjg/comeXkjglb";	//已选课程
-	
+	private final String Xsxk = "/xsxk/xsxk_index?jx0502zbid=054B5FA7E55F44E0BB3D24DB3BC561D5";	//主页，用于打开主页权限
+//	private final String Xkjglb = "/xsxkjg/xsxkBxqjhxk";	//已选课程----I non't know why I write this, but I'll keep it before I confirm it is unused.
+	private final String Xkjglb = "/xsxkjg/comeXkjglb";	//已选课程
+	private final String xsxkkc = "/xsxkkc/xsxk";
 	private final String DefaultQuery = "?kcxx=&skls=&skxq=&skjc=&sfym=false&sfct=false";
+	
 	public static final String[] courserepo = new String[] {
 			"Bxxk", 	//必修选课
 			"Xxxk", 	//选修选课
@@ -44,22 +45,22 @@ public class CourseData extends NetworkConnection {
 			"Ggxxkxk"	//共选课选课
 			};
 	
-	static final String opBxxk = "/jsxsd/xsxkkc/bxxkOper";		//必修选课操作
-	static final String opXxxk = "/jsxsd/xsxkkc/xxxkOper";		//选修选课操作
-	static final String opBxqjhxk = "/jsxsd/xsxkkc/bxqjhxkOper";	//本学期计划选课操作
-	static final String opKnjxk = "/jsxsd/xsxkkc/knjxkOper";	//专业内跨年级选课操作
-	static final String opFawxk = "/jsxsd/xsxkkc/fawxkOper";	//跨专业选课操作
-	static final String opGxkxk = "/jsxsd/xsxkkc/ggxxkxkOper";	//共选课选课操作
+	static final String opBxxk = "/xsxkkc/bxxkOper";		//必修选课操作
+	static final String opXxxk = "/xsxkkc/xxxkOper";		//选修选课操作
+	static final String opBxqjhxk = "/xsxkkc/bxqjhxkOper";	//本学期计划选课操作
+	static final String opKnjxk = "/xsxkkc/knjxkOper";	//专业内跨年级选课操作
+	static final String opFawxk = "/xsxkkc/fawxkOper";	//跨专业选课操作
+	static final String opGxkxk = "/xsxkkc/ggxxkxkOper";	//共选课选课操作
 	//选课参数： op[选课] + "?jx0404id=课程ID&xkzy=&trjf="
 	
-	private final String XstkOper = "/jsxsd/xsxkjg/xstkOper";	//学生退课
+	private final String XstkOper = "/xsxkjg/xstkOper";	//学生退课
 	//退课参数：XstkOper +　"?jx0404id=课程ID"
 	
 	public CourseData(String user, String pass) {
 		course = new JsonObject();
 		selected = new JsonArray();
 		searchResult = new JsonObject();
-		url = "http://jwxt.sustc.edu.cn";
+		url = "http://jwxt.sustc.edu.cn/jsxsd";
 		username = user;
 		password = pass;
 	    if (fileOper(coursestorge, false) && fileOper(selectedstorge, false)) {
@@ -67,25 +68,34 @@ public class CourseData extends NetworkConnection {
 	   	}
 	   	else {
 	   		System.out.println("[CourseCenter] Not all storages are found, get them.");
-	   		if (updateData()) {
-	   			System.out.println("[CourseCenter] Setup course storage successfully.");
-	   		} else {
-				System.out.println("[CourseCenter] Can't get storage, exit immediately!");
-				System.exit(-1);
+	   		try {
+				if (updateData()) {
+					System.out.println("[CourseCenter] Setup course storage successfully.");
+				} else {
+					System.out.println("[CourseCenter] Can't get storage, exit immediately!");
+					System.exit(-1);
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				if (e.getMessage() == "Can't get data whatever!") {
+						System.out.println("[CourseCenter] Can't get storage, exit immediately!");
+						System.exit(-1);					
+				}
 			}
     	}
 	}
-	
-	private boolean getIn() {//获取选课权限
+		
+	private boolean getIn() throws Exception {//获取选课权限
 		CloseableHttpResponse response = null;
 		if (isLogin()) {
 			try {
-					response = dataFetcher(NetworkConnection.GET, Xsxk, null);
-					if (EntityUtils.toString(response.getEntity())
-							.contains("当前未开放选课")) {
-						System.out.println("[CourseCenter] 尚未开放选课");
-						return false;
-					}
+				response = dataFetcher(GET, "/", null);
+				response.close();
+				response = dataFetcher(NetworkConnection.GET, Xsxk, null);
+				if (EntityUtils.toString(response.getEntity()).contains("未开放选课")) {
+					System.out.println("[CourseCenter] 尚未开放选课");
+					return false;
+				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -99,23 +109,23 @@ public class CourseData extends NetworkConnection {
 			}
 			return true;
 		} else {
-				if (login()) {
-					return getIn();
-				}
-				else {
-					System.out.println("[CourseCenter] Can't get course center access: Login Failed!");
-				}
+			if (login()) {
+				return getIn();
+			}
+			else {
+				System.out.println("[CourseCenter] Can't get course center access: Login Failed!");
+			}
 		}
 		return false;
 	}
 	
-	private JsonArray getCourseData(String repo) { //获取课程数据
+	private JsonArray getCourseData(String repo) throws Exception { //获取课程数据
 		try {
 			CloseableHttpResponse response;
 			JsonParser parse;
 			JsonObject source;
 			response = dataFetcher(NetworkConnection.POST, 
-					"/jsxsd/xsxkkc/xsxk" + repo + "?kcxx=&skls=&skxq=&skjc=&sfym=false&sfct=false",
+					xsxkkc + repo + DefaultQuery,
 					new String[] { "iDisplayStart=0", 
 			"iDisplayLength=0" });
 			if (response.getStatusLine().getStatusCode() == 200) {
@@ -124,7 +134,7 @@ public class CourseData extends NetworkConnection {
 					.parse(new StringReader(EntityUtils.toString(response.getEntity()))); //创建jsonObject对象
 				response.close();//获取总课程数
 				response = dataFetcher(NetworkConnection.POST, 
-						"/jsxsd/xsxkkc/xsxk" + repo + DefaultQuery, new String[] {
+						xsxkkc + repo + DefaultQuery, new String[] {
 								"iDisplayStart=0", 
 								"iDisplayLength=" + source.get("iTotalRecords").getAsString() });
 				source = (JsonObject) parse.parse(new StringReader(EntityUtils.toString(response.getEntity()))); //创建jsonObject对象
@@ -141,12 +151,13 @@ public class CourseData extends NetworkConnection {
 		return null;
 	}
 	
-	private JsonArray getSelectedData() { //更新已选课程数据
+	private JsonArray getSelectedData() throws Exception { //更新已选课程数据
 		CloseableHttpResponse response;
 		response = dataFetcher(NetworkConnection.GET, Xkjglb, null);
 		JsonArray array = new JsonArray();
 		try {
 			String string = EntityUtils.toString(response.getEntity());
+			System.out.println(string);
 			Document document = Jsoup.parse(string);
 			Elements courses = document.getElementsByTag("tbody").get(0).children();
 			for (int i = 0; i < courses.size(); i++) {
@@ -210,7 +221,7 @@ public class CourseData extends NetworkConnection {
 		return false;
 	}
 	
-	public boolean updateData() {//更新课程数据
+	public boolean updateData() throws Exception {//更新课程数据
 		if (!getIn()) {
 			System.out.println("[CourseCenter] Update Failed: Can't get course center access.");
 			return false;
@@ -225,7 +236,7 @@ public class CourseData extends NetworkConnection {
 		return false;
 	}
 	
-	public boolean select(String base, String id) {
+	public boolean select(String base, String id) throws Exception { //选课操作
 		getIn();
 		HttpResponse response = dataFetcher(NetworkConnection.GET, 
 				base + "?jx0404id=" + id + "&xkzy=&trjf=", null);
@@ -253,7 +264,7 @@ public class CourseData extends NetworkConnection {
 		return false;
 	}
 	
-	public boolean quit(String id) {
+	public boolean quit(String id) throws Exception { //退课操作
 		getIn();
 		CloseableHttpResponse response = dataFetcher(NetworkConnection.GET, 
 				XstkOper + "?jx0404id=" + id, null);
@@ -276,7 +287,7 @@ public class CourseData extends NetworkConnection {
 		return false;
 	}
 	
-	public void search(String name) {
+	public void search(String name) { //查找课程
 		JsonObject result = new JsonObject();
 		for (int i = 0; i < courserepo.length; i++) {
 			if (course.get(courserepo[i]).isJsonArray()) {

@@ -30,14 +30,13 @@ import org.jsoup.nodes.Document;
 
 public class NetworkConnection {
 	private CloseableHttpClient httpclient;
-	private final String url_cas = "https://cas.sustc.edu.cn/cas/login?service=http://jwxt.sustc.edu.cn/jsxsd/";
+	public static final String url_cas = "https://cas.sustc.edu.cn/cas/login";
 	protected String url = "";
 	private CookieStore cookieStore;
 	public static final int GET = 1;
 	public static final int POST =2;
 	protected String username = "";
 	protected String password = "";	
-	private String ticket = "";
 	private boolean isLogin = false;
 		
 	public NetworkConnection() {
@@ -65,10 +64,9 @@ public class NetworkConnection {
 		}
 	}
 
-	private boolean loginCAS() throws IOException {
+	private boolean loginCAS() throws Exception {
 		boolean re = false;
-		String cas = url_cas + "?service=" + url;
-		HttpGet get = new HttpGet(cas);	
+		HttpGet get = new HttpGet(url_cas);	
 		CloseableHttpResponse response = null;
 		try {
 			response = httpclient.execute(get);
@@ -77,7 +75,7 @@ public class NetworkConnection {
 				response.close();
 				String lt = document.getElementsByAttributeValue("name", "lt").attr("value");
 				String execution = document.getElementsByAttributeValue("name", "execution").attr("value");
-				HttpPost post = new HttpPost(cas);
+				HttpPost post = new HttpPost(url_cas);
 				CloseableHttpResponse response1 = null;
 				post.addHeader(new BasicHeader("Content-Type", "application/x-www-form-urlencoded"));		
 				List <NameValuePair> nvps = new ArrayList <NameValuePair>();
@@ -89,16 +87,14 @@ public class NetworkConnection {
 				nvps.add(new BasicNameValuePair("submit", "LOGIN"));
 				post.setEntity(new UrlEncodedFormEntity(nvps));
 				response1 = httpclient.execute(post);
-				if(response1 != null && response1.getStatusLine().getStatusCode() == 302){
-					ticket = response1.getHeaders("Location")[0].getValue().split("&")[1];
+				if(response1 != null && response1.toString().contains("TGC")){
 					System.out.println("[NetWork] Login Succeed!");
-					System.out.println("[NetWork] " + ticket
-//							.replaceAll("-(.*?)-cas", "-***********-cas")
-							);
 					re = true;
 				}
 				else{
-					re = false;
+					if(EntityUtils.toString(response1.getEntity()).contains("认证信息无效")) {
+						throw new Exception("Error authentication information");
+					}
 				}
 				response1.close();
 			}			
@@ -109,32 +105,7 @@ public class NetworkConnection {
 		return re;
 	}
 	
-	private boolean jwxtJSessionVerify() throws IOException {
-		HttpGet get = new HttpGet(url + "/jsxsd/" + "?" + ticket);
-		boolean re = false;
-		CloseableHttpResponse response;
-		if (loginCAS()) {
-			try {
-				response = httpclient.execute(get);
-				if (response.getStatusLine().getStatusCode() == 200 || 
-						(response.getStatusLine().getStatusCode() == 302 && 
-						!(response.getHeaders("Location")[0].getValue().startsWith(url_cas)))) {
-					System.out.println("[NetWork] Verify OK");
-					re = true;
-				}
-				response.close();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		else {
-			return false;
-		}
-		return re;
-	}
-	
-	public CloseableHttpResponse dataFetcher(int type, String suburl, String[] postdata) {//post data has the form: name=value
+	public CloseableHttpResponse dataFetcher(int type, String suburl, String[] postdata) throws Exception {//post data has the form: name=value
 		CloseableHttpResponse response = null;
 //		opr.addHeader(new BasicHeader("X-Requested-With", "XMLHttpRequest"));//unused
 		if (!(isLogin || login())) {
@@ -172,13 +143,14 @@ public class NetworkConnection {
 			e.printStackTrace();
 		}
 		if (response == null) {
-			return response;
+			return null;
 		}
 		else if (response.getStatusLine().getStatusCode() == 403 || 
 				(response.getStatusLine().getStatusCode() == 302 && 
 				response.getHeaders("Location")[0].getValue().startsWith(url_cas))) {
 			if (!login()) {
-				return null;
+				isLogin = false;
+				throw new Exception("Can't get data whatever!");
 			}
 			return dataFetcher(type, suburl, postdata);
 		}
@@ -189,7 +161,7 @@ public class NetworkConnection {
 		System.out.println("[NetWork] Login...");
 		clear();
 		try {
-			if (jwxtJSessionVerify()) {
+			if (loginCAS()) {
 				isLogin = true;
 				return true;
 			}
@@ -197,8 +169,10 @@ public class NetworkConnection {
 			// TODO Auto-generated catch block
 			System.out.println("[NetWork] Network error! Please check you have access to the Internet.");
 			return false;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.out.println("[NetWork] Login Failed! " + e.getMessage());
 		}
-		System.out.println("[NetWork] Login Failed. Please check your username and password.");
 		return false;
 	}
 	
@@ -206,8 +180,7 @@ public class NetworkConnection {
 		return isLogin;
 	}
 	
-	protected void clear() {	
-		ticket = "";
+	protected void clear() {
 		cookieStore.clear();
 	}
 	
