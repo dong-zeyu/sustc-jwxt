@@ -62,7 +62,7 @@ public class CourseData extends NetworkConnection {
 		url = "http://jwxt.sustc.edu.cn";
 		username = user;
 		password = pass;
-	    if (writeCourse(coursestorge, false) && writeCourse(selectedstorge, false)) {
+	    if (fileOper(coursestorge, false) && fileOper(selectedstorge, false)) {
 	    	System.out.println("[CourseCenter] Load storage.");
 	   	}
 	   	else {
@@ -168,7 +168,7 @@ public class CourseData extends NetworkConnection {
 		return null;
 	}
 	
-	private boolean writeCourse(String FilePath, boolean work) { //写入到文件
+	private boolean fileOper(String FilePath, boolean work) { //写入到文件
 		File file =new File(FilePath);
 		try {
 		if (work) {
@@ -219,7 +219,7 @@ public class CourseData extends NetworkConnection {
 		for (int i = 0; i < courserepo.length; i++) {
 			course.add(courserepo[i], getCourseData(courserepo[i]));		
 		}
-		if(writeCourse(coursestorge, true) && writeCourse(selectedstorge, true)) {
+		if(fileOper(coursestorge, true) && fileOper(selectedstorge, true)) {
 			return true;
 		}
 		return false;
