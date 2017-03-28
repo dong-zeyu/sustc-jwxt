@@ -33,8 +33,10 @@ public class NetworkConnection {
 	private final String url_cas = "https://cas.sustc.edu.cn/cas/login?service=http://jwxt.sustc.edu.cn/jsxsd/";
 	protected String url = "";
 	private CookieStore cookieStore;
-	public static final int GET = 1;
-	public static final int POST =2;
+	public static enum Method {
+		GET,
+		POST;
+	};
 	protected String username = "";
 	protected String password = "";	
 	private String ticket = "";
@@ -134,19 +136,19 @@ public class NetworkConnection {
 		return re;
 	}
 	
-	public CloseableHttpResponse dataFetcher(int type, String suburl, String[] postdata) {//post data has the form: name=value
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata) {//post data has the form: name=value
 		CloseableHttpResponse response = null;
 //		opr.addHeader(new BasicHeader("X-Requested-With", "XMLHttpRequest"));//unused
 		if (!(isLogin || login())) {
 			return null;
 		}
 		try {
-			if (type == GET) {
+			if (type == Method.GET) {
 				HttpGet opr = new HttpGet(url + suburl);
 				opr.addHeader(new BasicHeader("Connection", "Keep-Alive"));
 				response = httpclient.execute(opr);
 			}
-			else if (type == POST) {
+			else if (type == Method.POST) {
 				HttpPost opr = new HttpPost(url + suburl);
 				opr.addHeader(new BasicHeader("Connection", "Keep-Alive"));
 				if (postdata != null) {
