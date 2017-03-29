@@ -12,5 +12,6 @@
 hs_err_pid*
 
 *.json
-bin
+bin/
 run.*
+Text*
