@@ -54,28 +54,7 @@ public class Jwxt {
 			case "search" :
 				if (!param.equals("")) {
 					course.search(param);
-					for (int i = 0; i < CourseData.courserepo.length; i++) {
-						String repo = CourseData.courserepo[i];
-						System.out.println(repo + ":");
-						JsonArray array = course.searchResult.get(repo).getAsJsonArray();
-						for (int j = 0; j < array.size(); j++) {
-							JsonObject object = array.get(j).getAsJsonObject();
-							String skls = "";
-							if (object.get("skls").toString().equals("null")) {
-								skls = "无";
-							} else {
-								skls = object.get("skls").getAsString();
-							}
-							System.out.printf("%d\t%s\t%s\t%d\t%s\t%s\t%s\t%s\n", j, 
-									object.get("kch").getAsString(),
-									object.get("kcmc").getAsString(),
-									object.get("xf").getAsInt(), 
-									object.get("sksj").getAsString().replaceAll("<br>", "|"),
-									skls, 
-									object.get("skdd").getAsString().replaceAll("<br>", "|"),
-									object.get("ctsm").getAsString());
-						}
-					}
+					printSearch(course.searchResult);
 				} else {
 					System.out.println("Please input search param");
 				}
@@ -106,6 +85,31 @@ public class Jwxt {
 			}
 		}
 		scanner.close();
+	}
+	
+	public static void printSearch(JsonObject result) {
+		for (int i = 0; i < CourseData.courserepo.length; i++) {
+			String repo = CourseData.courserepo[i];
+			System.out.println(repo + ":");
+			JsonArray array = result.get(repo).getAsJsonArray();
+			for (int j = 0; j < array.size(); j++) {
+				JsonObject object = array.get(j).getAsJsonObject();
+				String skls = "";
+				if (object.get("skls").toString().equals("null")) {
+					skls = "无";
+				} else {
+					skls = object.get("skls").getAsString();
+				}
+				System.out.printf("%d\t%s\t%s\t%d\t%s\t%s\t%s\t%s\n", j, 
+						object.get("kch").getAsString(),
+						object.get("kcmc").getAsString(),
+						object.get("xf").getAsInt(), 
+						object.get("sksj").getAsString().replaceAll("<br>", "|"),
+						skls, 
+						object.get("skdd").getAsString().replaceAll("<br>", "|"),
+						object.get("ctsm").getAsString());
+			}
+		}
 	}
 	
 	public static void printHelp(boolean isMini) {

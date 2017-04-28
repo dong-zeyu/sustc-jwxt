@@ -46,12 +46,7 @@ public class CourseData extends NetworkConnection {
 			"Ggxxkxk"	//共选课选课
 			};
 	
-	static final String opBxxk = "/xsxkkc/bxxkOper";		//必修选课操作
-	static final String opXxxk = "/xsxkkc/xxxkOper";		//选修选课操作
-	static final String opBxqjhxk = "/xsxkkc/bxqjhxkOper";	//本学期计划选课操作
-	static final String opKnjxk = "/xsxkkc/knjxkOper";	//专业内跨年级选课操作
-	static final String opFawxk = "/xsxkkc/fawxkOper";	//跨专业选课操作
-	static final String opGxkxk = "/xsxkkc/ggxxkxkOper";	//共选课选课操作
+	private static final String xsskOper = "/xsxkkc/%sOper";
 	//选课参数： op[选课] + "?jx0404id=课程ID&xkzy=&trjf="
 	
 	private final String XstkOper = "/xsxkjg/xstkOper";	//学生退课
@@ -238,28 +233,29 @@ public class CourseData extends NetworkConnection {
 	public boolean select(String base, String id) throws Exception { //选课操作
 		getIn();
 		HttpResponse response = dataFetcher(Method.GET, 
-				base + "?jx0404id=" + id + "&xkzy=&trjf=", null);
+				String.format(xsskOper, base.toLowerCase()) + "?jx0404id=" + id + "&xkzy=&trjf=", null);
 		JsonParser jsonParser = new JsonParser();
 		try {
 			String string = EntityUtils.toString(response.getEntity());
 			JsonObject source = (JsonObject) jsonParser
 					.parse(new StringReader(string));//创建jsonObject对象
-			while (!source.get("success").getAsBoolean()) {
+			if (source.get("success").getAsBoolean()) {
+				System.out.printf("[CourseCenter] Success: %s\n", source.get("message").getAsString());
+				return true;
+//				Thread.sleep(5000);
+//				getIn();
+//				response = dataFetcher(Method.GET, 
+//						String.format(xsskOper, base.toLowerCase()) + "?jx0404id=" + id + "&xkzy=&trjf=", null);
+//				source = (JsonObject) jsonParser
+//						.parse(new StringReader(EntityUtils.toString(response.getEntity())));//创建jsonObject对象
+			} else {
 				System.out.printf("[CourseCenter] Failed: %s\n", source.get("message").getAsString());
-				Thread.sleep(10000);
-				getIn();
-				response = dataFetcher(Method.GET, 
-						opFawxk + "?jx0404id=" + id + "&xkzy=&trjf=", null);
-				source = (JsonObject) jsonParser
-						.parse(new StringReader(EntityUtils.toString(response.getEntity())));//创建jsonObject对象
+				return false;
 			}
 		} catch (JsonIOException | JsonSyntaxException | ParseException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+		}
 		return false;
 	}
 	
