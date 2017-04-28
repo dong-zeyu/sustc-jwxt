@@ -15,9 +15,26 @@ public class Jwxt {
 		System.out.print("Please input your password: ");
 		String password = scanner.nextLine();
 		CourseData course = new CourseData(username, password);		
-		String string = "initial_8dzulAHI44TITVTP";
+		String string = "";
 		String param = "";
+		printHelp(true);
 		while (!string.equals("exit")) {
+			System.out.print(">");
+			string = scanner.nextLine();
+			if (string.contains(" ")) {
+				string = string.replaceAll("\\s+", " ");
+				try {
+					param = string.split(" ")[1];
+					string = string.split(" ")[0];
+				} catch (ArrayIndexOutOfBoundsException e) {
+					System.out.println("Unknown command: Type 'help' for more information.");
+					string = "";
+					param = "";
+				}
+			}
+			else {
+				param = "";
+			}
 			switch (string) {
 			case "login" :
 				try {
@@ -63,9 +80,6 @@ public class Jwxt {
 					System.out.println("Please input search param");
 				}
 				break;
-			case "initial_8dzulAHI44TITVTP" :
-				printHelp(true);
-				break;
 			case "help":
 				printHelp(false);
 				break;
@@ -82,34 +96,20 @@ public class Jwxt {
 					System.out.println("[Main] Faild: " + e1.getMessage());
 				}
 				break;
+			case "exit":
+				break;
 			default:
 				if (!string.equals("")) {
 					System.out.println("Unknown command: Print 'help' for more information.");
 				}
 				break;
 			}
-			System.out.print(">");
-			string = scanner.nextLine();
-			if (string.contains(" ")) {
-				string = string.replaceAll("\\s+", " ");
-				try {
-					param = string.split(" ")[1];
-					string = string.split(" ")[0];
-				} catch (ArrayIndexOutOfBoundsException e) {
-					System.out.println("Unknown command: Type 'help' for more information.");
-					string = "";
-					param = "";
-				}
-			}
-			else {
-				param = "";
-			}
 		}
 		scanner.close();
 	}
 	
-	public static void printHelp(boolean mini) {
-		if (mini) {
+	public static void printHelp(boolean isMini) {
+		if (isMini) {
 //			System.out.println("This is a mini useless help.");
 			System.out.print(
 					  "\nUsage: command parameter\n"
