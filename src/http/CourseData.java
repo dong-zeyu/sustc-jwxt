@@ -30,7 +30,8 @@ public class CourseData extends NetworkConnection {
 	private final String coursestorge = "course.json";
 	private final String selectedstorge = "selected.json";
 	
-	private final String Xsxk = "/xsxk/xsxk_index?jx0502zbid=054B5FA7E55F44E0BB3D24DB3BC561D5";	//主页，用于打开主页权限
+//	private final String Xsxk = "/xsxk/xsxk_index?jx0502zbid=054B5FA7E55F44E0BB3D24DB3BC561D5";	//主页，用于打开主页权限
+	private final String Xsxk = "/xsxk/xsxk_index?jx0502zbid=054B5FA7E55F44E0BB3D24DB3BC561";	//主页，用于打开主页权限
 //	private final String Xkjglb = "/xsxkjg/xsxkBxqjhxk";	//已选课程----I non't know why I write this, but I'll keep it before I confirm it is unused.
 	private final String Xkjglb = "/xsxkjg/comeXkjglb";	//已选课程
 	private final String xsxkkc = "/xsxkkc/xsxk";
@@ -76,7 +77,6 @@ public class CourseData extends NetworkConnection {
 					System.exit(-1);
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				if (e.getMessage() == "Can't get data whatever!") {
 						System.out.println("[CourseCenter] Can't get storage, exit immediately!");
 						System.exit(-1);					
@@ -157,7 +157,6 @@ public class CourseData extends NetworkConnection {
 		JsonArray array = new JsonArray();
 		try {
 			String string = EntityUtils.toString(response.getEntity());
-			System.out.println(string);
 			Document document = Jsoup.parse(string);
 			Elements courses = document.getElementsByTag("tbody").get(0).children();
 			for (int i = 0; i < courses.size(); i++) {

@@ -9,7 +9,6 @@ import http.CourseData;
 
 public class Jwxt {		
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		Scanner scanner = new Scanner(System.in);
 		System.out.print("Please input your username: ");
 		String username = scanner.nextLine();
@@ -24,7 +23,6 @@ public class Jwxt {
 				try {
 					course.login(param.split(":")[0], param.split(":")[1]);
 				} catch (IndexOutOfBoundsException e1) {
-					// TODO Auto-generated catch block
 					System.out.println("Format error: pleas use 'login user:pass' to re-login");
 				}
 				break;
@@ -81,7 +79,6 @@ public class Jwxt {
 						System.out.println("[Main] Failed due to some reason.");
 					}
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
 					System.out.println("[Main] Faild: " + e1.getMessage());
 				}
 				break;
@@ -99,7 +96,6 @@ public class Jwxt {
 					param = string.split(" ")[1];
 					string = string.split(" ")[0];
 				} catch (ArrayIndexOutOfBoundsException e) {
-					// TODO Auto-generated catch block
 					System.out.println("Unknown command: Type 'help' for more information.");
 					string = "";
 					param = "";

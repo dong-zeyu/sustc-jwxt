@@ -166,11 +166,9 @@ public class NetworkConnection {
 				return true;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			System.out.println("[NetWork] Network error! Please check you have access to the Internet.");
 			return false;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			System.out.println("[NetWork] Login Failed! " + e.getMessage());
 		}
 		return false;
