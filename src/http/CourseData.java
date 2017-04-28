@@ -89,9 +89,9 @@ public class CourseData extends NetworkConnection {
 		CloseableHttpResponse response = null;
 		if (isLogin()) {
 			try {
-				response = dataFetcher(GET, "/", null);
+				response = dataFetcher(Method.GET, "/", null);
 				response.close();
-				response = dataFetcher(NetworkConnection.GET, Xsxk, null);
+				response = dataFetcher(Method.GET, Xsxk, null);
 				if (EntityUtils.toString(response.getEntity()).contains("未开放选课")) {
 					System.out.println("[CourseCenter] 尚未开放选课");
 					return false;
@@ -124,7 +124,7 @@ public class CourseData extends NetworkConnection {
 			CloseableHttpResponse response;
 			JsonParser parse;
 			JsonObject source;
-			response = dataFetcher(NetworkConnection.POST, 
+			response = dataFetcher(Method.POST, 
 					xsxkkc + repo + DefaultQuery,
 					new String[] { "iDisplayStart=0", 
 			"iDisplayLength=0" });
@@ -133,7 +133,7 @@ public class CourseData extends NetworkConnection {
 				source = (JsonObject) parse
 					.parse(new StringReader(EntityUtils.toString(response.getEntity()))); //创建jsonObject对象
 				response.close();//获取总课程数
-				response = dataFetcher(NetworkConnection.POST, 
+				response = dataFetcher(Method.POST, 
 						xsxkkc + repo + DefaultQuery, new String[] {
 								"iDisplayStart=0", 
 								"iDisplayLength=" + source.get("iTotalRecords").getAsString() });
@@ -153,7 +153,7 @@ public class CourseData extends NetworkConnection {
 	
 	private JsonArray getSelectedData() throws Exception { //更新已选课程数据
 		CloseableHttpResponse response;
-		response = dataFetcher(NetworkConnection.GET, Xkjglb, null);
+		response = dataFetcher(Method.GET, Xkjglb, null);
 		JsonArray array = new JsonArray();
 		try {
 			String string = EntityUtils.toString(response.getEntity());
@@ -237,7 +237,7 @@ public class CourseData extends NetworkConnection {
 	
 	public boolean select(String base, String id) throws Exception { //选课操作
 		getIn();
-		HttpResponse response = dataFetcher(NetworkConnection.GET, 
+		HttpResponse response = dataFetcher(Method.GET, 
 				base + "?jx0404id=" + id + "&xkzy=&trjf=", null);
 		JsonParser jsonParser = new JsonParser();
 		try {
@@ -248,7 +248,7 @@ public class CourseData extends NetworkConnection {
 				System.out.printf("[CourseCenter] Failed: %s\n", source.get("message").getAsString());
 				Thread.sleep(10000);
 				getIn();
-				response = dataFetcher(NetworkConnection.GET, 
+				response = dataFetcher(Method.GET, 
 						opFawxk + "?jx0404id=" + id + "&xkzy=&trjf=", null);
 				source = (JsonObject) jsonParser
 						.parse(new StringReader(EntityUtils.toString(response.getEntity())));//创建jsonObject对象
@@ -265,7 +265,7 @@ public class CourseData extends NetworkConnection {
 	
 	public boolean quit(String id) throws Exception { //退课操作
 		getIn();
-		CloseableHttpResponse response = dataFetcher(NetworkConnection.GET, 
+		CloseableHttpResponse response = dataFetcher(Method.GET, 
 				XstkOper + "?jx0404id=" + id, null);
 		JsonParser jsonParser = new JsonParser();
 		try {
