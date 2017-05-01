@@ -37,22 +37,25 @@ public class Jwxt {
 				param = "";
 			}
 			switch (string) {
-			case "login" :
+			case "login":
 				try {
 					course.login(param.split(":")[0], param.split(":")[1]);
 				} catch (IndexOutOfBoundsException e1) {
 					System.out.println("Format error: pleas use 'login user:pass' to re-login");
 				}
 				break;
-			case "remove" :
+			case "remove":
+			case "r":
 				break;
-			case "list" :
+			case "list":
+			case "l":
 				break;
-			case "add" :
+			case "add":
 				break;
-			case "select" :
+			case "select":
 				break;
-			case "search" :
+			case "search":
+			case "s":
 				if (!param.equals("")) {
 					course.search(param);
 					printSearch(course.searchResult);
@@ -60,7 +63,8 @@ public class Jwxt {
 					System.out.println("Please input search param");
 				}
 				break;
-			case "help":
+			case "help" :
+			case "h" :
 				printHelp(false);
 				break;
 			case "update":
@@ -77,6 +81,7 @@ public class Jwxt {
 				}
 				break;
 			case "exit":
+			case "e":
 				break;
 			default:
 				if (!string.equals("")) {
