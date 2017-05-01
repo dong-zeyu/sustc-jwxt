@@ -34,8 +34,8 @@ public class CourseData extends NetworkConnection {
 	private final String Xsxk = "/xsxk/xsxk_index?jx0502zbid=054B5FA7E55F44E0BB3D24DB3BC561";	//主页，用于打开主页权限
 //	private final String Xkjglb = "/xsxkjg/xsxkBxqjhxk";	//已选课程----I non't know why I write this, but I'll keep it before I confirm it is unused.
 	private final String Xkjglb = "/xsxkjg/comeXkjglb";	//已选课程
-	private final String xsxkkc = "/xsxkkc/xsxk";
-	private final String DefaultQuery = "?kcxx=&skls=&skxq=&skjc=&sfym=false&sfct=false";
+	
+	private final String query = "/xsxkkc/xsxk%s?kcxx=&skls=&skxq=&skjc=&sfym=false&sfct=false";
 	
 	public static enum CourseRepo {
 		Bxxk, 	//必修选课
@@ -121,22 +121,23 @@ public class CourseData extends NetworkConnection {
 		return false;
 	}
 	
-	private JsonArray getCourseData(String repo) throws Exception { //获取课程数据
+	private JsonArray getCourseData(CourseRepo repo) throws Exception { //获取课程数据
 		try {
 			CloseableHttpResponse response;
 			JsonParser parse;
 			JsonObject source;
 			response = dataFetcher(Method.POST, 
-					xsxkkc + repo + DefaultQuery,
+					String.format(query, repo.name()),
 					new String[] { "iDisplayStart=0", 
-			"iDisplayLength=0" });
+							"iDisplayLength=0" });
 			if (response.getStatusLine().getStatusCode() == 200) {
 				parse = new JsonParser(); //创建json解析器
 				source = (JsonObject) parse
 					.parse(new StringReader(EntityUtils.toString(response.getEntity()))); //创建jsonObject对象
 				response.close();//获取总课程数
 				response = dataFetcher(Method.POST, 
-						xsxkkc + repo + DefaultQuery, new String[] {
+						String.format(query, repo.name()),
+						new String[] {
 								"iDisplayStart=0", 
 								"iDisplayLength=" + source.get("iTotalRecords").getAsString() });
 				source = (JsonObject) parse.parse(new StringReader(EntityUtils.toString(response.getEntity()))); //创建jsonObject对象
@@ -229,7 +230,7 @@ public class CourseData extends NetworkConnection {
 		}
 		selected = getSelectedData();
 		for (CourseRepo repo : CourseRepo.values()) {
-			course.add(repo.name(), getCourseData(repo.name()));		
+			course.add(repo.name(), getCourseData(repo));		
 		}
 		if(fileOper(coursestorge, true) && fileOper(selectedstorge, true)) {
 			return true;
