@@ -84,9 +84,7 @@ public class CourseData extends NetworkConnection {
 		CloseableHttpResponse response = null;
 		if (isLogin()) {
 			try {
-				response = dataFetcher(Method.GET, "/", null);
-				response.close();
-				response = dataFetcher(Method.GET, Xsxk, null);
+				response = dataFetcher(Method.GET, Xsxk);
 				if (EntityUtils.toString(response.getEntity()).contains("未开放选课")) {
 					System.out.println("[CourseCenter] 尚未开放选课");
 					return false;
@@ -105,6 +103,8 @@ public class CourseData extends NetworkConnection {
 			return true;
 		} else {
 			if (login()) {
+				response = dataFetcher(Method.GET, "/", true);
+				response.close();
 				return getIn();
 			}
 			else {

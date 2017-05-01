@@ -2,6 +2,7 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -13,6 +14,7 @@ import javax.net.ssl.SSLContext;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -38,7 +40,7 @@ public class NetworkConnection {
 		POST;
 	};
 	protected String username = "";
-	protected String password = "";	
+	protected String password = "";
 	private boolean isLogin = false;
 		
 	public NetworkConnection() {
@@ -107,20 +109,33 @@ public class NetworkConnection {
 		return re;
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata) throws Exception{//post data has the form: name=value
+	public CloseableHttpResponse dataFetcher(Method type, String suburl) throws Exception {
+		return dataFetcher(type, suburl, null);
+	}
+	
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, boolean setRedirect) throws Exception {
+		return dataFetcher(type, suburl, null, setRedirect);
+	}
+	
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata) throws Exception {
+		return dataFetcher(type, suburl, postdata, false);
+	}
+	
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata, boolean setRedirect) throws Exception{//post data has the form: name=value
 		CloseableHttpResponse response = null;
-//		opr.addHeader(new BasicHeader("X-Requested-With", "XMLHttpRequest"));//unused
 		if (!(isLogin || login())) {
 			return null;
 		}
 		try {
 			if (type == Method.GET) {
 				HttpGet opr = new HttpGet(url + suburl);
+				opr.setConfig(RequestConfig.custom().setRedirectsEnabled(setRedirect).build());
 				opr.addHeader(new BasicHeader("Connection", "Keep-Alive"));
 				response = httpclient.execute(opr);
 			}
 			else if (type == Method.POST) {
 				HttpPost opr = new HttpPost(url + suburl);
+				opr.setConfig(RequestConfig.custom().setRedirectsEnabled(setRedirect).build());
 				opr.addHeader(new BasicHeader("Connection", "Keep-Alive"));
 				if (postdata != null) {
 					List<NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -154,7 +169,7 @@ public class NetworkConnection {
 				isLogin = false;
 				throw new Exception("Can't get data whatever!");
 			}
-			return dataFetcher(type, suburl, postdata);
+			return dataFetcher(type, suburl, postdata, true);
 		}
 		return response;
 	}
@@ -169,7 +184,6 @@ public class NetworkConnection {
 			}
 		} catch (IOException e) {
 			System.out.println("[NetWork] Network error! Please check you have access to the Internet.");
-			return false;
 		} catch (Exception e) {
 			System.out.println("[NetWork] Login Failed! " + e.getMessage());
 		}
@@ -182,6 +196,7 @@ public class NetworkConnection {
 	
 	protected void clear() {
 		cookieStore.clear();
+		isLogin = false;
 	}
 	
 }
