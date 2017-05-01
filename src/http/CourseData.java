@@ -103,8 +103,6 @@ public class CourseData extends NetworkConnection {
 			return true;
 		} else {
 			if (login()) {
-				response = dataFetcher(Method.GET, "/", true);
-				response.close();
 				return getIn();
 			}
 			else {

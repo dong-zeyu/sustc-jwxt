@@ -179,6 +179,7 @@ public class NetworkConnection {
 		clear();
 		try {
 			if (loginCAS()) {
+				dataFetcher(Method.GET, "/", true);
 				isLogin = true;
 				return true;
 			}
