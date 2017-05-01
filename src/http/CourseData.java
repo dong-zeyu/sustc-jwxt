@@ -311,10 +311,14 @@ public class CourseData extends NetworkConnection {
 		searchResult = result;
 	}
 	
+	public boolean login() {
+		return login(username, password);
+	}
+	
 	public boolean login(String user, String pass) {
 		username = user;
 		password = pass;
-		if (login()) {
+		if (super.login()) {
 			return true;
 		}
 		return false;	
