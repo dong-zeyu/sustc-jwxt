@@ -19,7 +19,7 @@ public class Jwxt {
 		String string = "";
 		String param = "";
 		printHelp(true);
-		while (!string.equals("exit")) {
+		while (!(string.equals("exit") || string.equals("e"))) {
 			System.out.print(">");
 			string = scanner.nextLine();
 			if (string.contains(" ")) {
