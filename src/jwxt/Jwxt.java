@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import http.CourseData;
+import http.CourseData.CourseRepo;
 
 public class Jwxt {		
 	public static void main(String[] args) {
@@ -88,8 +89,8 @@ public class Jwxt {
 	}
 	
 	public static void printSearch(JsonObject result) {
-		for (int i = 0; i < CourseData.courserepo.length; i++) {
-			String repo = CourseData.courserepo[i];
+		for (CourseRepo course : CourseRepo.values()) {
+			String repo = course.name();
 			System.out.println(repo + ":");
 			JsonArray array = result.get(repo).getAsJsonArray();
 			for (int j = 0; j < array.size(); j++) {

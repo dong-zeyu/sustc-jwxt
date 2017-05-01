@@ -37,14 +37,23 @@ public class CourseData extends NetworkConnection {
 	private final String xsxkkc = "/xsxkkc/xsxk";
 	private final String DefaultQuery = "?kcxx=&skls=&skxq=&skjc=&sfym=false&sfct=false";
 	
-	public static final String[] courserepo = new String[] {
-			"Bxxk", 	//必修选课
-			"Xxxk", 	//选修选课
-			"Bxqjhxk", 	//本学期计划选课
-			"Knjxk", 	//专业内跨年级选课
-			"Fawxk", 	//跨专业选课
-			"Ggxxkxk"	//共选课选课
-			};
+	public static enum CourseRepo {
+		Bxxk, 	//必修选课
+		Xxxk, 	//选修选课
+		Bxqjhxk, 	//本学期计划选课
+		Knjxk, 	//专业内跨年级选课
+		Fawxk, 	//跨专业选课
+		Ggxxkxk	//共选课选课
+	};
+	
+//	public static final String[] courserepo = new String[] {
+//			"Bxxk", 	//必修选课
+//			"Xxxk", 	//选修选课
+//			"Bxqjhxk", 	//本学期计划选课
+//			"Knjxk", 	//专业内跨年级选课
+//			"Fawxk", 	//跨专业选课
+//			"Ggxxkxk"	//共选课选课
+//			};
 	
 	private static final String xsskOper = "/xsxkkc/%sOper";
 	//选课参数： op[选课] + "?jx0404id=课程ID&xkzy=&trjf="
@@ -219,8 +228,8 @@ public class CourseData extends NetworkConnection {
 			return false;
 		}
 		selected = getSelectedData();
-		for (int i = 0; i < courserepo.length; i++) {
-			course.add(courserepo[i], getCourseData(courserepo[i]));		
+		for (CourseRepo repo : CourseRepo.values()) {
+			course.add(repo.name(), getCourseData(repo.name()));		
 		}
 		if(fileOper(coursestorge, true) && fileOper(selectedstorge, true)) {
 			return true;
@@ -282,9 +291,9 @@ public class CourseData extends NetworkConnection {
 	
 	public void search(String name) { //查找课程
 		JsonObject result = new JsonObject();
-		for (int i = 0; i < courserepo.length; i++) {
-			if (course.get(courserepo[i]).isJsonArray()) {
-				JsonArray array = course.get(courserepo[i]).getAsJsonArray();
+		for (CourseRepo repo : CourseRepo.values()) {
+			if (course.get(repo.name()).isJsonArray()) {
+				JsonArray array = course.get(repo.name()).getAsJsonArray();
 				JsonArray tArray = new JsonArray();
 				for (int j = 0; j < array.size(); j++) {
 					JsonObject jsonObject = array.get(j).getAsJsonObject();
@@ -292,10 +301,10 @@ public class CourseData extends NetworkConnection {
 						tArray.add(jsonObject);
 					}
 				}
-				result.add(courserepo[i], tArray);
+				result.add(repo.name(), tArray);
 			}
 			else {
-				result.add(courserepo[i], new JsonArray());
+				result.add(repo.name(), new JsonArray());
 			}
 		}
 		searchResult = result;
