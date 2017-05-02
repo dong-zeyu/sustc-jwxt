@@ -245,9 +245,8 @@ public class CourseData extends NetworkConnection {
 				System.out.printf("[CourseCenter] Failed in %s: %s\n", id, source.get("message").getAsString());
 				return false;
 			}
-		} catch (JsonIOException | JsonSyntaxException | ParseException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (JsonSyntaxException | ParseException e) {
+			System.out.printf("[CourseCenter] Failed in %s: Internal server error!\n", id);
 		}
 		return false;
 	}
