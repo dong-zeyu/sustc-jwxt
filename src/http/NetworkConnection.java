@@ -70,7 +70,7 @@ public class NetworkConnection {
 
 	private boolean loginCAS() throws Exception {
 		boolean re = false;
-		HttpGet get = new HttpGet(url_cas);	
+		HttpGet get = new HttpGet(url_cas);
 		CloseableHttpResponse response = null;
 		try {
 			response = httpclient.execute(get);
@@ -80,6 +80,7 @@ public class NetworkConnection {
 				String lt = document.getElementsByAttributeValue("name", "lt").attr("value");
 				String execution = document.getElementsByAttributeValue("name", "execution").attr("value");
 				HttpPost post = new HttpPost(url_cas);
+				post.setConfig(RequestConfig.custom().setRedirectsEnabled(false).build());
 				CloseableHttpResponse response1 = null;
 				post.addHeader(new BasicHeader("Content-Type", "application/x-www-form-urlencoded"));		
 				List <NameValuePair> nvps = new ArrayList <NameValuePair>();
@@ -162,9 +163,8 @@ public class NetworkConnection {
 		if (response == null) {
 			return null;
 		}
-		else if (response.getStatusLine().getStatusCode() == 403 || 
-				(response.getStatusLine().getStatusCode() == 302 && 
-				response.getHeaders("Location")[0].getValue().startsWith(url_cas))) {
+		else if (response.getStatusLine().getStatusCode() == 302 && 
+				response.getHeaders("Location")[0].getValue().startsWith(url_cas)) {
 			if (!login()) {
 				isLogin = false;
 				throw new Exception("Can't get data whatever!");
