@@ -46,20 +46,11 @@ public class CourseData extends NetworkConnection {
 		Ggxxkxk	//共选课选课
 	};
 	
-//	public static final String[] courserepo = new String[] {
-//			"Bxxk", 	//必修选课
-//			"Xxxk", 	//选修选课
-//			"Bxqjhxk", 	//本学期计划选课
-//			"Knjxk", 	//专业内跨年级选课
-//			"Fawxk", 	//跨专业选课
-//			"Ggxxkxk"	//共选课选课
-//			};
+	private static final String xsskOper = "/xsxkkc/%sOper?jx0404id=%s&xkzy=&trjf=";
+	//选课参数： /xsxkkc/[课程库(小写)]Oper?jx0404id=[课程ID]&xkzy=&trjf="
 	
-	private static final String xsskOper = "/xsxkkc/%sOper";
-	//选课参数： op[选课] + "?jx0404id=课程ID&xkzy=&trjf="
-	
-	private final String XstkOper = "/xsxkjg/xstkOper";	//学生退课
-	//退课参数：XstkOper +　"?jx0404id=课程ID"
+	private final String XstkOper = "/xsxkjg/xstkOper?jx0404id=";	//学生退课
+	//退课参数：/xsxkjg/xstkOper?jx0404id=[课程ID]"
 	
 	public CourseData(String user, String pass) {
 		course = new JsonObject();
@@ -241,23 +232,17 @@ public class CourseData extends NetworkConnection {
 	public boolean select(String base, String id) throws Exception { //选课操作
 		getIn();
 		HttpResponse response = dataFetcher(Method.GET, 
-				String.format(xsskOper, base.toLowerCase()) + "?jx0404id=" + id + "&xkzy=&trjf=", null);
+				String.format(xsskOper, base.toLowerCase(), id));
 		JsonParser jsonParser = new JsonParser();
 		try {
 			String string = EntityUtils.toString(response.getEntity());
 			JsonObject source = (JsonObject) jsonParser
 					.parse(new StringReader(string));//创建jsonObject对象
 			if (source.get("success").getAsBoolean()) {
-				System.out.printf("[CourseCenter] Success: %s\n", source.get("message").getAsString());
+				System.out.printf("[CourseCenter] Success in %s: %s\n", id, source.get("message").getAsString());
 				return true;
-//				Thread.sleep(5000);
-//				getIn();
-//				response = dataFetcher(Method.GET, 
-//						String.format(xsskOper, base.toLowerCase()) + "?jx0404id=" + id + "&xkzy=&trjf=", null);
-//				source = (JsonObject) jsonParser
-//						.parse(new StringReader(EntityUtils.toString(response.getEntity())));//创建jsonObject对象
 			} else {
-				System.out.printf("[CourseCenter] Failed: %s\n", source.get("message").getAsString());
+				System.out.printf("[CourseCenter] Failed in %s: %s\n", id, source.get("message").getAsString());
 				return false;
 			}
 		} catch (JsonIOException | JsonSyntaxException | ParseException | IOException e) {
@@ -270,7 +255,7 @@ public class CourseData extends NetworkConnection {
 	public boolean quit(String id) throws Exception { //退课操作
 		getIn();
 		CloseableHttpResponse response = dataFetcher(Method.GET, 
-				XstkOper + "?jx0404id=" + id, null);
+				XstkOper + id);
 		JsonParser jsonParser = new JsonParser();
 		try {
 			String string = EntityUtils.toString(response.getEntity());
@@ -311,6 +296,7 @@ public class CourseData extends NetworkConnection {
 		searchResult = result;
 	}
 	
+	@Override
 	public boolean login() {
 		return login(username, password);
 	}
