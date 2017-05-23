@@ -1,7 +1,5 @@
 ﻿package http;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -17,10 +15,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonWriter;
 
 public class CourseData extends NetworkConnection {
 	JsonObject course;
@@ -182,24 +183,26 @@ public class CourseData extends NetworkConnection {
 		   	}
 			//true = append file
 			FileWriter fileWritter = new FileWriter(file.getName(),false);
-			BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
+			JsonWriter writer = new JsonWriter(fileWritter);
+			writer.setLenient(true);
+			writer.setIndent("  ");
 			if (FilePath.equals(coursestorge)) {
-				bufferWritter.write(course.toString());				
+				Streams.write(course, writer);			
 			} else if (FilePath.equals(selectedstorge)){
-				bufferWritter.write(selected.toString());				
+				Streams.write(selected, writer);
 			}
-			bufferWritter.close();
+			writer.flush();
+			writer.close();
 			return true;
 		}
 		else {
-	        BufferedReader reader = null;
 		   	if(file.exists()){
-		        reader = new BufferedReader(new FileReader(file));
+		   		FileReader reader = new FileReader(file);
 				JsonParser parse = new JsonParser();  //创建json解析器
 				if (FilePath.equals(coursestorge)) {
-					course = parse.parse(reader.readLine()).getAsJsonObject();  //创建jsonObject对象					
+					course = parse.parse(reader).getAsJsonObject();  //创建jsonObject对象					
 				} else if(FilePath.equals(selectedstorge)) {
-					selected = parse.parse(reader.readLine()).getAsJsonArray();
+					selected = parse.parse(reader).getAsJsonArray();
 				}
 		      	reader.close();
 		      	return true;
@@ -239,11 +242,22 @@ public class CourseData extends NetworkConnection {
 			String string = EntityUtils.toString(response.getEntity());
 			JsonObject source = (JsonObject) jsonParser
 					.parse(new StringReader(string));//创建jsonObject对象
+			JsonElement m = source.get("message");
+			String msg;
+			if (m != null) {
+				msg = m.getAsString();
+			} else {
+				msg = "no message";
+			}
 			if (source.get("success").getAsBoolean()) {
-				System.out.printf("[CourseCenter] Success in %s: %s\n", id, source.get("message").getAsString());
+				System.out.printf("[CourseCenter] Success in %s: %s\n", id, msg);
 				return true;
 			} else {
-				System.out.printf("[CourseCenter] Failed in %s: %s\n", id, source.get("message").getAsString());
+//				if (msg.contains("已选择")) {
+//					System.out.printf("[CourseCenter] Success in %s: %s\n", id, msg);
+//					return true;
+//				}
+				System.out.printf("[CourseCenter] Failed in %s: %s\n", id, msg);
 				return false;
 			}
 		} catch (JsonSyntaxException | ParseException e) {
