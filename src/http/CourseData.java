@@ -31,7 +31,8 @@ public class CourseData extends NetworkConnection {
 	private final String selectedstorge = "selected.json";
 	
 //	private final String Xsxk = "/xsxk/xsxk_index?jx0502zbid=054B5FA7E55F44E0BB3D24DB3BC561D5";	//主页，用于打开主页权限
-	private final String Xsxk = "/xsxk/xsxk_index?jx0502zbid=054B5FA7E55F44E0BB3D24DB3BC561";	//主页，用于打开主页权限
+//	private final String Xsxk = "/xsxk/xsxk_index?jx0502zbid=054B5FA7E55F44E0BB3D24DB3BC561";	//主页，用于打开主页权限
+	private final String Xsxk = "/xsxk/xsxk_index?jx0502zbid=2A018810EA3C4DCFAD5A971752AD1A0D";	//主页，用于打开主页权限
 //	private final String Xkjglb = "/xsxkjg/xsxkBxqjhxk";	//已选课程----I non't know why I write this, but I'll keep it before I confirm it is unused.
 	private final String Xkjglb = "/xsxkjg/comeXkjglb";	//已选课程
 	
