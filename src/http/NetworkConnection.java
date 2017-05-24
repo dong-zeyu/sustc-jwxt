@@ -2,7 +2,6 @@
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -11,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.SSLContext;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
@@ -157,8 +157,8 @@ public class NetworkConnection {
 				response = httpclient.execute(opr);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Thread.sleep(700);
+			return dataFetcher(type, suburl, postdata, setRedirect);
 		}
 		if (response == null) {
 			return null;
