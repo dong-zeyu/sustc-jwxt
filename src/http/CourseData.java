@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -15,11 +14,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 
@@ -47,12 +43,6 @@ public class CourseData extends NetworkConnection {
 		Fawxk, 	//跨专业选课
 		Ggxxkxk	//共选课选课
 	};
-	
-	private static final String xsskOper = "/xsxkkc/%sOper?jx0404id=%s&xkzy=&trjf=";
-	//选课参数： /xsxkkc/[课程库(小写)]Oper?jx0404id=[课程ID]&xkzy=&trjf="
-	
-	private final String XstkOper = "/xsxkjg/xstkOper?jx0404id=";	//学生退课
-	//退课参数：/xsxkjg/xstkOper?jx0404id=[课程ID]"
 	
 	public CourseData(String user, String pass) {
 		course = new JsonObject();
@@ -230,62 +220,6 @@ public class CourseData extends NetworkConnection {
 		if(fileOper(coursestorge, true) && fileOper(selectedstorge, true)) {
 			return true;
 		}
-		return false;
-	}
-	
-	public boolean select(String base, String id) throws Exception { //选课操作
-		getIn();
-		HttpResponse response = dataFetcher(Method.GET, 
-				String.format(xsskOper, base.toLowerCase(), id));
-		JsonParser jsonParser = new JsonParser();
-		try {
-			String string = EntityUtils.toString(response.getEntity());
-			JsonObject source = (JsonObject) jsonParser
-					.parse(new StringReader(string));//创建jsonObject对象
-			JsonElement m = source.get("message");
-			String msg;
-			if (m != null) {
-				msg = m.getAsString();
-			} else {
-				msg = "no message";
-			}
-			if (source.get("success").getAsBoolean()) {
-				System.out.printf("[CourseCenter] Success in %s: %s\n", id, msg);
-				return true;
-			} else {
-//				if (msg.contains("已选择")) {
-//					System.out.printf("[CourseCenter] Success in %s: %s\n", id, msg);
-//					return true;
-//				}
-				System.out.printf("[CourseCenter] Failed in %s: %s\n", id, msg);
-				return false;
-			}
-		} catch (JsonSyntaxException | ParseException e) {
-			System.out.printf("[CourseCenter] Failed in %s: Internal server error!\n", id);
-		}
-		return false;
-	}
-	
-	public boolean quit(String id) throws Exception { //退课操作
-		getIn();
-		CloseableHttpResponse response = dataFetcher(Method.GET, 
-				XstkOper + id);
-		JsonParser jsonParser = new JsonParser();
-		try {
-			String string = EntityUtils.toString(response.getEntity());
-			response.close();
-			JsonObject source = (JsonObject) jsonParser.parse(new StringReader(string));//创建jsonObject对象
-			if (source.get("success").getAsBoolean()) {
-				System.out.println("[CourseCenter] Succeed: 退课成功");
-				return true;
-			} else {
-				System.out.printf("[CourseCenter] Failed: %s", source.get("message").getAsString());
-				return false;
-			}
-		} catch (JsonIOException | JsonSyntaxException | ParseException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
 		return false;
 	}
 	
