@@ -253,10 +253,10 @@ public class CourseData extends NetworkConnection {
 				System.out.printf("[CourseCenter] Success in %s: %s\n", id, msg);
 				return true;
 			} else {
-//				if (msg.contains("已选择")) {
-//					System.out.printf("[CourseCenter] Success in %s: %s\n", id, msg);
-//					return true;
-//				}
+				if (msg.contains("已选择")) {
+					System.out.printf("[CourseCenter] Success in %s: %s\n", id, msg);
+					return true;
+				}
 				System.out.printf("[CourseCenter] Failed in %s: %s\n", id, msg);
 				return false;
 			}
