@@ -9,7 +9,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
 import http.CourseData;
@@ -23,13 +22,13 @@ public class Select {
 
 	public static CourseData courseData;
 	enum Course {
-		羽毛球(CourseRepo.Ggxxkxk, 		"201720181000289"),
-		乐理与视唱练耳(CourseRepo.Ggxxkxk, 	"201720181001120"),
-		抽象代数(CourseRepo.Fawxk, 		"201720181000476"),
-		综合物理实验(CourseRepo.Fawxk, 		"201720181000535"),
-		数学分析精讲(CourseRepo.Fawxk, 		"201720181001137"),
-		概率论(CourseRepo.Fawxk, 			"201720181001155"),
-		毛概(CourseRepo.Knjxk, 			"201720181001203"),
+//		羽毛球(CourseRepo.Ggxxkxk, 		"201720181000289"),
+//		乐理与视唱练耳(CourseRepo.Ggxxkxk, 	"201720181001120"),
+//		抽象代数(CourseRepo.Fawxk, 		"201720181000476"),
+//		综合物理实验(CourseRepo.Fawxk, 		"201720181000535"),
+//		数学分析精讲(CourseRepo.Fawxk, 		"201720181001137"),
+//		概率论(CourseRepo.Fawxk, 			"201720181001155"),
+//		毛概(CourseRepo.Knjxk, 			"201720181001203"),
 		;
 		CourseRepo repo;
 		String id;
@@ -90,7 +89,6 @@ public class Select {
 		}
 		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
 		calendar.set(2017, 4, 25, 21, 59, 59);
-//		calendar.set(2017, 4, 25, 22, 0, 0);
 		calendar.set(Calendar.MILLISECOND, 800);
 		
 		courseData = new CourseData("11611716", "dzy19980909");
@@ -99,10 +97,9 @@ public class Select {
 		
 		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 		long shift = format.parse(courseData.dataFetcher(Method.GET, "/").getFirstHeader("Date").getValue()).getTime() - new Date().getTime();		
-		Timer timer1 = new Timer(true);
-		timer1.schedule(new Task(courses), new Date(calendar.getTime().getTime() - 20000));
-		new Timer(true).schedule(new Run(), new Date(calendar.getTime().getTime() - shift));
 		synchronized (lock) {
+			new Timer(true).schedule(new Task(courses), new Date(calendar.getTime().getTime() - 20000));
+			new Timer(true).schedule(new Run(), new Date(calendar.getTime().getTime() - shift));
 			lock.wait();
 		}
 		System.out.println("terminate");
