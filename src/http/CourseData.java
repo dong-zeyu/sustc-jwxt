@@ -82,12 +82,12 @@ public class CourseData extends NetworkConnection {
     	}
 	}
 		
-	private boolean getIn() throws Exception {//获取选课权限
+	public boolean getIn() throws Exception {//获取选课权限
 		CloseableHttpResponse response = null;
 		if (isLogin()) {
 			try {
 				response = dataFetcher(Method.GET, Xsxk);
-				if (EntityUtils.toString(response.getEntity()).contains("未开放选课")) {
+				if (EntityUtils.toString(response.getEntity()).contains("不在选课时间范围内")) {
 					System.out.println("[CourseCenter] 尚未开放选课");
 					return false;
 				}
@@ -163,7 +163,7 @@ public class CourseData extends NetworkConnection {
 				object.addProperty("Teacher", courses.get(i).child(4).text());
 				object.addProperty("Time", courses.get(i).child(5).text());
 				object.addProperty("Position", courses.get(i).child(6).text());
-				object.addProperty("jx0404id", courses.get(i).child(9).child(0).id().split("_")[1]);
+				object.addProperty("jx0404id", courses.get(i).child(10).child(0).id().split("_")[1]);
 				array.add(object);
 			}
 			return array;
