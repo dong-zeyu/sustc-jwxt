@@ -11,7 +11,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Predicate;
 
-import javax.naming.AuthenticationException;
+import org.apache.http.auth.AuthenticationException;
 
 import http.CourseData;
 import http.StatusException;
