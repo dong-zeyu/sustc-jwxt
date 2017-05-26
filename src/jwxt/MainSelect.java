@@ -15,7 +15,7 @@ import http.CourseData;
 import http.CourseData.CourseRepo;
 import http.NetworkConnection.Method;
 
-public class Select {
+public class MainSelect {
 	
 	public static byte[] lock = new byte[0];
 	public static int SLEEP = 1000;
@@ -103,7 +103,6 @@ public class Select {
 			lock.wait();
 		}
 		System.out.println("terminate");
-		Thread.sleep(200);
 	}
 	
 }
