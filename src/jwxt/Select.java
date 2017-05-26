@@ -67,7 +67,7 @@ public class Select {
 		}
 		
 		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
-		calendar.set(2017, 4, 26, 12, 59, 59);
+		calendar.set(2017, 4, 26, 21, 10, 0);
 		
 		courseData = new CourseData("11611716", "dzy19980909");
 		courseData.login();

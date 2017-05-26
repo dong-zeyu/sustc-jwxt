@@ -11,7 +11,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Predicate;
 
+import javax.naming.AuthenticationException;
+
 import http.CourseData;
+import http.StatusException;
 import http.CourseData.CourseRepo;
 import http.NetworkConnection.Method;
 
@@ -47,12 +50,18 @@ public class MainSelect {
 			public void run() {
 				synchronized (lock) {
 					System.out.println("Begin!");
-					try {
-						while (!courseData.getIn()) {
-							Thread.sleep(SLEEP);
+					while (true) {
+						try {
+							courseData.getIn();
+							break;
+						} catch (StatusException e1) {
+						} catch (AuthenticationException e) {
 						}
-					} catch (Exception e1) {
-						System.out.println("Failed due to Execption: " + e1.getMessage());
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							break;
+						}
 					}
 					while (!courses.isEmpty()) {
 						courses.removeIf(new Predicate<Course>() {
