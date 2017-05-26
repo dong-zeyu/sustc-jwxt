@@ -15,20 +15,13 @@ import http.CourseData;
 import http.CourseData.CourseRepo;
 import http.NetworkConnection.Method;
 
-public class MainSelect {
+public class Select {
 	
 	public static byte[] lock = new byte[0];
-	public static int SLEEP = 1000;
 
 	public static CourseData courseData;
 	enum Course {
-//		羽毛球(CourseRepo.Ggxxkxk, 		"201720181000289"),
-//		乐理与视唱练耳(CourseRepo.Ggxxkxk, 	"201720181001120"),
-//		抽象代数(CourseRepo.Fawxk, 		"201720181000476"),
-//		综合物理实验(CourseRepo.Fawxk, 		"201720181000535"),
-//		数学分析精讲(CourseRepo.Fawxk, 		"201720181001137"),
-//		概率论(CourseRepo.Fawxk, 			"201720181001155"),
-//		毛概(CourseRepo.Knjxk, 			"201720181001203"),
+		摄影(CourseRepo.Ggxxkxk, "201720181001105"),
 		;
 		CourseRepo repo;
 		String id;
@@ -47,14 +40,8 @@ public class MainSelect {
 			public void run() {
 				synchronized (lock) {
 					System.out.println("Begin!");
-					try {
-						while (!courseData.getIn()) {
-							Thread.sleep(SLEEP);
-						}
-					} catch (Exception e1) {
-						System.out.println("Failed due to Execption: " + e1.getMessage());
-					}
-					while (!courses.isEmpty()) {
+					long time = new Date().getTime();
+					while (!courses.isEmpty() && new Date().getTime() - time < 10*1000l) {
 						courses.removeIf(new Predicate<Course>() {
 							
 							@Override
@@ -79,16 +66,8 @@ public class MainSelect {
 			
 		}
 		
-		class Run extends TimerTask {
-
-			@Override
-			public void run() {
-				SLEEP = 100;
-			}
-			
-		}
 		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
-		calendar.set(2017, 4, 25, 21, 59, 59);
+		calendar.set(2017, 4, 26, 12, 59, 59);
 		
 		courseData = new CourseData("11611716", "dzy19980909");
 		courseData.login();
@@ -97,8 +76,7 @@ public class MainSelect {
 		SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 		long shift = format.parse(courseData.dataFetcher(Method.GET, "/").getFirstHeader("Date").getValue()).getTime() - new Date().getTime();		
 		synchronized (lock) {
-			new Timer(true).schedule(new Task(courses), new Date(calendar.getTime().getTime() - 20000));
-			new Timer(true).schedule(new Run(), new Date(calendar.getTime().getTime() - shift));
+			new Timer(true).schedule(new Task(courses), new Date(calendar.getTime().getTime() - shift));
 			lock.wait();
 		}
 		System.out.println("terminate");
