@@ -1,11 +1,15 @@
 ﻿package http;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 
+import javax.naming.AuthenticationException;
+
+import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -44,67 +48,54 @@ public class CourseData extends NetworkConnection {
 		Ggxxkxk	//共选课选课
 	};
 	
-	public CourseData(String user, String pass) {
+	public CourseData(String user, String pass) throws AuthenticationException {
 		course = new JsonObject();
 		selected = new JsonArray();
 		searchResult = new JsonObject();
 		url = "http://jwxt.sustc.edu.cn/jsxsd";
 		username = user;
 		password = pass;
-	    if (fileOper(coursestorge, false) && fileOper(selectedstorge, false)) {
-	    	System.out.println("[CourseCenter] Load storage.");
-	   	}
-	   	else {
-	   		System.out.println("[CourseCenter] Not all storages are found, get them.");
-	   		try {
-				if (updateData()) {
-					System.out.println("[CourseCenter] Setup course storage successfully.");
-				} else {
-					System.out.println("[CourseCenter] Can't get storage, exit immediately!");
-					System.exit(-1);
-				}
-			} catch (Exception e) {
-				if (e.getMessage() == "Can't get data whatever!") {
-						System.out.println("[CourseCenter] Can't get storage, exit immediately!");
-						System.exit(-1);					
-				}
+		try {
+			fileOper(coursestorge, false);
+			fileOper(selectedstorge, false);
+			System.out.println("[CourseCenter] Load storage.");
+		} catch (FileNotFoundException e1) {
+			System.out.println("[CourseCenter] Not all storages are found, get them.");
+			try {
+				updateData();
+				System.out.println("[CourseCenter] Setup course storage successfully.");
+			} catch (StatusException e) {
+				System.err.println("[CourseCenter] Update Data Failed: " + e.getMessage());
 			}
-    	}
+		} catch (IOException e2) {
+			System.err.println(e2.getMessage());
+		}
 	}
 		
-	public boolean getIn() throws Exception {//获取选课权限
+	public void getIn() throws AuthenticationException, StatusException {//获取选课权限
 		CloseableHttpResponse response = null;
 		if (isLogin()) {
 			try {
 				response = dataFetcher(Method.GET, Xsxk);
 				if (EntityUtils.toString(response.getEntity()).contains("不在选课时间范围内")) {
-					System.out.println("[CourseCenter] 尚未开放选课");
-					return false;
+					throw new StatusException("尚未开放选课");
 				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (IOException | ParseException e) {
+				System.err.println(e.getMessage());
 			} finally {
 				try {
 					response.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.err.println(e.getMessage());
 				}
 			}
-			return true;
 		} else {
-			if (login()) {
-				return getIn();
-			}
-			else {
-				System.out.println("[CourseCenter] Can't get course center access: Login Failed!");
-			}
+			login();
+			getIn();
 		}
-		return false;
 	}
 	
-	private JsonArray getCourseData(CourseRepo repo) throws Exception { //获取课程数据
+	private JsonArray getCourseData(CourseRepo repo) throws AuthenticationException { //获取课程数据
 		try {
 			CloseableHttpResponse response;
 			JsonParser parse;
@@ -131,13 +122,12 @@ public class CourseData extends NetworkConnection {
 				return null;
 			}
 		} catch (ParseException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 		}
 		return null;
 	}
 	
-	private JsonArray getSelectedData() throws Exception { //更新已选课程数据
+	private JsonArray getSelectedData() throws AuthenticationException { //更新已选课程数据
 		CloseableHttpResponse response;
 		response = dataFetcher(Method.GET, Xkjglb, null);
 		JsonArray array = new JsonArray();
@@ -158,19 +148,17 @@ public class CourseData extends NetworkConnection {
 			}
 			return array;
 		} catch (ParseException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println(e.getMessage());
 		}
 		return null;
 	}
 	
-	private boolean fileOper(String FilePath, boolean work) { //写入到文件
+	private void fileOper(String FilePath, boolean work) throws FileNotFoundException, IOException { //写入到文件
 		File file =new File(FilePath);
-		try {
 		if (work) {
 			if(!file.exists()){
-		   		file.createNewFile();
-		   	}
+				file.createNewFile();
+			}
 			//true = append file
 			FileWriter fileWritter = new FileWriter(file.getName(),false);
 			JsonWriter writer = new JsonWriter(fileWritter);
@@ -183,44 +171,36 @@ public class CourseData extends NetworkConnection {
 			}
 			writer.flush();
 			writer.close();
-			return true;
 		}
 		else {
-		   	if(file.exists()){
-		   		FileReader reader = new FileReader(file);
+			if(file.exists()){
+				FileReader reader = new FileReader(file);
 				JsonParser parse = new JsonParser();  //创建json解析器
 				if (FilePath.equals(coursestorge)) {
 					course = parse.parse(reader).getAsJsonObject();  //创建jsonObject对象					
 				} else if(FilePath.equals(selectedstorge)) {
 					selected = parse.parse(reader).getAsJsonArray();
 				}
-		      	reader.close();
-		      	return true;
+				reader.close();
 			}
-		   	else {
-				return false;
+			else {
+				throw new FileNotFoundException(String.format("Can't find '%s'\n", FilePath));
 			}
 		}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return false;
 	}
 	
-	public boolean updateData() throws Exception {//更新课程数据
-		if (!getIn()) {
-			System.out.println("[CourseCenter] Update Failed: Can't get course center access.");
-			return false;
-		}
+	public void updateData() throws AuthenticationException, StatusException {//更新课程数据
+		getIn();
 		selected = getSelectedData();
 		for (CourseRepo repo : CourseRepo.values()) {
 			course.add(repo.name(), getCourseData(repo));		
 		}
-		if(fileOper(coursestorge, true) && fileOper(selectedstorge, true)) {
-			return true;
+		try {
+			fileOper(coursestorge, true);
+			fileOper(selectedstorge, true);
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
 		}
-		return false;
 	}
 	
 	public void search(String name) { //查找课程
@@ -245,17 +225,14 @@ public class CourseData extends NetworkConnection {
 	}
 	
 	@Override
-	public boolean login() {
-		return login(username, password);
+	public void login() throws AuthenticationException {
+		login(username, password);
 	}
 	
-	public boolean login(String user, String pass) {
+	public void login(String user, String pass) throws AuthenticationException {
 		username = user;
 		password = pass;
-		if (super.login()) {
-			return true;
-		}
-		return false;	
+		super.login();
 	}
 	
 }
