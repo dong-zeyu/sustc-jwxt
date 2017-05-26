@@ -2,6 +2,8 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -9,6 +11,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.naming.AuthenticationException;
 import javax.net.ssl.SSLContext;
 
 import org.apache.http.NameValuePair;
@@ -62,14 +65,15 @@ public class NetworkConnection {
 					.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
 					.setDefaultCookieStore(cookieStore)
 					.build();//客户端建立
-		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException | CertificateException e) {
+			System.out.println(e.getMessage());
+		} catch (IOException e) {
+			System.err.println("Load cert failed. Exit");
+			System.exit(-1);
 		}
 	}
 
-	private boolean loginCAS() throws Exception {
-		boolean re = false;
+	private void loginCAS() throws AuthenticationException, IOException {
 		HttpGet get = new HttpGet(url_cas);
 		CloseableHttpResponse response = null;
 		try {
@@ -94,40 +98,37 @@ public class NetworkConnection {
 				response1 = httpclient.execute(post);
 				if(response1 != null && response1.toString().contains("TGC")){
 					System.out.println("[NetWork] Login Succeed!");
-					re = true;
 				}
 				else{
-					if(EntityUtils.toString(response1.getEntity()).contains("认证信息无效")) {
-						throw new Exception("Error authentication information");
+					if(EntityUtils.toString(response1.getEntity()).contains("class=\"errors\"")) {
+						throw new AuthenticationException("Login Failed: Error authentication information");
 					}
 				}
 				response1.close();
-			}			
-		}catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			}
+		} catch (ClientProtocolException | UnsupportedEncodingException e) {
+			System.err.println(e.getMessage());
 		}
-		return re;
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl) throws Exception {
+	public CloseableHttpResponse dataFetcher(Method type, String suburl) throws AuthenticationException {
 		return dataFetcher(type, suburl, null);
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl, boolean setRedirect) throws Exception {
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, boolean setRedirect) throws AuthenticationException {
 		return dataFetcher(type, suburl, null, setRedirect);
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata) throws Exception {
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata) throws AuthenticationException {
 		return dataFetcher(type, suburl, postdata, false);
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata, boolean setRedirect) throws Exception{//post data has the form: name=value
-		CloseableHttpResponse response = null;
-		if (!(isLogin || login())) {
-			return null;
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata, boolean setRedirect) throws AuthenticationException {//post data has the form: name=value
+		if (!isLogin) {
+			login();
 		}
 		try {
+			CloseableHttpResponse response;
 			if (type == Method.GET) {
 				HttpGet opr = new HttpGet(url + suburl);
 				opr.setConfig(RequestConfig.custom().setRedirectsEnabled(setRedirect).build());
@@ -155,40 +156,35 @@ public class NetworkConnection {
 					opr.setEntity(new UrlEncodedFormEntity(nvps));
 				}
 				response = httpclient.execute(opr);
+			} else {
+				response = null;
 			}
+			if (response == null) {
+				return null;
+			} else if (response.getStatusLine().getStatusCode() == 302 && 
+					response.getHeaders("Location")[0].getValue().startsWith(url_cas)) {
+				login();
+				return dataFetcher(type, suburl, postdata, true);
+			}
+			return response;
 		} catch (IOException e) {
-			Thread.sleep(700);
+			try {
+				Thread.sleep(700);
+			} catch (InterruptedException e1) {}
 			return dataFetcher(type, suburl, postdata, setRedirect);
 		}
-		if (response == null) {
-			return null;
-		}
-		else if (response.getStatusLine().getStatusCode() == 302 && 
-				response.getHeaders("Location")[0].getValue().startsWith(url_cas)) {
-			if (!login()) {
-				isLogin = false;
-				throw new Exception("Can't get data whatever!");
-			}
-			return dataFetcher(type, suburl, postdata, true);
-		}
-		return response;
 	}
 	
-	protected boolean login() {
+	protected void login() throws AuthenticationException {
 		System.out.println("[NetWork] Login...");
 		clear();
 		try {
-			if (loginCAS()) {
-				isLogin = true;
-				dataFetcher(Method.GET, "/", true);
-				return true;
-			}
+			loginCAS();
+			isLogin = true;
+			dataFetcher(Method.GET, "/", true);
 		} catch (IOException e) {
 			System.out.println("[NetWork] Network error! Please check you have access to the Internet.");
-		} catch (Exception e) {
-			System.out.println("[NetWork] Login Failed! " + e.getMessage());
 		}
-		return false;
 	}
 	
 	public boolean isLogin() {
