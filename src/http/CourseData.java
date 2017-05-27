@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Map.Entry;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -27,7 +28,6 @@ import com.google.gson.stream.JsonWriter;
 public class CourseData extends NetworkConnection {
 	JsonObject course;
 	JsonArray selected;
-	public JsonObject searchResult;
 	
 	private final String coursestorge = "course.json";
 	private final String selectedstorge = "selected.json";
@@ -58,7 +58,6 @@ public class CourseData extends NetworkConnection {
 	public CourseData(String user, String pass) throws AuthenticationException {
 		course = new JsonObject();
 		selected = new JsonArray();
-		searchResult = new JsonObject();
 		url = "http://jwxt.sustc.edu.cn/jsxsd";
 		username = user;
 		password = pass;
@@ -270,25 +269,20 @@ public class CourseData extends NetworkConnection {
 		return false;
 	}
 	
-	public void search(String name) { //查找课程
+	public JsonObject search(String name) { //查找课程
 		JsonObject result = new JsonObject();
-		for (CourseRepo repo : CourseRepo.values()) {
-			if (course.get(repo.name()).isJsonArray()) {
-				JsonArray array = course.get(repo.name()).getAsJsonArray();
-				JsonArray tArray = new JsonArray();
-				for (int j = 0; j < array.size(); j++) {
-					JsonObject jsonObject = array.get(j).getAsJsonObject();
-					if (jsonObject.toString().contains(name)) {
-						tArray.add(jsonObject);
-					}
+		for (Entry<String, JsonElement> entry : course.entrySet()) {
+			JsonArray array = entry.getValue().getAsJsonArray();
+			JsonArray tArray = new JsonArray();
+			for (int j = 0; j < array.size(); j++) {
+				JsonObject jsonObject = array.get(j).getAsJsonObject();
+				if (jsonObject.toString().contains(name)) {
+					tArray.add(jsonObject);
 				}
-				result.add(repo.name(), tArray);
 			}
-			else {
-				result.add(repo.name(), new JsonArray());
-			}
+			result.add(entry.getKey(), tArray);
 		}
-		searchResult = result;
+		return result;
 	}
 	
 	@Override
