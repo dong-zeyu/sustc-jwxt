@@ -69,7 +69,7 @@ public class CourseData extends NetworkConnection {
 		} catch (FileNotFoundException e1) {
 			System.out.println("[CourseCenter] Not all storages are found, get them.");
 			try {
-				updateData();
+				updateCourseData();
 				System.out.println("[CourseCenter] Setup course storage successfully.");
 			} catch (StatusException e) {
 				System.err.println("[CourseCenter] Update Data Failed: " + e.getMessage());
@@ -102,7 +102,15 @@ public class CourseData extends NetworkConnection {
 		}
 	}
 	
-	private JsonArray getCourseData(CourseRepo repo) throws AuthenticationException { //获取课程数据
+	public JsonObject updateCourseData() throws AuthenticationException, StatusException {//更新课程数据
+		getIn();
+		for (CourseRepo repo : CourseRepo.values()) {
+			course.add(repo.name(), updateCourseData1(repo));		
+		}
+		return course;
+	}
+	
+	private JsonArray updateCourseData1(CourseRepo repo) throws AuthenticationException { //获取课程数据
 		try {
 			CloseableHttpResponse response;
 			JsonParser parse;
@@ -134,7 +142,8 @@ public class CourseData extends NetworkConnection {
 		return null;
 	}
 	
-	private JsonArray getSelectedData() throws AuthenticationException { //更新已选课程数据
+	public JsonArray updateSelected() throws AuthenticationException, StatusException { //更新已选课程数据
+		getIn();
 		CloseableHttpResponse response;
 		response = dataFetcher(Method.GET, Xkjglb, null);
 		JsonArray array = new JsonArray();
@@ -146,11 +155,11 @@ public class CourseData extends NetworkConnection {
 				String id = courses.get(i).child(10).child(0).id().split("_")[1];
 				array.add(id);
 			}
-			return array;
+			selected = array;
 		} catch (ParseException | IOException e) {
 			System.err.println(e.getMessage());
 		}
-		return null;
+		return selected;
 	}
 	
 	private void fileOper(String FilePath, boolean work) throws FileNotFoundException, IOException { //写入到文件
@@ -189,16 +198,7 @@ public class CourseData extends NetworkConnection {
 		}
 	}
 	
-	public void updateData() throws AuthenticationException, StatusException {//更新课程数据
-		getIn();
-		selected = getSelectedData();
-		for (CourseRepo repo : CourseRepo.values()) {
-			course.add(repo.name(), getCourseData(repo));		
-		}
-	}
-	
 	public void saveToFile() throws IOException, AuthenticationException, StatusException {
-		updateData();
 		fileOper(coursestorge, true);
 		fileOper(selectedstorge, true);
 	}
