@@ -8,16 +8,24 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import http.CourseData;
+import http.StatusException;
+
 import org.eclipse.swt.widgets.Group;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 
 public class Main extends Shell {
 
@@ -25,6 +33,7 @@ public class Main extends Shell {
 	private SashForm sashForm;
 	private Tree tree;
 	private static String[] WEEK = new String[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+	private Text text;
 
 	/**
 	 * Launch the application.
@@ -36,19 +45,7 @@ public class Main extends Shell {
 			courseData = new CourseData("", "");
 			Display display = Display.getDefault();
 			Main shell = new Main(display);
-			Login dialog = new Login(shell, SWT.PRIMARY_MODAL);
-			do {
-				try {
-					Object o = dialog.open();
-					if (o != null) {
-						String[] auth = (String[]) o;
-						courseData.login(auth[0], auth[1]);
-						break;
-					}
-					break;
-				} catch (AuthenticationException e) {
-				}
-			} while (true);
+			login(shell);
 			shell.createContents();
 			shell.open();
 			shell.layout();
@@ -60,6 +57,23 @@ public class Main extends Shell {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static boolean login(Shell shell) {
+		Login dialog = new Login(shell, SWT.PRIMARY_MODAL);
+		do {
+			try {
+				Object o = dialog.open();
+				if (o != null) {
+					String[] auth = (String[]) o;
+					courseData.login(auth[0], auth[1]);
+					break;
+				}
+				return false;
+			} catch (AuthenticationException e) {
+			}
+		} while (true);
+		return true;
 	}
 
 	/**
@@ -77,7 +91,7 @@ public class Main extends Shell {
 		fd_group.left = new FormAttachment(0, 20);
 		fd_group.right = new FormAttachment(40, 0);
 		fd_group.bottom = new FormAttachment(100, -20);
-		fd_group.top = new FormAttachment(0, 20);
+		fd_group.top = new FormAttachment(0, 15);
 		group.setLayoutData(fd_group);
 		group.setLayout(new FormLayout());
 		group.setText("课程");
@@ -86,7 +100,7 @@ public class Main extends Shell {
 		FormData fd_tree = new FormData();
 		fd_tree.bottom = new FormAttachment(100, -7);
 		fd_tree.right = new FormAttachment(100, -7);
-		fd_tree.top = new FormAttachment(0, 25);
+		fd_tree.top = new FormAttachment(0, 30);
 		fd_tree.left = new FormAttachment(0, 7);
 		tree.setLayoutData(fd_tree);
 		tree.setLinesVisible(true);
@@ -113,6 +127,54 @@ public class Main extends Shell {
 		fd_sashForm.bottom = new FormAttachment(group, 0, SWT.BOTTOM);
 		fd_sashForm.top = new FormAttachment(group, 0, SWT.TOP);
 		fd_sashForm.left = new FormAttachment(group, 7, SWT.RIGHT);
+
+		Button button = new Button(group, SWT.NONE);
+		Shell shell = this;
+		button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				do {
+					try {
+						courseData.updateCourseData();
+						courseData.updateSelected();
+						break;
+					} catch (AuthenticationException e1) {
+						if (!login(shell)) {
+							break;
+						}
+					} catch (StatusException e1) {
+						MessageBox messageBox = new MessageBox(shell, SWT.OK);
+						messageBox.setMessage(e1.getMessage());
+						messageBox.open();
+						break;
+					}
+				} while (true);
+				updateData(null);
+			}
+		});
+		FormData fd_button = new FormData();
+		fd_button.right = new FormAttachment(tree, 0, SWT.RIGHT);
+		button.setLayoutData(fd_button);
+		button.setText("更新数据");
+
+		text = new Text(group, SWT.BORDER);
+		FormData fd_text = new FormData();
+		fd_text.top = new FormAttachment(button, 2, SWT.TOP);
+		fd_text.left = new FormAttachment(tree, 0, SWT.LEFT);
+		text.setLayoutData(fd_text);
+
+		Button button_1 = new Button(group, SWT.NONE);
+		button_1.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				updateData(text.getText());
+			}
+		});
+		FormData fd_button_1 = new FormData();
+		fd_button_1.left = new FormAttachment(0, 86);
+		fd_button_1.top = new FormAttachment(button, 0, SWT.TOP);
+		button_1.setLayoutData(fd_button_1);
+		button_1.setText("搜索");
 		fd_sashForm.right = new FormAttachment(100, -7);
 		sashForm.setLayoutData(fd_sashForm);
 
@@ -171,7 +233,18 @@ public class Main extends Shell {
 		setText("App");
 		setMaximized(true);
 
-		for (Entry<String, JsonElement> entry : courseData.getCourse().entrySet()) {
+		updateData(null);
+	}
+
+	private void updateData(String string) {
+		tree.removeAll();
+		JsonObject result;
+		if (string == null) {
+			result = courseData.getCourse();
+		} else {
+			result = courseData.search(string);
+		}
+		for (Entry<String, JsonElement> entry : result.entrySet()) {
 			for (JsonElement element : entry.getValue().getAsJsonArray()) {
 				TreeItem root = null;
 				for (TreeItem item : tree.getItems()) {
@@ -209,7 +282,6 @@ public class Main extends Shell {
 				item.setText(3, e3.isJsonNull() ? "无" : e3.getAsString());
 			}
 		}
-
 	}
 
 	@Override
