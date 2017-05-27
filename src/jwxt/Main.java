@@ -1,5 +1,6 @@
 package jwxt;
 
+import org.apache.http.auth.AuthenticationException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -32,18 +33,22 @@ public class Main extends Shell {
 	 */
 	public static void main(String args[]) {
 		try {
+			courseData = new CourseData("", "");
 			Display display = Display.getDefault();
 			Main shell = new Main(display);
-			// Login dialog = new Login(shell, SWT.PRIMARY_MODAL);
-			// courseData = new CourseData("", "");
-			// do {
-			// try {
-			// String[] auth = (String[]) dialog.open();
-			// courseData.login(auth[0], auth[1]);
-			// break;
-			// } catch (AuthenticationException e) {
-			// }
-			// } while (true);
+			Login dialog = new Login(shell, SWT.PRIMARY_MODAL);
+			do {
+				try {
+					Object o = dialog.open();
+					if (o != null) {
+						String[] auth = (String[]) o;
+						courseData.login(auth[0], auth[1]);
+						break;
+					}
+					break;
+				} catch (AuthenticationException e) {
+				}
+			} while (true);
 			shell.open();
 			shell.layout();
 			while (!shell.isDisposed()) {

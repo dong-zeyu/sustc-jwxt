@@ -9,6 +9,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 public class Login extends Dialog {
 
@@ -19,6 +21,7 @@ public class Login extends Dialog {
 
 	/**
 	 * Create the dialog.
+	 * 
 	 * @param parent
 	 * @param style
 	 */
@@ -29,6 +32,7 @@ public class Login extends Dialog {
 
 	/**
 	 * Open the dialog.
+	 * 
 	 * @return the result
 	 */
 	public Object open() {
@@ -51,37 +55,44 @@ public class Login extends Dialog {
 		shell = new Shell(getParent(), SWT.DIALOG_TRIM);
 		shell.setSize(450, 230);
 		shell.setText(getText());
-		
+
 		Label lblUserName = new Label(shell, SWT.NONE);
 		lblUserName.setAlignment(SWT.RIGHT);
 		lblUserName.setBounds(65, 50, 71, 17);
 		lblUserName.setText("User Name:");
-		
+
 		text = new Text(shell, SWT.BORDER);
 		text.setBounds(142, 47, 220, 23);
-		
+
 		Label lblPassword = new Label(shell, SWT.NONE);
 		lblPassword.setAlignment(SWT.RIGHT);
 		lblPassword.setBounds(65, 94, 71, 17);
 		lblPassword.setText("Password:");
-		
+
 		text_1 = new Text(shell, SWT.BORDER | SWT.PASSWORD);
 		text_1.setBounds(142, 91, 220, 23);
-		
+
 		Button btnLogin = new Button(shell, SWT.NONE);
 		btnLogin.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				result = new String[] {
-						text.getText(), 
-						text_1.getText()
-						};
+				result = new String[] { text.getText(), text_1.getText() };
 				shell.dispose();
 			}
 		});
 		btnLogin.setBounds(142, 134, 80, 27);
 		btnLogin.setText("Login");
 
-	}
+		Button btnCannel = new Button(shell, SWT.NONE);
+		btnCannel.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				result = null;
+				shell.dispose();
+			}
+		});
+		btnCannel.setBounds(282, 134, 80, 27);
+		btnCannel.setText("Cannel");
 
+	}
 }
