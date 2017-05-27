@@ -20,13 +20,14 @@ public class TreeItem extends org.eclipse.swt.widgets.TreeItem {
 		for (TreeItem item : getItems()) {
 			item.setChecked(checked);
 		}
-		if (getParentItem() != null) {
-			TreeItem parent = (TreeItem) getParentItem();
+		TreeItem parent;
+		TreeItem head = this;
+		while ((parent = (TreeItem) head.getParentItem()) != null) {
 			if (checked) {
 				parent.superSetChecked(true);
 				parent.setGrayed(false);
 				for (TreeItem item : parent.getItems()) {
-					if (!item.getChecked()) {
+					if (!item.getChecked() || item.getGrayed()) {
 						parent.setGrayed(true);
 						break;
 					}
@@ -41,31 +42,9 @@ public class TreeItem extends org.eclipse.swt.widgets.TreeItem {
 					}
 				}
 			}
+			head = parent;
 		}
 	}
-	
-	@Override
-	public void setGrayed(boolean grayed) {
-		super.setGrayed(grayed);
-		if (getParentItem() != null) {
-			TreeItem parent = (TreeItem) getParentItem();
-			if (grayed) {
-				parent.superSetChecked(true);
-				parent.setGrayed(true);
-			} else {
-				parent.setGrayed(false);
-				for (TreeItem item : parent.getItems()) {
-					if (item.getGrayed() || !item.getChecked()) {
-						parent.setGrayed(true);
-					}
-				}
-			}
-		}
-	}
-
-	private void superSetGrayed(boolean isChecked) {
-		super.setChecked(isChecked);
-	}	
 	
 	private void superSetChecked(boolean isChecked) {
 		super.setChecked(isChecked);
