@@ -133,15 +133,8 @@ public class CourseData extends NetworkConnection {
 			Document document = Jsoup.parse(string);
 			Elements courses = document.getElementsByTag("tbody").get(0).children();
 			for (int i = 0; i < courses.size(); i++) {
-				JsonObject object = new JsonObject();
-				object.addProperty("ID", courses.get(i).child(0).text());
-				object.addProperty("Name", courses.get(i).child(1).text());
-				object.addProperty("Credit", courses.get(i).child(2).text());
-				object.addProperty("Teacher", courses.get(i).child(4).text());
-				object.addProperty("Time", courses.get(i).child(5).text());
-				object.addProperty("Position", courses.get(i).child(6).text());
-				object.addProperty("jx0404id", courses.get(i).child(10).child(0).id().split("_")[1]);
-				array.add(object);
+				String id = courses.get(i).child(10).child(0).id().split("_")[1];
+				array.add(id);
 			}
 			return array;
 		} catch (ParseException | IOException e) {
