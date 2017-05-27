@@ -1,5 +1,7 @@
 package jwxt;
 
+import java.util.Map.Entry;
+
 import org.apache.http.auth.AuthenticationException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -7,24 +9,22 @@ import org.eclipse.swt.widgets.Shell;
 
 import http.CourseData;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.ProgressBar;
+import com.google.gson.JsonElement;
+
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.TreeColumn;
 
 public class Main extends Shell {
 
 	public static CourseData courseData;
-	private Table table;
 	private SashForm sashForm;
-	private ProgressBar progressBar;
+	private Tree tree;
+	private static String[] WEEK = new String[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
 
 	/**
 	 * Launch the application.
@@ -49,6 +49,7 @@ public class Main extends Shell {
 				} catch (AuthenticationException e) {
 				}
 			} while (true);
+			shell.createContents();
 			shell.open();
 			shell.layout();
 			while (!shell.isDisposed()) {
@@ -68,97 +69,99 @@ public class Main extends Shell {
 	 */
 	public Main(Display display) {
 		super(display, SWT.SHELL_TRIM);
+		setSize(900, 700);
 		setLayout(new FormLayout());
 
 		Group group = new Group(this, SWT.NONE);
 		FormData fd_group = new FormData();
 		fd_group.left = new FormAttachment(0, 20);
-		fd_group.right = new FormAttachment(100, -20);
-		fd_group.bottom = new FormAttachment(0, 250);
+		fd_group.right = new FormAttachment(40, 0);
+		fd_group.bottom = new FormAttachment(100, -20);
 		fd_group.top = new FormAttachment(0, 20);
 		group.setLayoutData(fd_group);
 		group.setLayout(new FormLayout());
-		group.setText("213");
+		group.setText("课程");
 
-		table = new Table(group, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION);
-		FormData fd_table = new FormData();
-		fd_table.bottom = new FormAttachment(100, -7);
-		fd_table.right = new FormAttachment(100, -7);
-		fd_table.top = new FormAttachment(0, 25);
-		fd_table.left = new FormAttachment(0, 7);
-		table.setLayoutData(fd_table);
-		table.setHeaderVisible(true);
-		table.setLinesVisible(true);
+		tree = new Tree(group, SWT.BORDER | SWT.CHECK);
+		FormData fd_tree = new FormData();
+		fd_tree.bottom = new FormAttachment(100, -7);
+		fd_tree.right = new FormAttachment(100, -7);
+		fd_tree.top = new FormAttachment(0, 25);
+		fd_tree.left = new FormAttachment(0, 7);
+		tree.setLayoutData(fd_tree);
+		tree.setLinesVisible(true);
+		tree.setHeaderVisible(true);
 
-		TableColumn tblclmnNewColumn = new TableColumn(table, SWT.NONE);
-		tblclmnNewColumn.setWidth(242);
-		tblclmnNewColumn.setText("New Column");
+		TreeColumn trclmnA = new TreeColumn(tree, SWT.NONE);
+		trclmnA.setWidth(275);
+		trclmnA.setText("课程名称");
 
-		TableColumn tblclmnNewColumn_1 = new TableColumn(table, SWT.NONE);
-		tblclmnNewColumn_1.setWidth(50);
-		tblclmnNewColumn_1.setText("New Column");
+		TreeColumn treeColumn = new TreeColumn(tree, SWT.NONE);
+		treeColumn.setWidth(36);
+		treeColumn.setText("学分");
 
-		TableColumn tblclmnNewColumn_2 = new TableColumn(table, SWT.NONE);
-		tblclmnNewColumn_2.setWidth(142);
-		tblclmnNewColumn_2.setText("New Column");
+		TreeColumn trlclmn_ls = new TreeColumn(tree, SWT.NONE);
+		trlclmn_ls.setWidth(60);
+		trlclmn_ls.setText("老师");
 
-		TableItem tableItem_1 = new TableItem(table, SWT.NONE);
-		tableItem_1.setText(2, "HEllo");
-		tableItem_1.setText("New TableItem");
+		TreeColumn trlclmn_pgtj = new TreeColumn(tree, SWT.NONE);
+		trlclmn_pgtj.setWidth(275);
+		trlclmn_pgtj.setText("先修课程");
 
-		TableItem tableItem = new TableItem(table, SWT.NONE);
-		tableItem.setText("New TableItem");
-
-		progressBar = new ProgressBar(this, SWT.NONE);
-		FormData fd_progressBar = new FormData();
-		fd_progressBar.bottom = new FormAttachment(100, -7);
-		fd_progressBar.left = new FormAttachment(group, 0, SWT.LEFT);
-		progressBar.setLayoutData(fd_progressBar);
-
-		Composite composite = new Composite(this, SWT.NONE);
-		FormData fd_composite = new FormData();
-		fd_composite.bottom = new FormAttachment(progressBar, -7);
-		fd_composite.top = new FormAttachment(group, 7);
-		fd_composite.left = new FormAttachment(group, 0, SWT.LEFT);
-		fd_composite.right = new FormAttachment(group, 0, SWT.RIGHT);
-		composite.setLayoutData(fd_composite);
-		composite.setLayout(new FillLayout(SWT.HORIZONTAL));
-
-		sashForm = new SashForm(composite, SWT.VERTICAL);
+		sashForm = new SashForm(this, SWT.VERTICAL);
+		FormData fd_sashForm = new FormData();
+		fd_sashForm.bottom = new FormAttachment(group, 0, SWT.BOTTOM);
+		fd_sashForm.top = new FormAttachment(group, 0, SWT.TOP);
+		fd_sashForm.left = new FormAttachment(group, 7, SWT.RIGHT);
+		fd_sashForm.right = new FormAttachment(100, -7);
+		sashForm.setLayoutData(fd_sashForm);
 
 		SashForm sashForm_1 = new SashForm(sashForm, SWT.BORDER);
 		sashForm_1.setEnabled(false);
 
-		Composite composite_1 = new Composite(sashForm_1, SWT.NONE);
-		composite_1.setLayout(null);
+		Composite composite = new Composite(sashForm_1, SWT.NONE);
+		composite.setLayout(new FormLayout());
 
-		Label lblMon = new Label(composite_1, SWT.CENTER);
-		lblMon.setBounds(0, 0, 105, 19);
-		lblMon.setText("Mon");
+		Label lblNewLabel = new Label(composite, SWT.NONE);
+		FormData fd_lblNewLabel = new FormData();
+		fd_lblNewLabel.top = new FormAttachment(0);
+		fd_lblNewLabel.left = new FormAttachment(0, 5);
+		lblNewLabel.setLayoutData(fd_lblNewLabel);
+		lblNewLabel.setAlignment(SWT.CENTER);
+		lblNewLabel.setText("1");
 
-		Label label = new Label(composite_1, SWT.SEPARATOR | SWT.HORIZONTAL);
-		label.setBounds(0, 19, 105, 2);
+		Label lblNewLabel_1 = new Label(composite, SWT.NONE);
+		FormData fd_lblNewLabel_1 = new FormData();
+		fd_lblNewLabel_1.top = new FormAttachment(0, 17);
+		fd_lblNewLabel_1.left = new FormAttachment(0, 5);
+		lblNewLabel_1.setLayoutData(fd_lblNewLabel_1);
+		lblNewLabel_1.setText("New Label");
 
-		Label lblTue = new Label(sashForm_1, SWT.CENTER);
-		lblTue.setText("Tue");
+		for (String string : WEEK) {
+			Composite composite_1 = new Composite(sashForm_1, SWT.NONE);
+			composite_1.setLayout(new FormLayout());
 
-		Label lblWed = new Label(sashForm_1, SWT.CENTER);
-		lblWed.setText("Wed");
+			Label lbl = new Label(composite_1, SWT.CENTER);
+			FormData fd = new FormData();
+			fd.top = new FormAttachment(0, 0);
+			fd.bottom = new FormAttachment(0, 22);
+			fd.left = new FormAttachment(0, 0);
+			fd.right = new FormAttachment(100, 0);
+			lbl.setLayoutData(fd);
+			lbl.setText(string);
 
-		Label lblThu = new Label(sashForm_1, SWT.CENTER);
-		lblThu.setText("Thu");
+			Label line = new Label(composite_1, SWT.SEPARATOR | SWT.HORIZONTAL);
 
-		Label lblFri = new Label(sashForm_1, SWT.CENTER);
-		lblFri.setText("Fri");
+			FormData fd_line = new FormData();
+			fd_line.left = new FormAttachment(0, 0);
+			fd_line.right = new FormAttachment(100, 0);
+			fd_line.top = new FormAttachment(lbl, 0, SWT.BOTTOM);
+			line.setLayoutData(fd_line);
+		}
 
-		Label lblSat = new Label(sashForm_1, SWT.CENTER);
-		lblSat.setText("Sat");
+		sashForm_1.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
 
-		Label lblSun = new Label(sashForm_1, SWT.CENTER);
-		lblSun.setText("Sun");
-		sashForm_1.setWeights(new int[] { 1, 1, 1, 1, 1, 1, 1 });
 		sashForm.setWeights(new int[] { 20 });
-		createContents();
 	}
 
 	/**
@@ -166,7 +169,46 @@ public class Main extends Shell {
 	 */
 	protected void createContents() {
 		setText("App");
-		setSize(839, 700);
+		setMaximized(true);
+
+		for (Entry<String, JsonElement> entry : courseData.getCourse().entrySet()) {
+			for (JsonElement element : entry.getValue().getAsJsonArray()) {
+				TreeItem root = null;
+				for (TreeItem item : tree.getItems()) {
+					if (item.getText().equals(entry.getKey())) {
+						root = item;
+					}
+				}
+				if (root == null) {
+					TreeItem newItem = new TreeItem(tree, SWT.CHECK);
+					newItem.setText(entry.getKey());
+					root = newItem;
+				}
+				TreeItem parent = null;
+				for (TreeItem item : root.getItems()) {
+					if (item.getText().equals(element.getAsJsonObject().get("kcmc").getAsString())) {
+						parent = item;
+					}
+				}
+				if (parent == null) {
+					TreeItem newItem = new TreeItem(root, SWT.NONE);
+					newItem.setText(0, element.getAsJsonObject().get("kcmc").getAsString());
+					newItem.setText(1, String.valueOf(element.getAsJsonObject().get("xf").getAsInt()));
+					JsonElement e = element.getAsJsonObject().get("pgtj");
+					newItem.setText(3, e.isJsonNull() ? "无" : e.getAsString());
+					parent = newItem;
+				}
+				TreeItem item = new TreeItem(parent, SWT.NONE);
+				JsonElement e1 = element.getAsJsonObject().get("fzmc");
+				item.setText(0, element.getAsJsonObject().get("kcmc").getAsString()
+						+ (e1.isJsonNull() ? "" : "[" + e1.getAsString() + "]"));
+				item.setText(1, String.valueOf(element.getAsJsonObject().get("xf").getAsInt()));
+				JsonElement e2 = element.getAsJsonObject().get("skls");
+				item.setText(2, e2.isJsonNull() ? "无" : e2.getAsString());
+				JsonElement e3 = element.getAsJsonObject().get("pgtj");
+				item.setText(3, e3.isJsonNull() ? "无" : e3.getAsString());
+			}
+		}
 
 	}
 
