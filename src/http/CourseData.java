@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
-
 import org.apache.http.ParseException;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -193,12 +192,20 @@ public class CourseData extends NetworkConnection {
 		for (CourseRepo repo : CourseRepo.values()) {
 			course.add(repo.name(), getCourseData(repo));		
 		}
-		try {
-			fileOper(coursestorge, true);
-			fileOper(selectedstorge, true);
-		} catch (IOException e) {
-			System.err.println(e.getMessage());
-		}
+	}
+	
+	public void saveToFile() throws IOException, AuthenticationException, StatusException {
+		updateData();
+		fileOper(coursestorge, true);
+		fileOper(selectedstorge, true);
+	}
+	
+	public JsonObject getCourse() {
+		return course;
+	}
+	
+	public JsonArray getSelected() {
+		return selected;
 	}
 	
 	public void search(String name) { //查找课程
