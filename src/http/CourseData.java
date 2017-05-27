@@ -18,7 +18,6 @@ import org.jsoup.select.Elements;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -203,12 +202,20 @@ public class CourseData extends NetworkConnection {
 		for (CourseRepo repo : CourseRepo.values()) {
 			course.add(repo.name(), getCourseData(repo));		
 		}
-		try {
-			fileOper(coursestorge, true);
-			fileOper(selectedstorge, true);
-		} catch (IOException e) {
-			System.err.println(e.getMessage());
-		}
+	}
+	
+	public void saveToFile() throws IOException, AuthenticationException, StatusException {
+		updateData();
+		fileOper(coursestorge, true);
+		fileOper(selectedstorge, true);
+	}
+	
+	public JsonObject getCourse() {
+		return course;
+	}
+	
+	public JsonArray getSelected() {
+		return selected;
 	}
 	
 	public boolean select(String base, String id) throws AuthenticationException, StatusException { //选课操作
