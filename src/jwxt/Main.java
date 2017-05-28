@@ -176,15 +176,6 @@ public class Main extends Shell {
 		trlclmn_pgtj.setWidth(275);
 		trlclmn_pgtj.setText("先修课程");
 
-		sashForm = new SashForm(this, SWT.HORIZONTAL | SWT.BORDER);
-		sashForm.setEnabled(false);
-		FormData fd_sashForm = new FormData();
-		fd_sashForm.bottom = new FormAttachment(group, 0, SWT.BOTTOM);
-		fd_sashForm.top = new FormAttachment(group, 0, SWT.TOP);
-		fd_sashForm.left = new FormAttachment(group, 7, SWT.RIGHT);
-		fd_sashForm.right = new FormAttachment(100, -7);
-		sashForm.setLayoutData(fd_sashForm);
-
 		Button button = new Button(group, SWT.NONE);
 		Shell shell = this;
 		button.addMouseListener(new MouseAdapter() {
@@ -238,6 +229,15 @@ public class Main extends Shell {
 		fd_button_1.top = new FormAttachment(button, 0, SWT.TOP);
 		button_1.setLayoutData(fd_button_1);
 		button_1.setText("搜索");
+
+		sashForm = new SashForm(this, SWT.HORIZONTAL | SWT.BORDER);
+		sashForm.setEnabled(false);
+		FormData fd_sashForm = new FormData();
+		fd_sashForm.bottom = new FormAttachment(group, 0, SWT.BOTTOM);
+		fd_sashForm.top = new FormAttachment(group, 0, SWT.TOP);
+		fd_sashForm.left = new FormAttachment(group, 7, SWT.RIGHT);
+		fd_sashForm.right = new FormAttachment(100, -7);
+		sashForm.setLayoutData(fd_sashForm);
 
 		for (String string : WEEK) {
 			SashForm sashForm_1 = new SashForm(sashForm, SWT.VERTICAL);
