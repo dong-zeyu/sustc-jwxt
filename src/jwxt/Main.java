@@ -51,7 +51,7 @@ public class Main extends Shell {
 	 */
 	public static void main(String args[]) {
 		try {
-			courseData = new CourseData("", "");
+			courseData = new CourseData();
 			Display display = Display.getDefault();
 			Main shell = new Main(display);
 			login(shell);
@@ -63,6 +63,7 @@ public class Main extends Shell {
 					display.sleep();
 				}
 			}
+			courseData.saveToFile();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
