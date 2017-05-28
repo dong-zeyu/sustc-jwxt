@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/lib/httpmime-4.5.3.jar"/>
 	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/lib/jna-4.1.0.jar"/>
 	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/lib/jna-platform-4.1.0.jar"/>
+	<classpathentry kind="lib" path="../lib/swt.jar" sourcepath="C:/Users/lenove/WorkPlace/JAVA/lib/swt.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

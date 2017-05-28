@@ -197,19 +197,6 @@ public class CourseData extends NetworkConnection {
 		}
 	}
 	
-	public void saveToFile() throws IOException, AuthenticationException, StatusException {
-		fileOper(coursestorge, true);
-		fileOper(selectedstorge, true);
-	}
-	
-	public JsonObject getCourse() {
-		return course;
-	}
-	
-	public JsonArray getSelected() {
-		return selected;
-	}
-	
 	public boolean select(String base, String id) throws AuthenticationException, StatusException { //选课操作
 		getIn();
 		HttpResponse response = dataFetcher(Method.GET, 
@@ -267,6 +254,19 @@ public class CourseData extends NetworkConnection {
 			System.err.println(e.getMessage());
 		}
 		return false;
+	}
+	
+	public void saveToFile() throws IOException, AuthenticationException, StatusException {
+		fileOper(coursestorge, true);
+		fileOper(selectedstorge, true);
+	}
+	
+	public JsonObject getCourse() {
+		return course;
+	}
+	
+	public JsonArray getSelected() {
+		return selected;
 	}
 	
 	public JsonObject search(String name) { //查找课程
