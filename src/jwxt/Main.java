@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import http.CourseData;
+import http.CourseData.CourseRepo;
 import http.StatusException;
 
 import org.eclipse.swt.widgets.Group;
@@ -293,13 +294,13 @@ public class Main extends Shell {
 			for (JsonElement element : entry.getValue().getAsJsonArray()) {
 				TreeItem root = null;
 				for (TreeItem item : tree.getItems()) {
-					if (item.getText().equals(entry.getKey())) {
+					if (item.getText().equals(CourseRepo.valueOf(entry.getKey()).getName())) {
 						root = item;
 					}
 				}
 				if (root == null) {
 					TreeItem newItem = new TreeItem(tree, SWT.CHECK);
-					newItem.setText(entry.getKey());
+					newItem.setText(CourseRepo.valueOf(entry.getKey()).getName());
 					root = newItem;
 				}
 				TreeItem parent = null;
