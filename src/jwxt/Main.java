@@ -40,7 +40,7 @@ public class Main extends Shell {
 	public static CourseData courseData;
 	private SashForm sashForm;
 	private Tree tree;
-	private static String[] WEEK = new String[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+	private static String[] WEEK = new String[] { "", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
 	private Text text;
 
 	/**
@@ -68,7 +68,7 @@ public class Main extends Shell {
 	}
 
 	private static boolean login(Shell shell) {
-		Login dialog = new Login(shell, SWT.PRIMARY_MODAL);
+		Login dialog = new Login(shell, SWT.NONE);
 		do {
 			try {
 				Object o = dialog.open();
@@ -174,11 +174,14 @@ public class Main extends Shell {
 		trlclmn_pgtj.setWidth(275);
 		trlclmn_pgtj.setText("先修课程");
 
-		sashForm = new SashForm(this, SWT.VERTICAL);
+		sashForm = new SashForm(this, SWT.HORIZONTAL | SWT.BORDER);
+		sashForm.setEnabled(false);
 		FormData fd_sashForm = new FormData();
 		fd_sashForm.bottom = new FormAttachment(group, 0, SWT.BOTTOM);
 		fd_sashForm.top = new FormAttachment(group, 0, SWT.TOP);
 		fd_sashForm.left = new FormAttachment(group, 7, SWT.RIGHT);
+		fd_sashForm.right = new FormAttachment(100, -7);
+		sashForm.setLayoutData(fd_sashForm);
 
 		Button button = new Button(group, SWT.NONE);
 		Shell shell = this;
@@ -233,55 +236,39 @@ public class Main extends Shell {
 		fd_button_1.top = new FormAttachment(button, 0, SWT.TOP);
 		button_1.setLayoutData(fd_button_1);
 		button_1.setText("搜索");
-		fd_sashForm.right = new FormAttachment(100, -7);
-		sashForm.setLayoutData(fd_sashForm);
-
-		SashForm sashForm_1 = new SashForm(sashForm, SWT.BORDER);
-		sashForm_1.setEnabled(false);
-
-		Composite composite = new Composite(sashForm_1, SWT.NONE);
-		composite.setLayout(new FormLayout());
-
-		Label lblNewLabel = new Label(composite, SWT.NONE);
-		FormData fd_lblNewLabel = new FormData();
-		fd_lblNewLabel.top = new FormAttachment(0);
-		fd_lblNewLabel.left = new FormAttachment(0, 5);
-		lblNewLabel.setLayoutData(fd_lblNewLabel);
-		lblNewLabel.setAlignment(SWT.CENTER);
-		lblNewLabel.setText("1");
-
-		Label lblNewLabel_1 = new Label(composite, SWT.NONE);
-		FormData fd_lblNewLabel_1 = new FormData();
-		fd_lblNewLabel_1.top = new FormAttachment(0, 17);
-		fd_lblNewLabel_1.left = new FormAttachment(0, 5);
-		lblNewLabel_1.setLayoutData(fd_lblNewLabel_1);
-		lblNewLabel_1.setText("New Label");
 
 		for (String string : WEEK) {
-			Composite composite_1 = new Composite(sashForm_1, SWT.NONE);
-			composite_1.setLayout(new FormLayout());
+			SashForm sashForm_1 = new SashForm(sashForm, SWT.VERTICAL);
+			sashForm_1.setEnabled(false);
 
-			Label lbl = new Label(composite_1, SWT.CENTER);
-			FormData fd = new FormData();
-			fd.top = new FormAttachment(0, 0);
-			fd.bottom = new FormAttachment(0, 22);
-			fd.left = new FormAttachment(0, 0);
-			fd.right = new FormAttachment(100, 0);
-			lbl.setLayoutData(fd);
+			Label lbl = new Label(sashForm_1, SWT.CENTER);
 			lbl.setText(string);
 
-			Label line = new Label(composite_1, SWT.SEPARATOR | SWT.HORIZONTAL);
+			Composite composite2 = new Composite(sashForm_1, SWT.NONE);
+			composite2.setLayout(new FormLayout());
 
-			FormData fd_line = new FormData();
-			fd_line.left = new FormAttachment(0, 0);
-			fd_line.right = new FormAttachment(100, 0);
-			fd_line.top = new FormAttachment(lbl, 0, SWT.BOTTOM);
-			line.setLayoutData(fd_line);
+			for (int i = 0; i < 10; i++) {
+				Label line = new Label(composite2, SWT.SEPARATOR | SWT.HORIZONTAL);
+
+				FormData fd_line = new FormData();
+				fd_line.left = new FormAttachment(0, 0);
+				fd_line.right = new FormAttachment(100, 0);
+				fd_line.top = new FormAttachment(i * 10, 0);
+				line.setLayoutData(fd_line);
+				if (string.equals("")) {
+					Label num = new Label(composite2, SWT.CENTER);
+					FormData fd_num = new FormData();
+					fd_num.left = new FormAttachment(0, 0);
+					fd_num.right = new FormAttachment(100, 0);
+					fd_num.top = new FormAttachment(i * 10 + 4, 0);
+					num.setLayoutData(fd_num);
+					num.setText(String.valueOf(i + 1));
+				}
+			}
+			sashForm_1.setWeights(new int[] { 1, 40 });
 		}
 
-		sashForm_1.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
-
-		sashForm.setWeights(new int[] { 20 });
+		sashForm.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
 	}
 
 	/**
