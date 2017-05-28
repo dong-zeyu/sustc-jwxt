@@ -9,7 +9,7 @@ if you want to debug it, please download reference lib in thanks list or get it 
 
 Thanks for the following project:
 
-* httpcomponents-client
-* jsoup
-* GSON
-* SWT
+* [httpcomponents-client](http://hc.apache.org/)
+* [jsoup](https://jsoup.org)
+* [GSON](https://github.com/google/gson)
+* [SWT](http://www.eclipse.org/swt/)
