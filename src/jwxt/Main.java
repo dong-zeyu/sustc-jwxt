@@ -32,6 +32,8 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 
 public class Main extends Shell {
 
@@ -208,6 +210,12 @@ public class Main extends Shell {
 		button.setText("更新数据");
 
 		text = new Text(group, SWT.BORDER);
+		text.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				updateData(text.getText().equals("") ? null : text.getText());
+			}
+		});
 		FormData fd_text = new FormData();
 		fd_text.top = new FormAttachment(button, 2, SWT.TOP);
 		fd_text.left = new FormAttachment(tree, 0, SWT.LEFT);
@@ -217,7 +225,7 @@ public class Main extends Shell {
 		button_1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				updateData(text.getText());
+				updateData(text.getText().equals("") ? null : text.getText());
 			}
 		});
 		FormData fd_button_1 = new FormData();
@@ -331,6 +339,9 @@ public class Main extends Shell {
 				JsonElement e3 = element.getAsJsonObject().get("pgtj");
 				item.setText(3, e3.isJsonNull() ? "无" : e3.getAsString());
 			}
+		}
+		for (TreeItem item : tree.getItems()) {
+			item.setExpanded(true);
 		}
 	}
 

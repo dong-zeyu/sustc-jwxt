@@ -1,5 +1,7 @@
 package jwxt;
 
+import java.util.Set;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -11,6 +13,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 
 public class Login extends Dialog {
 
@@ -62,6 +66,17 @@ public class Login extends Dialog {
 		lblUserName.setText("User Name:");
 
 		text = new Text(shell, SWT.BORDER);
+		text.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.character == SWT.ESC) {
+					result = null;
+					shell.dispose();
+				} else if (e.character == SWT.CR || e.character == SWT.LF) {
+					text_1.setFocus();
+				}
+			}
+		});
 		text.setBounds(142, 47, 220, 23);
 
 		Label lblPassword = new Label(shell, SWT.NONE);
@@ -70,6 +85,18 @@ public class Login extends Dialog {
 		lblPassword.setText("Password:");
 
 		text_1 = new Text(shell, SWT.BORDER | SWT.PASSWORD);
+		text_1.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.character == SWT.CR || e.character == SWT.LF) {
+					result = new String[] { text.getText(), text_1.getText() };
+					shell.dispose();
+				} else if (e.character == SWT.ESC) {
+					result = null;
+					shell.dispose();
+				}
+			}
+		});
 		text_1.setBounds(142, 91, 220, 23);
 
 		Button btnLogin = new Button(shell, SWT.NONE);
