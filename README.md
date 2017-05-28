@@ -10,6 +10,6 @@ if you want to debug it, please dowload reference lib in the thanks list or get 
 
 Thanks for the following project:
 
-* httpcomponents-client
-* jsoup
-* GSON
+* [httpcomponents-client](http://hc.apache.org/)
+* [jsoup](https://jsoup.org)
+* [GSON](https://github.com/google/gson)
