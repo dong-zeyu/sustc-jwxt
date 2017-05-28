@@ -1,5 +1,7 @@
 package jwxt;
 
+import java.util.Arrays;
+import java.util.Stack;
 import java.util.Map.Entry;
 
 import org.apache.http.auth.AuthenticationException;
@@ -22,10 +24,14 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 public class Main extends Shell {
 
@@ -97,6 +103,50 @@ public class Main extends Shell {
 		group.setText("课程");
 
 		tree = new Tree(group, SWT.BORDER | SWT.CHECK);
+		tree.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (e.item instanceof TreeItem) {
+					TreeItem item = (TreeItem) e.item;
+					boolean checked = item.getChecked();
+					item.setChecked(checked);
+					item.setGrayed(false);
+					Stack<TreeItem> items = new Stack<>();
+					items.push(item);
+					while (!items.isEmpty()) {
+						TreeItem item1 = items.pop();
+						item1.setChecked(checked);
+						item1.setGrayed(false);
+						items.addAll(Arrays.asList(item1.getItems()));
+					}
+					TreeItem parent;
+					TreeItem head = item;
+					while ((parent = head.getParentItem()) != null) {
+						if (checked) {
+							parent.setChecked(true);
+							parent.setGrayed(false);
+							for (TreeItem item1 : parent.getItems()) {
+								if (!item1.getChecked() || item1.getGrayed()) {
+									parent.setGrayed(true);
+									break;
+								}
+							}
+						} else {
+							parent.setGrayed(true);
+							parent.setChecked(false);
+							for (TreeItem item1 : parent.getItems()) {
+								if (item1.getChecked()) {
+									parent.setChecked(true);
+									break;
+								}
+							}
+						}
+						head = parent;
+					}
+				}
+			}
+		});
 		FormData fd_tree = new FormData();
 		fd_tree.bottom = new FormAttachment(100, -7);
 		fd_tree.right = new FormAttachment(100, -7);
