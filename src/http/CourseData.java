@@ -62,7 +62,11 @@ public class CourseData extends NetworkConnection {
 	private final String XstkOper = "/xsxkjg/xstkOper?jx0404id=";	//学生退课
 	//退课参数：/xsxkjg/xstkOper?jx0404id=[课程ID]"
 	
-	public CourseData(String user, String pass) throws AuthenticationException {
+	public CourseData() {
+		this("", "");
+	}
+	
+	public CourseData(String user, String pass) {
 		course = new JsonObject();
 		selected = new JsonArray();
 		url = "http://jwxt.sustc.edu.cn/jsxsd";
@@ -72,16 +76,10 @@ public class CourseData extends NetworkConnection {
 			fileOper(coursestorge, false);
 			fileOper(selectedstorge, false);
 			System.out.println("[CourseCenter] Load storage.");
-		} catch (FileNotFoundException e1) {
-			System.out.println("[CourseCenter] Not all storages are found, get them.");
-			try {
-				updateCourseData();
-				System.out.println("[CourseCenter] Setup course storage successfully.");
-			} catch (StatusException e) {
-				System.err.println("[CourseCenter] Update Data Failed: " + e.getMessage());
-			}
-		} catch (IOException e2) {
-			System.err.println(e2.getMessage());
+		} catch (FileNotFoundException e) {
+			System.err.println("[CourseCenter] Update Data Failed: " + e.getMessage());
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
 		}
 	}
 		
