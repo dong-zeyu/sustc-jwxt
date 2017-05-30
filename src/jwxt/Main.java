@@ -5,6 +5,7 @@ import java.util.Stack;
 import java.util.Map.Entry;
 
 import org.apache.http.auth.AuthenticationException;
+import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -51,6 +52,7 @@ public class Main extends Shell {
 	 */
 	public static void main(String args[]) {
 		try {
+			PropertyConfigurator.configure("log4j.properties");
 			courseData = new CourseData();
 			Display display = Display.getDefault();
 			Main shell = new Main(display);

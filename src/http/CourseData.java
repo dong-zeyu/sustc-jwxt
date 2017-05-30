@@ -12,6 +12,7 @@ import org.apache.http.ParseException;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -24,6 +25,9 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 
 public class CourseData extends NetworkConnection {
+	
+	private Logger logger = Logger.getLogger("CourseCenter");
+	
 	JsonObject course;
 	JsonArray selected;
 	
@@ -67,11 +71,12 @@ public class CourseData extends NetworkConnection {
 		try {
 			fileOper(coursestorge, false);
 			fileOper(selectedstorge, false);
-			System.out.println("[CourseCenter] Load storage.");
+			logger.info("Load storage.");
 		} catch (FileNotFoundException e) {
-			System.err.println("[CourseCenter] Update Data Failed: " + e.getMessage());
+			logger.warn("Update Data Failed: " + e.getMessage());
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
+			logger.fatal(e.getMessage());
+			System.exit(-1);
 		}
 	}
 		
@@ -84,12 +89,12 @@ public class CourseData extends NetworkConnection {
 					throw new StatusException("尚未开放选课");
 				}
 			} catch (IOException | ParseException e) {
-				System.err.println(e.getMessage());
+				logger.error(e.getMessage());
 			} finally {
 				try {
 					response.close();
 				} catch (IOException e) {
-					System.err.println(e.getMessage());
+					logger.error(e.getMessage());
 				}
 			}
 		} else {
@@ -129,11 +134,11 @@ public class CourseData extends NetworkConnection {
 				response.close();//获取全部课程并写入source
 				return source.get("aaData").getAsJsonArray();
 			} else {
-				System.out.printf("[CourseCenter] Failed to update %s, ignore it.\n", repo);
+				logger.error(String.format("Failed to update %s, ignore it.\n", repo));
 				return null;
 			}
 		} catch (ParseException | IOException e) {
-			System.err.println(e.getMessage());
+			logger.error(e.getMessage());
 		}
 		return null;
 	}
@@ -153,7 +158,7 @@ public class CourseData extends NetworkConnection {
 			}
 			selected = array;
 		} catch (ParseException | IOException e) {
-			System.err.println(e.getMessage());
+			logger.error(e.getMessage());
 		}
 		return selected;
 	}

@@ -29,6 +29,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -44,8 +45,10 @@ public class NetworkConnection {
 	protected String username = "";
 	protected String password = "";
 	private boolean isLogin = false;
+	private Logger logger = Logger.getLogger("Network");
 		
 	public NetworkConnection() {
+		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
 		setupSSL();//建立通过SSL的httpclient
 	}
 	
@@ -65,9 +68,10 @@ public class NetworkConnection {
 					.setDefaultCookieStore(cookieStore)
 					.build();//客户端建立
 		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException | CertificateException e) {
-			System.out.println(e.getMessage());
+			logger.fatal(e.getMessage());
+			System.exit(-1);
 		} catch (IOException e) {
-			System.err.println("Load cert failed. Exit");
+			logger.fatal("Load cert failed. Exit");
 			System.exit(-1);
 		}
 	}
@@ -96,7 +100,7 @@ public class NetworkConnection {
 				post.setEntity(new UrlEncodedFormEntity(nvps));
 				response1 = httpclient.execute(post);
 				if(response1 != null && response1.toString().contains("TGC")){
-					System.out.println("[NetWork] Login Succeed!");
+					logger.info("Login Succeed!");
 				}
 				else{
 					if(EntityUtils.toString(response1.getEntity()).contains("class=\"errors\"")) {
@@ -106,7 +110,8 @@ public class NetworkConnection {
 				response1.close();
 			}
 		} catch (ClientProtocolException | UnsupportedEncodingException e) {
-			System.err.println(e.getMessage());
+			logger.fatal(e.getMessage());
+			System.exit(-1);
 		}
 	}
 	
@@ -175,14 +180,14 @@ public class NetworkConnection {
 	}
 	
 	protected void login() throws AuthenticationException {
-		System.out.println("[NetWork] Login...");
+		logger.info("Login...");
 		clear();
 		try {
 			loginCAS();
 			isLogin = true;
 			dataFetcher(Method.GET, "/", true);
 		} catch (IOException e) {
-			System.out.println("[NetWork] Network error! Please check you have access to the Internet.");
+			logger.warn("Network error! Please check you have access to the Internet.");
 		}
 	}
 	
