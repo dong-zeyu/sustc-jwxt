@@ -145,7 +145,7 @@ public class CourseData extends NetworkConnection {
 				logger.error(String.format("Failed to update %s, ignore it.\n", repo));
 				return null;
 			}
-		} catch (ParseException | IOException e) {
+		} catch (ParseException | IOException | NullPointerException e) {
 			logger.error(e.getMessage());
 		}
 		return null;
@@ -165,7 +165,7 @@ public class CourseData extends NetworkConnection {
 				array.add(id);
 			}
 			selected = array;
-		} catch (ParseException | IOException e) {
+		} catch (ParseException | IOException | IndexOutOfBoundsException | NullPointerException e) {
 			logger.error(e.getMessage());
 		}
 		return selected;
@@ -217,26 +217,17 @@ public class CourseData extends NetworkConnection {
 			JsonObject source = (JsonObject) jsonParser
 					.parse(new StringReader(string));//创建jsonObject对象
 			JsonElement m = source.get("message");
-			String msg;
-			if (m != null) {
-				msg = m.getAsString();
-			} else {
-				msg = "no message";
-			}
-			if (source.get("success").getAsBoolean()) {
+			String msg = m == null ? "null" : m.getAsString();
+			if (source.get("success").getAsBoolean() || msg.contains("已选择")) {
 				logger.info(String.format("Success in %s: %s", id, msg));
 				return true;
 			} else {
-				if (msg.contains("已选择")) {
-					logger.info(String.format("Success in %s: %s", id, msg));
-					return true;
-				}
 				logger.info(String.format("Failed in %s: %s", id, msg));
-				return false;
+				return false;				
 			}
 		} catch (JsonSyntaxException e) {
 			logger.warn(String.format("Failed in %s: Internal server error!", id));
-		} catch (ParseException | IOException e) {
+		} catch (ParseException | IOException | NullPointerException e) {
 			logger.error(e.getMessage());
 		}
 		return false;
@@ -251,6 +242,7 @@ public class CourseData extends NetworkConnection {
 			String string = EntityUtils.toString(response.getEntity());
 			response.close();
 			JsonObject source = (JsonObject) jsonParser.parse(new StringReader(string));//创建jsonObject对象
+			
 			if (source.get("success").getAsBoolean()) {
 				logger.info("Succeed: 退课成功");
 				return true;
@@ -260,7 +252,7 @@ public class CourseData extends NetworkConnection {
 			}
 		} catch (JsonSyntaxException e) {
 			logger.warn(String.format("Failed in %s: Internal server error!", id));		
-		} catch (IOException | ParseException e) {
+		} catch (IOException | ParseException | NullPointerException e) {
 			logger.error(e.getMessage());
 		}
 		return false;
