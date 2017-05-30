@@ -49,11 +49,11 @@ public class NetworkConnection {
 		
 	public NetworkConnection() {
 		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
+		cookieStore = new BasicCookieStore();
 		setupSSL();//建立通过SSL的httpclient
 	}
 	
 	private void setupSSL() {
-		cookieStore = new BasicCookieStore();
 		try {
 			SSLContext sslContext;
 			sslContext = SSLContexts.custom().loadTrustMaterial(new File("cas.keystore"), "123456".toCharArray()).build();
@@ -115,19 +115,19 @@ public class NetworkConnection {
 		}
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl) throws AuthenticationException {
+	public CloseableHttpResponse dataFetcher(Method type, String suburl) throws AuthenticationException, IOException {
 		return dataFetcher(type, suburl, null);
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl, boolean setRedirect) throws AuthenticationException {
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, boolean setRedirect) throws AuthenticationException, IOException {
 		return dataFetcher(type, suburl, null, setRedirect);
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata) throws AuthenticationException {
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata) throws AuthenticationException, IOException {
 		return dataFetcher(type, suburl, postdata, false);
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata, boolean setRedirect) throws AuthenticationException {//post data has the form: name=value
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata, boolean setRedirect) throws AuthenticationException, IOException {//post data has the form: name=value
 		if (!isLogin) {
 			login();
 		}
@@ -161,22 +161,19 @@ public class NetworkConnection {
 				}
 				response = httpclient.execute(opr);
 			} else {
-				response = null;
-			}
-			if (response == null) {
 				return null;
-			} else if (response.getStatusLine().getStatusCode() == 302 && 
+			}
+			if (response.getStatusLine().getStatusCode() == 302 && 
 					response.getHeaders("Location")[0].getValue().startsWith(url_cas)) {
 				login();
 				return dataFetcher(type, suburl, postdata, true);
 			}
 			return response;
-		} catch (IOException e) {
-			try {
-				Thread.sleep(700);
-			} catch (InterruptedException e1) {}
-			return dataFetcher(type, suburl, postdata, setRedirect);
+		} catch (ClientProtocolException | UnsupportedEncodingException e) {
+			logger.fatal(e.getMessage());
+			System.exit(-1);
 		}
+		return null;
 	}
 	
 	protected void login() throws AuthenticationException {
@@ -188,6 +185,7 @@ public class NetworkConnection {
 			dataFetcher(Method.GET, "/", true);
 		} catch (IOException e) {
 			logger.warn("Network error! Please check you have access to the Internet.");
+			throw new AuthenticationException("Can't connect to Central Authentication Servives(CAS)", e);
 		}
 	}
 	

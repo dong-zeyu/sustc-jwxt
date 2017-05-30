@@ -146,9 +146,9 @@ public class CourseData extends NetworkConnection {
 	public JsonArray updateSelected() throws AuthenticationException, StatusException { //更新已选课程数据
 		getIn();
 		CloseableHttpResponse response;
-		response = dataFetcher(Method.GET, Xkjglb, null);
-		JsonArray array = new JsonArray();
 		try {
+			response = dataFetcher(Method.GET, Xkjglb, null);
+			JsonArray array = new JsonArray();
 			String string = EntityUtils.toString(response.getEntity());
 			Document document = Jsoup.parse(string);
 			Elements courses = document.getElementsByTag("tbody").get(0).children();
