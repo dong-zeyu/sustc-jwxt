@@ -137,7 +137,7 @@ public class CourseData extends NetworkConnection {
 				logger.error(String.format("Failed to update %s, ignore it.\n", repo));
 				return null;
 			}
-		} catch (ParseException | IOException e) {
+		} catch (ParseException | IOException | NullPointerException e) {
 			logger.error(e.getMessage());
 		}
 		return null;
@@ -157,7 +157,7 @@ public class CourseData extends NetworkConnection {
 				array.add(id);
 			}
 			selected = array;
-		} catch (ParseException | IOException e) {
+		} catch (ParseException | IOException | IndexOutOfBoundsException | NullPointerException e) {
 			logger.error(e.getMessage());
 		}
 		return selected;
@@ -198,7 +198,7 @@ public class CourseData extends NetworkConnection {
 			}
 		}
 	}
-	
+
 	public void saveToFile() throws IOException, AuthenticationException, StatusException {
 		fileOper(coursestorge, true);
 		fileOper(selectedstorge, true);
