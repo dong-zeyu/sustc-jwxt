@@ -1,40 +1,41 @@
 package jwxt;
 
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.Stack;
 import java.util.Map.Entry;
+import java.util.Stack;
 
 import org.apache.http.auth.AuthenticationException;
+import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
-import http.CourseData;
-import http.CourseData.CourseRepo;
-import http.StatusException;
-
-import org.eclipse.swt.widgets.Group;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TreeItem;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import http.CourseData;
+import http.CourseData.CourseRepo;
+import http.StatusException;
 
 public class Main extends Shell {
 
@@ -51,6 +52,7 @@ public class Main extends Shell {
 	 */
 	public static void main(String args[]) {
 		try {
+			PropertyConfigurator.configure("log4j.properties");
 			courseData = new CourseData();
 			Display display = Display.getDefault();
 			Main shell = new Main(display);
@@ -81,6 +83,12 @@ public class Main extends Shell {
 				}
 				return false;
 			} catch (AuthenticationException e) {
+				MessageBox messageBox = new MessageBox(shell, SWT.OK);
+				messageBox.setMessage(e.getMessage());
+				messageBox.open();
+				if (e.getCause() instanceof IOException) {
+					return false;
+				}
 			}
 		} while (true);
 		return true;

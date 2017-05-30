@@ -15,5 +15,6 @@
 	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/lib/jna-4.1.0.jar"/>
 	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/lib/jna-platform-4.1.0.jar"/>
 	<classpathentry kind="lib" path="../lib/swt.jar" sourcepath="C:/Users/lenove/WorkPlace/JAVA/lib/swt.zip"/>
+	<classpathentry kind="lib" path="C:/Users/lenove/WorkPlace/JAVA/lib/log4j-1.2.17.jar" sourcepath="C:/Users/lenove/WorkPlace/JAVA/lib/log4j-1.2.17.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

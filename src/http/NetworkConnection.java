@@ -29,6 +29,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -44,13 +45,15 @@ public class NetworkConnection {
 	protected String username = "";
 	protected String password = "";
 	private boolean isLogin = false;
+	private Logger logger = Logger.getLogger("Network");
 		
 	public NetworkConnection() {
+		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
+		cookieStore = new BasicCookieStore();
 		setupSSL();//建立通过SSL的httpclient
 	}
 	
 	private void setupSSL() {
-		cookieStore = new BasicCookieStore();
 		try {
 			SSLContext sslContext;
 			sslContext = SSLContexts.custom().loadTrustMaterial(new File("cas.keystore"), "123456".toCharArray()).build();
@@ -65,9 +68,10 @@ public class NetworkConnection {
 					.setDefaultCookieStore(cookieStore)
 					.build();//客户端建立
 		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException | CertificateException e) {
-			System.out.println(e.getMessage());
+			logger.fatal(e.getMessage());
+			System.exit(-1);
 		} catch (IOException e) {
-			System.err.println("Load cert failed. Exit");
+			logger.fatal("Load cert failed. Exit");
 			System.exit(-1);
 		}
 	}
@@ -96,7 +100,7 @@ public class NetworkConnection {
 				post.setEntity(new UrlEncodedFormEntity(nvps));
 				response1 = httpclient.execute(post);
 				if(response1 != null && response1.toString().contains("TGC")){
-					System.out.println("[NetWork] Login Succeed!");
+					logger.info("Login Succeed!");
 				}
 				else{
 					if(EntityUtils.toString(response1.getEntity()).contains("class=\"errors\"")) {
@@ -106,23 +110,24 @@ public class NetworkConnection {
 				response1.close();
 			}
 		} catch (ClientProtocolException | UnsupportedEncodingException e) {
-			System.err.println(e.getMessage());
+			logger.fatal(e.getMessage());
+			System.exit(-1);
 		}
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl) throws AuthenticationException {
+	public CloseableHttpResponse dataFetcher(Method type, String suburl) throws AuthenticationException, IOException {
 		return dataFetcher(type, suburl, null);
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl, boolean setRedirect) throws AuthenticationException {
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, boolean setRedirect) throws AuthenticationException, IOException {
 		return dataFetcher(type, suburl, null, setRedirect);
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata) throws AuthenticationException {
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata) throws AuthenticationException, IOException {
 		return dataFetcher(type, suburl, postdata, false);
 	}
 	
-	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata, boolean setRedirect) throws AuthenticationException {//post data has the form: name=value
+	public CloseableHttpResponse dataFetcher(Method type, String suburl, String[] postdata, boolean setRedirect) throws AuthenticationException, IOException {//post data has the form: name=value
 		if (!isLogin) {
 			login();
 		}
@@ -156,33 +161,31 @@ public class NetworkConnection {
 				}
 				response = httpclient.execute(opr);
 			} else {
-				response = null;
-			}
-			if (response == null) {
 				return null;
-			} else if (response.getStatusLine().getStatusCode() == 302 && 
+			}
+			if (response.getStatusLine().getStatusCode() == 302 && 
 					response.getHeaders("Location")[0].getValue().startsWith(url_cas)) {
 				login();
 				return dataFetcher(type, suburl, postdata, true);
 			}
 			return response;
-		} catch (IOException e) {
-			try {
-				Thread.sleep(700);
-			} catch (InterruptedException e1) {}
-			return dataFetcher(type, suburl, postdata, setRedirect);
+		} catch (ClientProtocolException | UnsupportedEncodingException e) {
+			logger.fatal(e.getMessage());
+			System.exit(-1);
 		}
+		return null;
 	}
 	
 	protected void login() throws AuthenticationException {
-		System.out.println("[NetWork] Login...");
+		logger.info("Login...");
 		clear();
 		try {
 			loginCAS();
 			isLogin = true;
 			dataFetcher(Method.GET, "/", true);
 		} catch (IOException e) {
-			System.out.println("[NetWork] Network error! Please check you have access to the Internet.");
+			logger.warn("Network error! Please check you have access to the Internet.");
+			throw new AuthenticationException("Can't connect to Central Authentication Servives(CAS)", e);
 		}
 	}
 	
