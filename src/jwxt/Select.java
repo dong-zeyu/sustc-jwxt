@@ -11,11 +11,19 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Predicate;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+
 import http.CourseData;
 import http.CourseData.CourseRepo;
 import http.NetworkConnection.Method;
 
 public class Select {
+	
+	static {
+		PropertyConfigurator.configure("log4j.properties");
+	}
+	public static Logger logger = Logger.getLogger("Select");
 	
 	public static byte[] lock = new byte[0];
 
@@ -39,7 +47,7 @@ public class Select {
 			@Override
 			public void run() {
 				synchronized (lock) {
-					System.out.println("Begin!");
+					logger.info("Begin");
 					long time = new Date().getTime();
 					while (!courses.isEmpty() && new Date().getTime() - time < 10*1000l) {
 						courses.removeIf(new Predicate<Course>() {
@@ -49,13 +57,14 @@ public class Select {
 								try {
 									return courseData.select(t.repo.name(), t.id);
 								} catch (Exception e) {
-									System.out.println("Failed due to Execption: " + e.getMessage());
+									logger.error("Failed due to Execption: " + e.getMessage() 
+									+ "\n\tCaused by: " + e.getCause());
 								}
 								return false;
 							}
 						});
 					}
-					System.out.println("Over!");
+					logger.info("Over!");
 					lock.notify();
 				}
 			}

@@ -207,7 +207,7 @@ public class CourseData extends NetworkConnection {
 		}
 	}
 	
-	public boolean select(String base, String id) throws AuthenticationException, StatusException { //选课操作
+	public boolean select(String base, String id) throws AuthenticationException, StatusException, IOException { //选课操作
 		getIn();
 		HttpResponse response = dataFetcher(Method.GET, 
 				String.format(xsskOper, base.toLowerCase(), id));
@@ -224,25 +224,25 @@ public class CourseData extends NetworkConnection {
 				msg = "no message";
 			}
 			if (source.get("success").getAsBoolean()) {
-				System.out.printf("[CourseCenter] Success in %s: %s\n", id, msg);
+				logger.info(String.format("Success in %s: %s", id, msg));
 				return true;
 			} else {
 				if (msg.contains("已选择")) {
-					System.out.printf("[CourseCenter] Success in %s: %s\n", id, msg);
+					logger.info(String.format("Success in %s: %s", id, msg));
 					return true;
 				}
-				System.out.printf("[CourseCenter] Failed in %s: %s\n", id, msg);
+				logger.info(String.format("Failed in %s: %s", id, msg));
 				return false;
 			}
 		} catch (JsonSyntaxException e) {
-			System.out.printf("[CourseCenter] Failed in %s: Internal server error!\n", id);
+			logger.warn(String.format("Failed in %s: Internal server error!", id));
 		} catch (ParseException | IOException e) {
-			System.err.println(e.getMessage());
+			logger.error(e.getMessage());
 		}
 		return false;
 	}
 	
-	public boolean quit(String id) throws AuthenticationException, StatusException { //退课操作
+	public boolean quit(String id) throws AuthenticationException, StatusException, IOException { //退课操作
 		getIn();
 		CloseableHttpResponse response = dataFetcher(Method.GET, 
 				XstkOper + id);
@@ -252,16 +252,16 @@ public class CourseData extends NetworkConnection {
 			response.close();
 			JsonObject source = (JsonObject) jsonParser.parse(new StringReader(string));//创建jsonObject对象
 			if (source.get("success").getAsBoolean()) {
-				System.out.println("[CourseCenter] Succeed: 退课成功");
+				logger.info("Succeed: 退课成功");
 				return true;
 			} else {
-				System.out.printf("[CourseCenter] Failed: %s", source.get("message").getAsString());
+				logger.info("Failed: " + source.get("message").getAsString());
 				return false;
 			}
 		} catch (JsonSyntaxException e) {
-			System.out.printf("[CourseCenter] Failed in %s: Internal server error!\n", id);			
+			logger.warn(String.format("Failed in %s: Internal server error!", id));		
 		} catch (IOException | ParseException e) {
-			System.err.println(e.getMessage());
+			logger.error(e.getMessage());
 		}
 		return false;
 	}

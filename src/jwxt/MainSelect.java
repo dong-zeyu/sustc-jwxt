@@ -12,6 +12,8 @@ import java.util.TimerTask;
 import java.util.function.Predicate;
 
 import org.apache.http.auth.AuthenticationException;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import http.CourseData;
 import http.StatusException;
@@ -19,6 +21,11 @@ import http.CourseData.CourseRepo;
 import http.NetworkConnection.Method;
 
 public class MainSelect {
+	
+	static {
+		PropertyConfigurator.configure("log4j.properties");
+	}
+	public static Logger logger = Logger.getLogger("Select");
 	
 	public static byte[] lock = new byte[0];
 	public static int SLEEP = 1000;
@@ -49,7 +56,7 @@ public class MainSelect {
 			@Override
 			public void run() {
 				synchronized (lock) {
-					System.out.println("Begin!");
+					logger.info("Begin!");
 					while (true) {
 						try {
 							courseData.getIn();
@@ -71,13 +78,14 @@ public class MainSelect {
 								try {
 									return courseData.select(t.repo.name(), t.id);
 								} catch (Exception e) {
-									System.out.println("Failed due to Execption: " + e.getMessage());
+									logger.error("Failed due to Execption: " + e.getMessage() 
+									+ "\n\tCaused by: " + e.getCause());
 								}
 								return false;
 							}
 						});
 					}
-					System.out.println("Over!");
+					logger.info("Over!");
 					lock.notify();
 				}
 			}
