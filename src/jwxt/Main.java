@@ -83,10 +83,10 @@ public class Main extends Shell {
 				}
 				return false;
 			} catch (AuthenticationException e) {
+				MessageBox messageBox = new MessageBox(shell, SWT.OK);
+				messageBox.setMessage(e.getMessage());
+				messageBox.open();
 				if (e.getCause() instanceof IOException) {
-					MessageBox messageBox = new MessageBox(shell, SWT.OK);
-					messageBox.setMessage(e.getMessage());
-					messageBox.open();
 					return false;
 				}
 			}
