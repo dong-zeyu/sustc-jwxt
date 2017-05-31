@@ -9,6 +9,7 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -104,13 +105,15 @@ public class Main extends Shell {
 		setSize(900, 700);
 		setLayout(new FormLayout());
 
-		Group group = new Group(this, SWT.NONE);
-		FormData fd_group = new FormData();
-		fd_group.left = new FormAttachment(0, 20);
-		fd_group.right = new FormAttachment(40, 0);
-		fd_group.bottom = new FormAttachment(100, -20);
-		fd_group.top = new FormAttachment(0, 15);
-		group.setLayoutData(fd_group);
+		SashForm sashForm_p = new SashForm(this, SWT.NONE);
+		FormData fd_sashForm_p = new FormData();
+		fd_sashForm_p.bottom = new FormAttachment(100, -20);
+		fd_sashForm_p.top = new FormAttachment(0, 15);
+		fd_sashForm_p.right = new FormAttachment(100, -20);
+		fd_sashForm_p.left = new FormAttachment(0, 20);
+		sashForm_p.setLayoutData(fd_sashForm_p);
+
+		Group group = new Group(sashForm_p, SWT.NONE);
 		group.setLayout(new FormLayout());
 		group.setText("课程");
 
@@ -238,14 +241,14 @@ public class Main extends Shell {
 		button_1.setLayoutData(fd_button_1);
 		button_1.setText("搜索");
 
-		sashForm = new SashForm(this, SWT.HORIZONTAL | SWT.BORDER);
+		ScrolledComposite scrolledComposite = new ScrolledComposite(sashForm_p, SWT.H_SCROLL | SWT.V_SCROLL);
+		scrolledComposite.setLayoutData(new FormData());
+		scrolledComposite.setExpandHorizontal(true);
+		scrolledComposite.setExpandVertical(true);
+		scrolledComposite.setMinWidth(0);
+
+		sashForm = new SashForm(scrolledComposite, SWT.HORIZONTAL | SWT.BORDER);
 		sashForm.setEnabled(false);
-		FormData fd_sashForm = new FormData();
-		fd_sashForm.bottom = new FormAttachment(group, 0, SWT.BOTTOM);
-		fd_sashForm.top = new FormAttachment(group, 0, SWT.TOP);
-		fd_sashForm.left = new FormAttachment(group, 7, SWT.RIGHT);
-		fd_sashForm.right = new FormAttachment(100, -7);
-		sashForm.setLayoutData(fd_sashForm);
 
 		for (String string : WEEK) {
 			SashForm sashForm_1 = new SashForm(sashForm, SWT.VERTICAL);
@@ -278,7 +281,11 @@ public class Main extends Shell {
 			sashForm_1.setWeights(new int[] { 1, 40 });
 		}
 
+		scrolledComposite.setContent(sashForm);
+		
 		sashForm.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
+		sashForm_p.setWeights(new int[] { 3, 5 });
+
 	}
 
 	/**
