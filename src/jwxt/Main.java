@@ -188,7 +188,6 @@ public class Main extends Shell {
 		trlclmn_pgtj.setText("先修课程");
 
 		Button button = new Button(group, SWT.NONE);
-		Shell shell = this;
 		button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -198,11 +197,11 @@ public class Main extends Shell {
 						courseData.updateSelected();
 						break;
 					} catch (AuthenticationException e1) {
-						if (!login(shell)) {
+						if (!login(Main.this)) {
 							break;
 						}
 					} catch (StatusException e1) {
-						MessageBox messageBox = new MessageBox(shell, SWT.OK);
+						MessageBox messageBox = new MessageBox(Main.this, SWT.OK);
 						messageBox.setMessage(e1.getMessage());
 						messageBox.open();
 						break;
@@ -282,7 +281,7 @@ public class Main extends Shell {
 		}
 
 		scrolledComposite.setContent(sashForm);
-		
+
 		sashForm.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
 		sashForm_p.setWeights(new int[] { 3, 5 });
 
@@ -300,12 +299,7 @@ public class Main extends Shell {
 
 	private void updateData(String string) {
 		tree.removeAll();
-		JsonObject result;
-		if (string == null) {
-			result = courseData.getCourse();
-		} else {
-			result = courseData.search(string);
-		}
+		JsonObject result = string == null ? courseData.getCourse() : courseData.search(string);
 		for (Entry<String, JsonElement> entry : result.entrySet()) {
 			for (JsonElement element : entry.getValue().getAsJsonArray()) {
 				TreeItem root = null;
