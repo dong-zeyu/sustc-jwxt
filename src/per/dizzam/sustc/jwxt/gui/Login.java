@@ -1,4 +1,4 @@
-package jwxt;
+package per.dizzam.sustc.jwxt.gui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;

@@ -1,4 +1,4 @@
-﻿package http;
+﻿package per.dizzam.sustc.cas;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,10 +38,6 @@ public class NetworkConnection {
 	public static final String url_cas = "https://cas.sustc.edu.cn/cas/login";
 	protected String url = "";
 	private CookieStore cookieStore;
-	public static enum Method {
-		GET,
-		POST;
-	};
 	protected String username = "";
 	protected String password = "";
 	private boolean isLogin = false;

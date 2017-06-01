@@ -1,4 +1,4 @@
-package jwxt;
+package per.dizzam.sustc.jwxt.gui;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -34,9 +34,9 @@ import org.eclipse.swt.widgets.TreeItem;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import http.CourseData;
-import http.CourseData.CourseRepo;
-import http.StatusException;
+import per.dizzam.sustc.jwxt.CourseData;
+import per.dizzam.sustc.jwxt.StatusException;
+import per.dizzam.sustc.jwxt.CourseData.CourseRepo;
 
 public class Main extends Shell {
 

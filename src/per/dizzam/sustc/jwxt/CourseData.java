@@ -1,4 +1,4 @@
-﻿package http;
+﻿package per.dizzam.sustc.jwxt;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,6 +23,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
+
+import per.dizzam.sustc.cas.NetworkConnection;
+import per.dizzam.sustc.cas.Method;
 
 public class CourseData extends NetworkConnection {
 	
