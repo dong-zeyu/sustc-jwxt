@@ -1,4 +1,4 @@
-package jwxt;
+package per.dizzam.sustc.jwxt.gui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -54,7 +54,7 @@ public class Login extends Dialog {
 	 * Create contents of the dialog.
 	 */
 	private void createContents() {
-		shell = new Shell(getParent(), SWT.DIALOG_TRIM);
+		shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.PRIMARY_MODAL);
 		shell.setSize(450, 230);
 		shell.setText(getText());
 

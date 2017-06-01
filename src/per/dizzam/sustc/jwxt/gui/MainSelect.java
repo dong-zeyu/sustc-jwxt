@@ -1,4 +1,4 @@
-package jwxt;
+package per.dizzam.sustc.jwxt.gui;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,10 +15,10 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import http.CourseData;
-import http.StatusException;
-import http.CourseData.CourseRepo;
-import http.NetworkConnection.Method;
+import per.dizzam.sustc.cas.Method;
+import per.dizzam.sustc.jwxt.CourseData;
+import per.dizzam.sustc.jwxt.CourseData.CourseRepo;
+import per.dizzam.sustc.jwxt.StatusException;
 
 public class MainSelect {
 	

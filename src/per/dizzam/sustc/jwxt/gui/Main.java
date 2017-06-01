@@ -1,4 +1,4 @@
-package jwxt;
+package per.dizzam.sustc.jwxt.gui;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -9,6 +9,7 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -33,9 +34,9 @@ import org.eclipse.swt.widgets.TreeItem;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import http.CourseData;
-import http.CourseData.CourseRepo;
-import http.StatusException;
+import per.dizzam.sustc.jwxt.CourseData;
+import per.dizzam.sustc.jwxt.StatusException;
+import per.dizzam.sustc.jwxt.CourseData.CourseRepo;
 
 public class Main extends Shell {
 
@@ -72,7 +73,7 @@ public class Main extends Shell {
 	}
 
 	private static boolean login(Shell shell) {
-		Login dialog = new Login(shell, SWT.NONE);
+		Login dialog = new Login(shell, SWT.PRIMARY_MODAL);
 		do {
 			try {
 				Object o = dialog.open();
@@ -104,13 +105,15 @@ public class Main extends Shell {
 		setSize(900, 700);
 		setLayout(new FormLayout());
 
-		Group group = new Group(this, SWT.NONE);
-		FormData fd_group = new FormData();
-		fd_group.left = new FormAttachment(0, 20);
-		fd_group.right = new FormAttachment(40, 0);
-		fd_group.bottom = new FormAttachment(100, -20);
-		fd_group.top = new FormAttachment(0, 15);
-		group.setLayoutData(fd_group);
+		SashForm sashForm_p = new SashForm(this, SWT.NONE);
+		FormData fd_sashForm_p = new FormData();
+		fd_sashForm_p.bottom = new FormAttachment(100, -20);
+		fd_sashForm_p.top = new FormAttachment(0, 15);
+		fd_sashForm_p.right = new FormAttachment(100, -20);
+		fd_sashForm_p.left = new FormAttachment(0, 20);
+		sashForm_p.setLayoutData(fd_sashForm_p);
+
+		Group group = new Group(sashForm_p, SWT.NONE);
 		group.setLayout(new FormLayout());
 		group.setText("课程");
 
@@ -185,7 +188,6 @@ public class Main extends Shell {
 		trlclmn_pgtj.setText("先修课程");
 
 		Button button = new Button(group, SWT.NONE);
-		Shell shell = this;
 		button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -195,11 +197,11 @@ public class Main extends Shell {
 						courseData.updateSelected();
 						break;
 					} catch (AuthenticationException e1) {
-						if (!login(shell)) {
+						if (!login(Main.this)) {
 							break;
 						}
 					} catch (StatusException e1) {
-						MessageBox messageBox = new MessageBox(shell, SWT.OK);
+						MessageBox messageBox = new MessageBox(Main.this, SWT.OK);
 						messageBox.setMessage(e1.getMessage());
 						messageBox.open();
 						break;
@@ -238,14 +240,14 @@ public class Main extends Shell {
 		button_1.setLayoutData(fd_button_1);
 		button_1.setText("搜索");
 
-		sashForm = new SashForm(this, SWT.HORIZONTAL | SWT.BORDER);
+		ScrolledComposite scrolledComposite = new ScrolledComposite(sashForm_p, SWT.H_SCROLL | SWT.V_SCROLL);
+		scrolledComposite.setLayoutData(new FormData());
+		scrolledComposite.setExpandHorizontal(true);
+		scrolledComposite.setExpandVertical(true);
+		scrolledComposite.setMinWidth(0);
+
+		sashForm = new SashForm(scrolledComposite, SWT.HORIZONTAL | SWT.BORDER);
 		sashForm.setEnabled(false);
-		FormData fd_sashForm = new FormData();
-		fd_sashForm.bottom = new FormAttachment(group, 0, SWT.BOTTOM);
-		fd_sashForm.top = new FormAttachment(group, 0, SWT.TOP);
-		fd_sashForm.left = new FormAttachment(group, 7, SWT.RIGHT);
-		fd_sashForm.right = new FormAttachment(100, -7);
-		sashForm.setLayoutData(fd_sashForm);
 
 		for (String string : WEEK) {
 			SashForm sashForm_1 = new SashForm(sashForm, SWT.VERTICAL);
@@ -278,7 +280,11 @@ public class Main extends Shell {
 			sashForm_1.setWeights(new int[] { 1, 40 });
 		}
 
+		scrolledComposite.setContent(sashForm);
+
 		sashForm.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
+		sashForm_p.setWeights(new int[] { 3, 5 });
+
 	}
 
 	/**
@@ -293,12 +299,7 @@ public class Main extends Shell {
 
 	private void updateData(String string) {
 		tree.removeAll();
-		JsonObject result;
-		if (string == null) {
-			result = courseData.getCourse();
-		} else {
-			result = courseData.search(string);
-		}
+		JsonObject result = string == null ? courseData.getCourse() : courseData.search(string);
 		for (Entry<String, JsonElement> entry : result.entrySet()) {
 			for (JsonElement element : entry.getValue().getAsJsonArray()) {
 				TreeItem root = null;

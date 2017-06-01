@@ -1,4 +1,4 @@
-package http;
+package per.dizzam.sustc.jwxt;
 
 @SuppressWarnings("serial")
 public class StatusException extends Exception {
