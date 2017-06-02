@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.Stack;
 
 import org.apache.http.auth.AuthenticationException;
+import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -40,6 +41,8 @@ import per.dizzam.sustc.jwxt.CourseData.CourseRepo;
 
 public class Main extends Shell {
 
+	private static Logger logger = Logger.getLogger("Main");
+	
 	public static CourseData courseData;
 	private SashForm sashForm;
 	private Tree tree;
@@ -72,7 +75,7 @@ public class Main extends Shell {
 			}
 			courseData.saveToFile();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.fatal(e.getMessage(), e);
 		}
 	}
 

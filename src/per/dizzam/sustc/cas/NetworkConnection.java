@@ -68,7 +68,7 @@ public class NetworkConnection {
 					.setDefaultCookieStore(cookieStore)
 					.build();//客户端建立
 		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException e) {
-			logger.fatal(e.getMessage());
+			logger.fatal(e.getMessage(), e);
 			System.exit(-1);
 		}
 	}
@@ -107,7 +107,7 @@ public class NetworkConnection {
 				response1.close();
 			}
 		} catch (ClientProtocolException | UnsupportedEncodingException e) {
-			logger.fatal(e.getMessage());
+			logger.fatal(e.getMessage(), e);
 			System.exit(-1);
 		}
 	}
@@ -167,7 +167,7 @@ public class NetworkConnection {
 			}
 			return response;
 		} catch (ClientProtocolException | UnsupportedEncodingException e) {
-			logger.fatal(e.getMessage());
+			logger.fatal(e.getMessage(), e);
 			System.exit(-1);
 		}
 		return null;
