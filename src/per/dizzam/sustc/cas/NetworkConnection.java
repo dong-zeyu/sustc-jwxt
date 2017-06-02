@@ -52,7 +52,11 @@ public class NetworkConnection {
 	private void setupSSL() {
 		try {
 			SSLContext sslContext;
-			sslContext = SSLContexts.custom().loadTrustMaterial(new File("cas.keystore"), "123456".toCharArray()).build();
+			try {
+				sslContext = SSLContexts.custom().loadTrustMaterial(this.getClass().getResource("/cas.keystore"), "123456".toCharArray()).build();
+			} catch (IllegalArgumentException e) {
+				sslContext = SSLContexts.custom().loadTrustMaterial(new File("cas.keystore"), "123456".toCharArray()).build();
+			}
 			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
 					sslContext,
 					new String[] { "TLSv1" },
@@ -63,11 +67,8 @@ public class NetworkConnection {
 					.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
 					.setDefaultCookieStore(cookieStore)
 					.build();//客户端建立
-		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException | CertificateException e) {
+		} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException | CertificateException | IOException e) {
 			logger.fatal(e.getMessage());
-			System.exit(-1);
-		} catch (IOException e) {
-			logger.fatal("Load cert failed. Exit");
 			System.exit(-1);
 		}
 	}
