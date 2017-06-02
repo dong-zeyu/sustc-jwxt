@@ -57,8 +57,7 @@ public class Select {
 								try {
 									return courseData.select(t.repo.name(), t.id);
 								} catch (Exception e) {
-									logger.error("Failed due to Execption: " + e.getMessage() 
-									+ "\n\tCaused by: " + e.getCause());
+									logger.error("Failed due to Execption: " + e.getMessage(), e);
 								}
 								return false;
 							}

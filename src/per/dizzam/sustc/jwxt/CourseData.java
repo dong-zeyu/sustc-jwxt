@@ -86,7 +86,7 @@ public class CourseData extends NetworkConnection {
 		} catch (FileNotFoundException e) {
 			logger.warn("Update Data Failed: " + e.getMessage());
 		} catch (IOException e) {
-			logger.fatal(e.getMessage());
+			logger.fatal(e.getMessage(), e);
 			System.exit(-1);
 		}
 	}
@@ -100,12 +100,12 @@ public class CourseData extends NetworkConnection {
 					throw new StatusException("尚未开放选课");
 				}
 			} catch (IOException | ParseException e) {
-				logger.error(e.getMessage());
+				logger.error(e.getMessage(), e);
 			} finally {
 				try {
 					response.close();
 				} catch (IOException e) {
-					logger.error(e.getMessage());
+					logger.error(e.getMessage(), e);
 				}
 			}
 		} else {
@@ -149,7 +149,7 @@ public class CourseData extends NetworkConnection {
 				return null;
 			}
 		} catch (ParseException | IOException | NullPointerException e) {
-			logger.error(e.getMessage());
+			logger.error(e.getMessage(), e);
 		}
 		return null;
 	}
@@ -169,7 +169,7 @@ public class CourseData extends NetworkConnection {
 			}
 			selected = array;
 		} catch (ParseException | IOException | IndexOutOfBoundsException | NullPointerException e) {
-			logger.error(e.getMessage());
+			logger.error(e.getMessage(), e);
 		}
 		return selected;
 	}
@@ -231,7 +231,7 @@ public class CourseData extends NetworkConnection {
 		} catch (JsonSyntaxException e) {
 			logger.warn(String.format("Failed in %s: Internal server error!", id));
 		} catch (ParseException | IOException | NullPointerException e) {
-			logger.error(e.getMessage());
+			logger.error(e.getMessage(), e);
 		}
 		return false;
 	}
@@ -256,7 +256,7 @@ public class CourseData extends NetworkConnection {
 		} catch (JsonSyntaxException e) {
 			logger.warn(String.format("Failed in %s: Internal server error!", id));		
 		} catch (IOException | ParseException | NullPointerException e) {
-			logger.error(e.getMessage());
+			logger.error(e.getMessage(), e);
 		}
 		return false;
 	}
