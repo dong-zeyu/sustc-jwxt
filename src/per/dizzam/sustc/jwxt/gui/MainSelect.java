@@ -17,7 +17,7 @@ import org.apache.log4j.PropertyConfigurator;
 
 import per.dizzam.sustc.cas.Method;
 import per.dizzam.sustc.jwxt.CourseData;
-import per.dizzam.sustc.jwxt.CourseData.CourseRepo;
+import per.dizzam.sustc.jwxt.CourseRepo;
 import per.dizzam.sustc.jwxt.StatusException;
 
 public class MainSelect {
