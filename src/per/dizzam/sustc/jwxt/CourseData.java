@@ -24,8 +24,8 @@ import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
 
-import per.dizzam.sustc.cas.NetworkConnection;
 import per.dizzam.sustc.cas.Method;
+import per.dizzam.sustc.cas.NetworkConnection;
 
 public class CourseData extends NetworkConnection {
 	
@@ -37,10 +37,10 @@ public class CourseData extends NetworkConnection {
 	private final String coursestorge = "course.json";
 	private final String selectedstorge = "selected.json";
 	
-//	private final String Xsxk = "/xsxk/xsxk_index?jx0502zbid=054B5FA7E55F44E0BB3D24DB3BC561D5";	//主页，用于打开主页权限
-//	private final String Xsxk = "/xsxk/xsxk_index?jx0502zbid=054B5FA7E55F44E0BB3D24DB3BC561";	//主页，用于打开主页权限
-	private final String Xsxk = "/xsxk/xsxk_index?jx0502zbid=2A018810EA3C4DCFAD5A971752AD1A0D";	//主页，用于打开主页权限
-//	private final String Xkjglb = "/xsxkjg/xsxkBxqjhxk";	//已选课程----I non't know why I write this, but I'll keep it before I confirm it is unused.
+	private String Xsxk = "/xsxk/xsxk_index?jx0502zbid=";
+	private String xklc_list = "/xsxk/xklc_list";
+	private boolean isChoose = false;
+	
 	private final String Xkjglb = "/xsxkjg/comeXkjglb";	//已选课程
 	
 	private final String query = "/xsxkkc/xsxk%s?kcxx=&skls=&skxq=&skjc=&sfym=false&sfct=false";
@@ -71,6 +71,7 @@ public class CourseData extends NetworkConnection {
 		CloseableHttpResponse response = null;
 		if (isLogin()) {
 			try {
+				getIndex(); // XXX it's a very bad idea to put getIndex here
 				response = dataFetcher(Method.GET, Xsxk);
 				if (EntityUtils.toString(response.getEntity()).contains("不在选课时间范围内")) {
 					throw new StatusException("尚未开放选课");
@@ -87,6 +88,27 @@ public class CourseData extends NetworkConnection {
 		} else {
 			login();
 			getIn();
+		}
+	}
+	
+	public void getIndex() throws StatusException, AuthenticationException, IOException {
+		try {
+			getIndex(0);
+		} catch (IndexOutOfBoundsException e) {
+			throw new StatusException("尚未开放选课", e);
+		}
+	}
+	
+	public void getIndex(int index) throws IndexOutOfBoundsException, AuthenticationException, IOException {
+		if (!isChoose) {
+			CloseableHttpResponse response = dataFetcher(Method.GET, xklc_list);
+			Document document = Jsoup.parse(EntityUtils.toString(response.getEntity()));
+			response.close();
+			String id = document.getElementById("tbKxkc").child(0)
+					.child(index + 1).child(0).lastElementSibling()
+					.child(0).attr("href").split("=")[1];
+			Xsxk += id;
+			isChoose = true;			
 		}
 	}
 	
