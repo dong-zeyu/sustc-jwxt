@@ -37,7 +37,7 @@ import com.google.gson.JsonObject;
 
 import per.dizzam.sustc.jwxt.CourseData;
 import per.dizzam.sustc.jwxt.StatusException;
-import per.dizzam.sustc.jwxt.CourseData.CourseRepo;
+import per.dizzam.sustc.jwxt.CourseRepo;
 
 public class Main extends Shell {
 
