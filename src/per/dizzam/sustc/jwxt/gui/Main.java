@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -21,10 +20,8 @@ import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -36,18 +33,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import per.dizzam.sustc.jwxt.CourseData;
-import per.dizzam.sustc.jwxt.StatusException;
 import per.dizzam.sustc.jwxt.CourseRepo;
+import per.dizzam.sustc.jwxt.StatusException;
 
 public class Main extends Shell {
 
 	private static Logger logger = Logger.getLogger("Main");
-	
+
 	public static CourseData courseData;
-	private SashForm sashForm;
 	private Tree tree;
-	private static String[] WEEK = new String[] { "", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
 	private Text text;
+
+	private TimeTableManager timeTableManager;
 
 	/**
 	 * Launch the application.
@@ -247,50 +244,9 @@ public class Main extends Shell {
 		button_1.setLayoutData(fd_button_1);
 		button_1.setText("搜索");
 
-		ScrolledComposite scrolledComposite = new ScrolledComposite(sashForm_p, SWT.H_SCROLL | SWT.V_SCROLL);
-		scrolledComposite.setLayoutData(new FormData());
-		scrolledComposite.setExpandHorizontal(true);
-		scrolledComposite.setExpandVertical(true);
-		scrolledComposite.setMinWidth(0);
+		timeTableManager = new TimeTableManager(sashForm_p);
 
-		sashForm = new SashForm(scrolledComposite, SWT.HORIZONTAL | SWT.BORDER);
-		sashForm.setEnabled(false);
-
-		for (String string : WEEK) {
-			SashForm sashForm_1 = new SashForm(sashForm, SWT.VERTICAL);
-			sashForm_1.setEnabled(false);
-
-			Label lbl = new Label(sashForm_1, SWT.CENTER);
-			lbl.setText(string);
-
-			Composite composite2 = new Composite(sashForm_1, SWT.NONE);
-			composite2.setLayout(new FormLayout());
-
-			for (int i = 0; i < 10; i++) {
-				Label line = new Label(composite2, SWT.SEPARATOR | SWT.HORIZONTAL);
-
-				FormData fd_line = new FormData();
-				fd_line.left = new FormAttachment(0, 0);
-				fd_line.right = new FormAttachment(100, 0);
-				fd_line.top = new FormAttachment(i * 10, 0);
-				line.setLayoutData(fd_line);
-				if (string.equals("")) {
-					Label num = new Label(composite2, SWT.CENTER);
-					FormData fd_num = new FormData();
-					fd_num.left = new FormAttachment(0, 0);
-					fd_num.right = new FormAttachment(100, 0);
-					fd_num.top = new FormAttachment(i * 10 + 4, 0);
-					num.setLayoutData(fd_num);
-					num.setText(String.valueOf(i + 1));
-				}
-			}
-			sashForm_1.setWeights(new int[] { 1, 40 });
-		}
-
-		scrolledComposite.setContent(sashForm);
-
-		sashForm.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
-		sashForm_p.setWeights(new int[] { 3, 5 });
+		sashForm_p.setWeights(new int[] { 6, 13 });
 
 	}
 
