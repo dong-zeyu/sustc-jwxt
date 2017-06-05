@@ -1,15 +1,19 @@
 package per.dizzam.sustc.jwxt.gui;
 
 import java.util.ArrayList;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -27,17 +31,16 @@ public class TimeTableManager {
 		picker = new ColorPicker(parent.getDisplay());
 		
 		scroll = new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-		scroll.setLayoutData(new FormData());
 		scroll.setExpandHorizontal(true);
 		scroll.setExpandVertical(true);
 		scroll.setMinWidth(0);
 
 		SashForm ver = new SashForm(scroll, SWT.HORIZONTAL | SWT.BORDER);
-		ver.setEnabled(false);
+//		ver.setEnabled(false);
 
 		for (String string : WEEK) {
 			SashForm hor = new SashForm(ver, SWT.VERTICAL);
-			hor.setEnabled(false);
+//			hor.setEnabled(false);
 
 			Label lbl = new Label(hor, SWT.CENTER);
 			lbl.setText(string);
@@ -108,6 +111,18 @@ public class TimeTableManager {
 //			label.setFont(new Font(scroll.getDisplay(), fd));
 			label.moveAbove(null);
 			label.requestLayout();
+			label.addMouseTrackListener(new MouseTrackAdapter() {
+
+				@Override
+				public void mouseEnter(MouseEvent e) {
+					label.setBackground(picker.changeLighten(label.getBackground(), true));
+				}
+
+				@Override
+				public void mouseExit(MouseEvent e) {
+					label.setBackground(picker.changeLighten(label.getBackground(), false));
+				}
+			});
 		}
 	}
 
