@@ -137,6 +137,13 @@ public class Main extends Shell {
 						TreeItem item1 = items.pop();
 						item1.setChecked(checked);
 						item1.setGrayed(false);
+						if (item1.getItems().length == 0 && item1.getData() instanceof JsonObject) {
+							if (checked) {
+								timeTableManager.addCourse((JsonObject) item1.getData());
+							} else {
+								timeTableManager.removeCourse((JsonObject) item1.getData());
+							}
+						}
 						items.addAll(Arrays.asList(item1.getItems()));
 					}
 					TreeItem parent;
@@ -299,6 +306,7 @@ public class Main extends Shell {
 				item.setText(2, e2.isJsonNull() ? "无" : e2.getAsString());
 				JsonElement e3 = element.getAsJsonObject().get("pgtj");
 				item.setText(3, e3.isJsonNull() ? "无" : e3.getAsString());
+				item.setData(element);
 			}
 		}
 		for (TreeItem item : tree.getItems()) {
