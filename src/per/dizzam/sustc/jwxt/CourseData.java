@@ -76,23 +76,17 @@ public class CourseData extends NetworkConnection {
 	}
 		
 	public void getIn() throws AuthenticationException, StatusException {//获取选课权限
-		CloseableHttpResponse response = null;
 		if (isLogin()) {
-			try {
-				getIndex(); // XXX it's a very bad idea to put getIndex here
-				response = dataFetcher(Method.GET, Xsxk);
-				if (EntityUtils.toString(response.getEntity()).contains("不在选课时间范围内")) {
-					throw new StatusException("尚未开放选课");
-				}
-			} catch (IOException | ParseException e) {
-				logger.error(e.getMessage(), e);
-			} finally {
-				try {
+ 			try {
+ 				getIndex(); // XXX it's a very bad idea to put getIndex here
+				CloseableHttpResponse response = dataFetcher(Method.GET, Xsxk);
+ 				if (EntityUtils.toString(response.getEntity()).contains("不在选课时间范围内")) {
 					response.close();
-				} catch (IOException e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
+ 					throw new StatusException("尚未开放选课");
+ 				}
+ 			} catch (IOException | ParseException e) {
+ 				logger.error(e.getMessage(), e);
+ 			}
 		} else {
 			login();
 			getIn();
@@ -102,12 +96,12 @@ public class CourseData extends NetworkConnection {
 	public void getIndex() throws StatusException, AuthenticationException, IOException {
 		try {
 			getIndex(0);
-		} catch (IndexOutOfBoundsException e) {
+		} catch (IndexOutOfBoundsException | NullPointerException e) {
 			throw new StatusException("尚未开放选课", e);
 		}
 	}
 	
-	public void getIndex(int index) throws IndexOutOfBoundsException, AuthenticationException, IOException {
+	public void getIndex(int index) throws NullPointerException, IndexOutOfBoundsException, AuthenticationException, IOException {
 		if (!isChoose) {
 			CloseableHttpResponse response = dataFetcher(Method.GET, xklc_list);
 			Document document = Jsoup.parse(EntityUtils.toString(response.getEntity()));
