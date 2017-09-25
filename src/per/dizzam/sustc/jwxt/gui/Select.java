@@ -17,6 +17,7 @@ import org.apache.log4j.PropertyConfigurator;
 import per.dizzam.sustc.cas.Method;
 import per.dizzam.sustc.jwxt.CourseData;
 import per.dizzam.sustc.jwxt.CourseRepo;
+import per.dizzam.sustc.jwxt.StatusException;
 
 public class Select {
 	
@@ -29,7 +30,6 @@ public class Select {
 
 	public static CourseData courseData;
 	enum Course {
-		摄影(CourseRepo.Ggxxkxk, "201720181001105"),
 		;
 		CourseRepo repo;
 		String id;
@@ -57,7 +57,11 @@ public class Select {
 								try {
 									return courseData.select(t.repo.name(), t.id);
 								} catch (Exception e) {
-									logger.error("Failed due to Execption: " + e.getMessage(), e);
+									if (e instanceof StatusException) {
+										logger.info(e.getMessage());
+									} else {
+										logger.error("Failed due to Execption: " + e.getMessage(), e);										
+									}
 								}
 								return false;
 							}
@@ -75,7 +79,8 @@ public class Select {
 		}
 		
 		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
-		calendar.set(2017, 4, 26, 21, 10, 0);
+		calendar.set(2017, 8, 11, 13, 00, 00);
+		// 0 means Jan. in month
 		
 		courseData = new CourseData("11611716", "dzy19980909");
 		courseData.login();
