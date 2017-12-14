@@ -100,9 +100,8 @@ public class NetworkConnection {
 					logger.info("Login Succeed!");
 				}
 				else{
-					if(EntityUtils.toString(response1.getEntity()).contains("class=\"errors\"")) {
-						throw new AuthenticationException("Login Failed: Error authentication information");
-					}
+					response1.close();
+					throw new AuthenticationException("Login Failed: Error authentication information");
 				}
 				response1.close();
 			}
