@@ -13,3 +13,4 @@ Thanks for the following project:
 * [jsoup](https://jsoup.org)
 * [GSON](https://github.com/google/gson)
 * [SWT](http://www.eclipse.org/swt/)
+* [log4j-1.2](http://logging.apache.org/log4j/1.2/)
