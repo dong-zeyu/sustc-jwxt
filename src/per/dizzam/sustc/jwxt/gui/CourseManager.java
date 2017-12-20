@@ -31,7 +31,7 @@ import com.google.gson.JsonObject;
 import per.dizzam.sustc.jwxt.CourseData;
 import per.dizzam.sustc.jwxt.CourseRepo;
 
-public class TimeTableManager {
+public class CourseManager {
 	
 	private static final String[] WEEK = new String[] { "", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
 	
@@ -134,11 +134,11 @@ public class TimeTableManager {
 	private ArrayList<Course> courses = new ArrayList<>();
 	private ColorPicker picker;
 
-	public TimeTableManager(Composite boxParent, Composite treeParent, CourseData courseData) {
+	public CourseManager(ScrolledComposite scroll, Tree tree, CourseData courseData) {
+		this.tree = tree;
+		this.scroll = scroll;
 		this.courseData = courseData;
-		picker = new ColorPicker(boxParent.getDisplay());
-		tree = new Tree(treeParent, SWT.BORDER | SWT.CHECK);
-		scroll = new ScrolledComposite(boxParent, SWT.H_SCROLL | SWT.V_SCROLL);
+		picker = new ColorPicker(scroll.getDisplay());
 		init();
 	}
 	
@@ -216,14 +216,6 @@ public class TimeTableManager {
 	}
 	
 	private void init() {
-		FormData fd_tree = new FormData();
-		fd_tree.bottom = new FormAttachment(100, -7);
-		fd_tree.right = new FormAttachment(100, -7);
-		fd_tree.top = new FormAttachment(0, 30);
-		fd_tree.left = new FormAttachment(0, 7);
-		tree.setLayoutData(fd_tree);
-		tree.setLinesVisible(true);
-		tree.setHeaderVisible(true);
 
 		TreeColumn trclmnA = new TreeColumn(tree, SWT.NONE);
 		trclmnA.setWidth(275);
@@ -291,10 +283,6 @@ public class TimeTableManager {
 				}
 			}
 		});
-		
-		scroll.setExpandHorizontal(true);
-		scroll.setExpandVertical(true);
-		scroll.setMinWidth(0);
 
 		SashForm ver = new SashForm(scroll, SWT.HORIZONTAL | SWT.BORDER);
 //		ver.setEnabled(false);
