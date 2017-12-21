@@ -14,7 +14,6 @@ import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.internal.mozilla.nsDynamicFunctionLoad;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -24,8 +23,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
-import org.jsoup.select.Evaluator.IsEmpty;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -41,19 +38,25 @@ public class CourseManager {
 		
 		private ArrayList<Label> labels;
 		private JsonObject course;
-		private float hue;
+		private float hue = 0;
 		private boolean isSelected;
+		private boolean isChecked;
+		private TreeItem item;
+		private CourseRepo category;
 		
-		public Course(JsonObject course) {
+		public Course(JsonObject course, CourseRepo category) {
 			labels = new ArrayList<>();
 			this.course = course;
-			hue = picker.getCurrentHue();
-			layout();
+			this.category = category;
 		}
 		
-		private void layout() {
+		public void layoutLable() {
+			if (!labels.isEmpty()) {
+				return;
+			}
+			hue = picker.getCurrentHue();
 			JsonArray times = course.get("kkapList").getAsJsonArray();
-			Color color = picker.changeLighten(hue, isSelected);				
+			Color color = picker.changeLighten(hue, isSelected);
 			for (JsonElement time : times) {
 				JsonObject t = time.getAsJsonObject();
 				int week = t.get("xq").getAsInt();
@@ -63,13 +66,13 @@ public class CourseManager {
 				FormData fd_l = new FormData();
 				Label label = new Label(composite, SWT.WRAP);
 				label.setText(course.get("kcmc").getAsString());
-				label.setData(course);
+				label.setData(this);
 				label.setBackground(color);
 				fd_l.top = new FormAttachment((from - 1) * 10, 2);
 				fd_l.bottom = new FormAttachment(to * 10, -1);
 				int left = 0;
 				for (Control control : composite.getChildren()) {
-					if (control.getData() != null && control.getData() instanceof JsonObject && !control.equals(label)) {
+					if (control.getData() != null && control.getData() instanceof Course && !control.equals(label)) {
 						FormData data = (FormData) control.getLayoutData();
 						if (data.top.numerator < fd_l.bottom.numerator && data.bottom.numerator > fd_l.top.numerator
 								&& data.right.offset > left) {
@@ -90,14 +93,14 @@ public class CourseManager {
 					@Override
 					public void mouseEnter(MouseEvent e) {
 						if (!isSelected) {
-							lighten(true);							
+							lightenLable(true);
 						}
 					}
 
 					@Override
 					public void mouseExit(MouseEvent e) {
 						if (!isSelected) {
-							lighten(false);
+							lightenLable(false);
 						}
 					}
 				});
@@ -107,8 +110,10 @@ public class CourseManager {
 					public void mouseDown(MouseEvent e) {
 						if (isSelected) {
 							isSelected = false;
+							selected.remove(Course.this);
 						} else {
 							isSelected = true;
+							selected.add(Course.this);
 						}
 					}
 				});
@@ -116,21 +121,87 @@ public class CourseManager {
 			}
 		}
 		
-		public void lighten(boolean light) {
+		public void disposeLable() {
+			for (Label label : labels) {
+				label.dispose();
+			}
+			labels.removeAll(labels);
+		}
+		
+		public void lightenLable(boolean light) {
 			for (Label l : labels) {
 				l.setBackground(picker.changeLighten(hue, light));							
 			}
 		}
 		
-		public JsonObject getCourse() {
-			return course;
-		}
-
-		public void dispose() {
-			for (Label label : labels) {
-				label.dispose();
+		public void displayItem() {
+			TreeItem root = null;
+			for (TreeItem item : tree.getItems()) {
+				if (item.getData().equals(category)) {
+					root = item;
+				}
 			}
-			labels.removeAll(labels);
+			TreeItem parent = null;
+			JsonElement element = course;
+			for (TreeItem item : root.getItems()) {
+				if (item.getText().equals(element.getAsJsonObject().get("kcmc").getAsString())) {
+					parent = item;
+				}
+			}
+			if (parent == null) {
+				TreeItem newItem = new TreeItem(root, SWT.NONE);
+				newItem.setText(0, element.getAsJsonObject().get("kcmc").getAsString());
+				newItem.setText(1, String.valueOf(element.getAsJsonObject().get("xf").getAsInt()));
+				JsonElement e = element.getAsJsonObject().get("pgtj");
+				newItem.setText(3, e.isJsonNull() ? "无" : e.getAsString());
+				parent = newItem;
+			}
+			item = new TreeItem(parent, SWT.NONE);
+			JsonElement e1 = element.getAsJsonObject().get("fzmc");
+			item.setText(0, element.getAsJsonObject().get("kcmc").getAsString()
+					+ (e1.isJsonNull() ? "" : "[" + e1.getAsString() + "]"));
+			item.setText(1, String.valueOf(element.getAsJsonObject().get("xf").getAsInt()));
+			JsonElement e2 = element.getAsJsonObject().get("skls");
+			item.setText(2, e2.isJsonNull() ? "无" : e2.getAsString());
+			JsonElement e3 = element.getAsJsonObject().get("pgtj");
+			item.setText(3, e3.isJsonNull() ? "无" : e3.getAsString());
+			item.setChecked(isChecked);
+			item.setGrayed(false);
+			TreeItem head = item;
+			while ((parent = head.getParentItem()) != null) {
+				if (isChecked) {
+					parent.setChecked(true);
+					parent.setGrayed(false);
+					for (TreeItem item1 : parent.getItems()) {
+						if (!item1.getChecked() || item1.getGrayed()) {
+							parent.setGrayed(true);
+							break;
+						}
+					}
+				} else {
+					parent.setGrayed(true);
+					parent.setChecked(false);
+					for (TreeItem item1 : parent.getItems()) {
+						if (item1.getChecked()) {
+							parent.setChecked(true);
+							break;
+						}
+					}
+				}
+				head = parent;
+			}
+			item.setData(this);
+		}
+		
+		public void disposeItem() {
+			if (item != null) {
+				TreeItem parent = item.getParentItem();
+				item.dispose();
+				item = null;
+				if (parent.getItems().length == 0) {
+					parent.dispose();
+				}
+			}
 		}
 	}
 	
@@ -139,6 +210,7 @@ public class CourseManager {
 	private ScrolledComposite scroll;
 	private ArrayList<Composite> weekList = new ArrayList<>();
 	private ArrayList<Course> courses = new ArrayList<>();
+	private ArrayList<Course> selected = new ArrayList<>();
 	private ColorPicker picker;
 
 	public CourseManager(ScrolledComposite scroll, Tree tree, CourseData courseData) {
@@ -147,12 +219,6 @@ public class CourseManager {
 		this.courseData = courseData;
 		picker = new ColorPicker(scroll.getDisplay());
 		init();
-	}
-	
-	public Course addCourse(JsonObject course) {
-		Course newCourse = new Course(course);
-		courses.add(newCourse);
-		return newCourse;
 	}
 	
 	private void computeSize(Composite target) {
@@ -166,65 +232,64 @@ public class CourseManager {
 //			scroll.setMinWidth(max * 7 + 20);
 //		}
 	}
-
-	public void removeCourse(JsonObject course) {
-		for (Course course1 : courses) {
-			if (course1.getCourse().equals(course)) {
-				courses.remove(course1);
-				course1.dispose();
-				break;
+	
+	private ArrayList<Course> search(String name) {
+		if (name == null) {
+			return courses;
+		}
+		ArrayList<Course> target = new ArrayList<>();
+		for (Course course : courses) {
+			JsonObject jsonObject = course.course;
+			if (jsonObject.get("kcmc").getAsString().contains(name)
+					|| jsonObject.get("kch").getAsString().contains(name) 
+					|| jsonObject.get("jx0404id").getAsString().equals(name)
+					|| (jsonObject.get("skls") == null ? false : jsonObject.get("skls").toString().contains(name))) {
+				target.add(course);
 			}
 		}
+		return target;
 	}
 	
-	public void updateData(String string) {
-		tree.removeAll();
-		JsonObject result = string == null ? courseData.getCourse() : courseData.search(string);
-		for (Entry<String, JsonElement> entry : result.entrySet()) {
-			for (JsonElement element : entry.getValue().getAsJsonArray()) {
-				TreeItem root = null;
-				for (TreeItem item : tree.getItems()) {
-					if (item.getText().equals(CourseRepo.valueOf(entry.getKey()).getName())) {
-						root = item;
-					}
-				}
-				if (root == null) {
-					TreeItem newItem = new TreeItem(tree, SWT.CHECK);
-					newItem.setText(CourseRepo.valueOf(entry.getKey()).getName());
-					root = newItem;
-				}
-				TreeItem parent = null;
-				for (TreeItem item : root.getItems()) {
-					if (item.getText().equals(element.getAsJsonObject().get("kcmc").getAsString())) {
-						parent = item;
-					}
-				}
-				if (parent == null) {
-					TreeItem newItem = new TreeItem(root, SWT.NONE);
-					newItem.setText(0, element.getAsJsonObject().get("kcmc").getAsString());
-					newItem.setText(1, String.valueOf(element.getAsJsonObject().get("xf").getAsInt()));
-					JsonElement e = element.getAsJsonObject().get("pgtj");
-					newItem.setText(3, e.isJsonNull() ? "无" : e.getAsString());
-					parent = newItem;
-				}
-				TreeItem item = new TreeItem(parent, SWT.NONE);
-				JsonElement e1 = element.getAsJsonObject().get("fzmc");
-				item.setText(0, element.getAsJsonObject().get("kcmc").getAsString()
-						+ (e1.isJsonNull() ? "" : "[" + e1.getAsString() + "]"));
-				item.setText(1, String.valueOf(element.getAsJsonObject().get("xf").getAsInt()));
-				JsonElement e2 = element.getAsJsonObject().get("skls");
-				item.setText(2, e2.isJsonNull() ? "无" : e2.getAsString());
-				JsonElement e3 = element.getAsJsonObject().get("pgtj");
-				item.setText(3, e3.isJsonNull() ? "无" : e3.getAsString());
-				item.setData(element);
-			}
+	public void searchCourse(String string) {
+		for (Course course : courses) {
+			course.disposeItem();
 		}
+		
+		for (Course course : search(string)) {
+			course.displayItem();
+		}
+		
 		for (TreeItem item : tree.getItems()) {
 			item.setExpanded(true);
 		}
 	}
 	
+	public void updateData() {
+		tree.removeAll();
+		scroll.getContent().dispose();
+		courses = new ArrayList<>();
+		selected = new ArrayList<>();
+		weekList = new ArrayList<>();
+		System.gc();
+		init();
+		searchCourse(null);
+	}
+	
 	private void init() {
+		for (Entry<String, JsonElement> entry : courseData.getCourse().entrySet()) {
+			for (JsonElement course : entry.getValue().getAsJsonArray()) {
+				Course newCourse = new Course((JsonObject) course, CourseRepo.valueOf(entry.getKey()));
+				courses.add(newCourse);
+			}
+		}
+		
+		for (JsonElement selected : courseData.getSelected()) {
+			for (Course target : search(selected.getAsString())) {
+				target.isSelected = true;
+				target.isChecked = true;
+				this.selected.add(target);
+			}
+		}
 
 		TreeColumn trclmnA = new TreeColumn(tree, SWT.NONE);
 		trclmnA.setWidth(275);
@@ -241,6 +306,7 @@ public class CourseManager {
 		TreeColumn trlclmn_pgtj = new TreeColumn(tree, SWT.NONE);
 		trlclmn_pgtj.setWidth(275);
 		trlclmn_pgtj.setText("先修课程");
+		
 		tree.addSelectionListener(new SelectionAdapter() {
 
 			@Override
@@ -248,7 +314,6 @@ public class CourseManager {
 				if (e.item instanceof TreeItem) {
 					TreeItem item = (TreeItem) e.item;
 					boolean checked = item.getChecked();
-					item.setChecked(checked);
 					item.setGrayed(false);
 					Stack<TreeItem> items = new Stack<>();
 					items.push(item);
@@ -256,15 +321,19 @@ public class CourseManager {
 						TreeItem item1 = items.pop();
 						item1.setChecked(checked);
 						item1.setGrayed(false);
-						if (item1.getItems().length == 0 && item1.getData() instanceof JsonObject) {
+						if (item1.getData() instanceof Course) {
 							if (checked) {
-								addCourse((JsonObject) item1.getData());
+								((Course) item1.getData()).layoutLable();
+								((Course) item1.getData()).isChecked = true;
 							} else {
-								removeCourse((JsonObject) item1.getData());
+								((Course) item1.getData()).disposeLable();
+								((Course) item1.getData()).isChecked = false;
+//								((Course) item1.getData()).isSelected = false;
 							}
 						}
 						items.addAll(Arrays.asList(item1.getItems()));
 					}
+					
 					TreeItem parent;
 					TreeItem head = item;
 					while ((parent = head.getParentItem()) != null) {
@@ -293,6 +362,12 @@ public class CourseManager {
 			}
 		});
 
+		for (CourseRepo repo : CourseRepo.values()) {
+			TreeItem item = new TreeItem(tree, SWT.NONE);
+			item.setData(repo);
+			item.setText(repo.getName());
+		}
+		
 		SashForm ver = new SashForm(scroll, SWT.HORIZONTAL | SWT.BORDER);
 //		ver.setEnabled(false);
 
@@ -333,11 +408,8 @@ public class CourseManager {
 
 		ver.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
 		
-		JsonArray seletedCourse = courseData.getSelected();
-		for (JsonElement course : seletedCourse) {
-			Course newCourse = addCourse(courseData.searchById(course.getAsString()));
-			newCourse.isSelected = true;
-			newCourse.lighten(true);
+		for (Course course : selected) {
+			course.layoutLable();
 		}
 	}
 }
