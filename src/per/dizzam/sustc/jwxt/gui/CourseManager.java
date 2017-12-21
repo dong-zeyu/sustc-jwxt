@@ -39,8 +39,8 @@ public class CourseManager {
 		private ArrayList<Label> labels;
 		private JsonObject course;
 		private float hue = 0;
-		private boolean isSelected;
-		private boolean isChecked;
+		private boolean isSelected = false;
+		private boolean isChecked = false;
 		private TreeItem item;
 		private CourseRepo category;
 		
