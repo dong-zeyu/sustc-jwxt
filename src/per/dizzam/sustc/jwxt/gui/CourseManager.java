@@ -233,7 +233,7 @@ public class CourseManager {
 //		}
 	}
 	
-	public ArrayList<Course> searchCourse(String name) {
+	private ArrayList<Course> search(String name) {
 		if (name == null) {
 			return courses;
 		}
@@ -250,18 +250,29 @@ public class CourseManager {
 		return target;
 	}
 	
-	public void updateData(String string) {
+	public void searchCourse(String string) {
 		for (Course course : courses) {
 			course.disposeItem();
 		}
 		
-		for (Course course : searchCourse(string)) {
+		for (Course course : search(string)) {
 			course.displayItem();
 		}
 		
 		for (TreeItem item : tree.getItems()) {
 			item.setExpanded(true);
 		}
+	}
+	
+	public void updateData() {
+		tree.removeAll();
+		scroll.getContent().dispose();
+		courses = new ArrayList<>();
+		selected = new ArrayList<>();
+		weekList = new ArrayList<>();
+		System.gc();
+		init();
+		searchCourse(null);
 	}
 	
 	private void init() {
@@ -273,7 +284,7 @@ public class CourseManager {
 		}
 		
 		for (JsonElement selected : courseData.getSelected()) {
-			for (Course target : searchCourse(selected.getAsString())) {
+			for (Course target : search(selected.getAsString())) {
 				target.isSelected = true;
 				target.isChecked = true;
 				this.selected.add(target);

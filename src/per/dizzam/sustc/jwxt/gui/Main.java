@@ -130,7 +130,7 @@ public class Main extends Shell {
 						break;
 					}
 				} while (true);
-				timeTableManager.updateData(null);
+				timeTableManager.updateData();
 			}
 		});
 
@@ -144,7 +144,7 @@ public class Main extends Shell {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.character == SWT.CR || e.character == SWT.LF) {
-					timeTableManager.updateData(text.getText().equals("") ? null : text.getText());
+					timeTableManager.searchCourse(text.getText().equals("") ? null : text.getText());
 				}
 			}
 		});
@@ -157,7 +157,7 @@ public class Main extends Shell {
 		button_1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				timeTableManager.updateData(text.getText().equals("") ? null : text.getText());
+				timeTableManager.searchCourse(text.getText().equals("") ? null : text.getText());
 			}
 		});
 		FormData fd_button_1 = new FormData();
@@ -194,7 +194,7 @@ public class Main extends Shell {
 		setText("App");
 		setMaximized(true);
 
-		timeTableManager.updateData(null);
+		timeTableManager.searchCourse(null);
 	}
 
 	@Override
