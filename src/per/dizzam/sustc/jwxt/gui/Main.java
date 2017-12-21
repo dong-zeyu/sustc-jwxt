@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -20,6 +21,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tree;
 
 import per.dizzam.sustc.jwxt.CourseData;
 import per.dizzam.sustc.jwxt.StatusException;
@@ -31,7 +33,7 @@ public class Main extends Shell {
 	public static CourseData courseData;
 	private Text text;
 
-	private TimeTableManager timeTableManager;
+	private CourseManager timeTableManager;
 
 	/**
 	 * Launch the application.
@@ -141,7 +143,9 @@ public class Main extends Shell {
 		text.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
-				timeTableManager.updateData(text.getText().equals("") ? null : text.getText());
+				if (e.character == SWT.CR || e.character == SWT.LF) {
+					timeTableManager.updateData(text.getText().equals("") ? null : text.getText());
+				}
 			}
 		});
 		FormData fd_text = new FormData();
@@ -162,7 +166,22 @@ public class Main extends Shell {
 		button_1.setLayoutData(fd_button_1);
 		button_1.setText("搜索");
 
-		timeTableManager = new TimeTableManager(sashForm_p, group, courseData);
+		Tree tree = new Tree(group, SWT.BORDER | SWT.CHECK);
+		FormData fd_tree = new FormData();
+		fd_tree.bottom = new FormAttachment(100, -7);
+		fd_tree.right = new FormAttachment(100, -7);
+		fd_tree.top = new FormAttachment(0, 30);
+		fd_tree.left = new FormAttachment(0, 7);
+		tree.setLayoutData(fd_tree);
+		tree.setLinesVisible(true);
+		tree.setHeaderVisible(true);
+
+		ScrolledComposite scroll = new ScrolledComposite(sashForm_p, SWT.H_SCROLL | SWT.V_SCROLL);
+		scroll.setExpandHorizontal(true);
+		scroll.setExpandVertical(true);
+		scroll.setMinWidth(0);
+
+		timeTableManager = new CourseManager(scroll, tree, courseData);
 
 		sashForm_p.setWeights(new int[] { 6, 13 });
 

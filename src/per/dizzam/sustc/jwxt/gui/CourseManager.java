@@ -14,6 +14,7 @@ import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.internal.mozilla.nsDynamicFunctionLoad;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -23,6 +24,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
+import org.jsoup.select.Evaluator.IsEmpty;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -31,7 +33,7 @@ import com.google.gson.JsonObject;
 import per.dizzam.sustc.jwxt.CourseData;
 import per.dizzam.sustc.jwxt.CourseRepo;
 
-public class TimeTableManager {
+public class CourseManager {
 	
 	private static final String[] WEEK = new String[] { "", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
 	
@@ -51,7 +53,7 @@ public class TimeTableManager {
 		
 		private void layout() {
 			JsonArray times = course.get("kkapList").getAsJsonArray();
-			Color color = picker.changeLighten(hue, false);
+			Color color = picker.changeLighten(hue, isSelected);				
 			for (JsonElement time : times) {
 				JsonObject t = time.getAsJsonObject();
 				int week = t.get("xq").getAsInt();
@@ -87,17 +89,15 @@ public class TimeTableManager {
 
 					@Override
 					public void mouseEnter(MouseEvent e) {
-						for (Label l : labels) {
-							l.setBackground(picker.changeLighten(hue, true));							
+						if (!isSelected) {
+							lighten(true);							
 						}
 					}
 
 					@Override
 					public void mouseExit(MouseEvent e) {
 						if (!isSelected) {
-							for (Label l : labels) {
-								l.setBackground(picker.changeLighten(hue, false));							
-							}							
+							lighten(false);
 						}
 					}
 				});
@@ -116,6 +116,12 @@ public class TimeTableManager {
 			}
 		}
 		
+		public void lighten(boolean light) {
+			for (Label l : labels) {
+				l.setBackground(picker.changeLighten(hue, light));							
+			}
+		}
+		
 		public JsonObject getCourse() {
 			return course;
 		}
@@ -124,6 +130,7 @@ public class TimeTableManager {
 			for (Label label : labels) {
 				label.dispose();
 			}
+			labels.removeAll(labels);
 		}
 	}
 	
@@ -134,18 +141,20 @@ public class TimeTableManager {
 	private ArrayList<Course> courses = new ArrayList<>();
 	private ColorPicker picker;
 
-	public TimeTableManager(Composite boxParent, Composite treeParent, CourseData courseData) {
+	public CourseManager(ScrolledComposite scroll, Tree tree, CourseData courseData) {
+		this.tree = tree;
+		this.scroll = scroll;
 		this.courseData = courseData;
-		picker = new ColorPicker(boxParent.getDisplay());
-		tree = new Tree(treeParent, SWT.BORDER | SWT.CHECK);
-		scroll = new ScrolledComposite(boxParent, SWT.H_SCROLL | SWT.V_SCROLL);
+		picker = new ColorPicker(scroll.getDisplay());
 		init();
 	}
 	
-	public void addCourse(JsonObject course) throws IllegalArgumentException {
-		courses.add(new Course(course));
+	public Course addCourse(JsonObject course) {
+		Course newCourse = new Course(course);
+		courses.add(newCourse);
+		return newCourse;
 	}
-
+	
 	private void computeSize(Composite target) {
 		scroll.setMinWidth(target.computeSize(SWT.DEFAULT, SWT.DEFAULT).x * 7 + 20);
 //		int max = 0;
@@ -216,14 +225,6 @@ public class TimeTableManager {
 	}
 	
 	private void init() {
-		FormData fd_tree = new FormData();
-		fd_tree.bottom = new FormAttachment(100, -7);
-		fd_tree.right = new FormAttachment(100, -7);
-		fd_tree.top = new FormAttachment(0, 30);
-		fd_tree.left = new FormAttachment(0, 7);
-		tree.setLayoutData(fd_tree);
-		tree.setLinesVisible(true);
-		tree.setHeaderVisible(true);
 
 		TreeColumn trclmnA = new TreeColumn(tree, SWT.NONE);
 		trclmnA.setWidth(275);
@@ -291,10 +292,6 @@ public class TimeTableManager {
 				}
 			}
 		});
-		
-		scroll.setExpandHorizontal(true);
-		scroll.setExpandVertical(true);
-		scroll.setMinWidth(0);
 
 		SashForm ver = new SashForm(scroll, SWT.HORIZONTAL | SWT.BORDER);
 //		ver.setEnabled(false);
@@ -335,5 +332,12 @@ public class TimeTableManager {
 		scroll.setContent(ver);
 
 		ver.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
+		
+		JsonArray seletedCourse = courseData.getSelected();
+		for (JsonElement course : seletedCourse) {
+			Course newCourse = addCourse(courseData.searchById(course.getAsString()));
+			newCourse.isSelected = true;
+			newCourse.lighten(true);
+		}
 	}
 }
