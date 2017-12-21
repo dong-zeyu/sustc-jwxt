@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Map.Entry;
 
 import org.apache.http.ParseException;
 import org.apache.http.auth.AuthenticationException;
@@ -18,7 +17,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.internal.Streams;
@@ -213,36 +211,6 @@ public class CourseData extends NetworkConnection {
 	
 	public JsonArray getSelected() {
 		return selected;
-	}
-	
-	public JsonObject searchById(String id) {
-		for (Entry<String, JsonElement> entry : course.entrySet()) {
-			JsonArray array = entry.getValue().getAsJsonArray();
-			for (JsonElement course : array) {
-				if (course.getAsJsonObject().get("jx0404id").getAsString().equals(id)) {
-					return course.getAsJsonObject();
-				}
-			}
-		}
-		return null;
-	}
-	
-	public JsonObject search(String name) { //查找课程
-		JsonObject result = new JsonObject();
-		for (Entry<String, JsonElement> entry : course.entrySet()) {
-			JsonArray array = entry.getValue().getAsJsonArray();
-			JsonArray tArray = new JsonArray();
-			for (int j = 0; j < array.size(); j++) {
-				JsonObject jsonObject = array.get(j).getAsJsonObject();
-				if (jsonObject.get("kcmc").getAsString().contains(name)
-						|| jsonObject.get("kch").getAsString().contains(name) 
-						|| (jsonObject.get("skls") == null ? false : jsonObject.get("skls").toString().contains(name))) {
-					tArray.add(jsonObject);
-				}
-			}
-			result.add(entry.getKey(), tArray);
-		}
-		return result;
 	}
 	
 	@Override
