@@ -234,7 +234,9 @@ public class CourseData extends NetworkConnection {
 			JsonArray tArray = new JsonArray();
 			for (int j = 0; j < array.size(); j++) {
 				JsonObject jsonObject = array.get(j).getAsJsonObject();
-				if (jsonObject.toString().contains(name)) {
+				if (jsonObject.get("kcmc").getAsString().contains(name)
+						|| jsonObject.get("kch").getAsString().contains(name) 
+						|| (jsonObject.get("skls") == null ? false : jsonObject.get("skls").toString().contains(name))) {
 					tArray.add(jsonObject);
 				}
 			}

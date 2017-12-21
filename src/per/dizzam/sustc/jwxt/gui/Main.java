@@ -143,7 +143,9 @@ public class Main extends Shell {
 		text.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
-				timeTableManager.updateData(text.getText().equals("") ? null : text.getText());
+				if (e.character == SWT.CR || e.character == SWT.LF) {
+					timeTableManager.updateData(text.getText().equals("") ? null : text.getText());
+				}
 			}
 		});
 		FormData fd_text = new FormData();
