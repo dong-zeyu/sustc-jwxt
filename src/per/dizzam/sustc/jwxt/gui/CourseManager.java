@@ -167,34 +167,14 @@ public class CourseManager {
 			item.setText(3, e3.isJsonNull() ? "无" : e3.getAsString());
 			item.setChecked(isChecked);
 			item.setGrayed(false);
-			TreeItem head = item;
-			while ((parent = head.getParentItem()) != null) {
-				if (isChecked) {
-					parent.setChecked(true);
-					parent.setGrayed(false);
-					for (TreeItem item1 : parent.getItems()) {
-						if (!item1.getChecked() || item1.getGrayed()) {
-							parent.setGrayed(true);
-							break;
-						}
-					}
-				} else {
-					parent.setGrayed(true);
-					parent.setChecked(false);
-					for (TreeItem item1 : parent.getItems()) {
-						if (item1.getChecked()) {
-							parent.setChecked(true);
-							break;
-						}
-					}
-				}
-				head = parent;
-			}
+			recurseParent(item, isChecked);
 			item.setData(this);
 		}
 		
 		public void disposeItem() {
 			if (item != null) {
+				item.setChecked(false);
+				recurseParent(item, false);
 				TreeItem parent = item.getParentItem();
 				item.dispose();
 				item = null;
@@ -231,6 +211,33 @@ public class CourseManager {
 //		if (target.getBounds().width < max) {
 //			scroll.setMinWidth(max * 7 + 20);
 //		}
+	}
+	
+	private void recurseParent(TreeItem item, boolean state) {
+		TreeItem parent;
+		TreeItem head = item;
+		while ((parent = head.getParentItem()) != null) {
+			if (state) {
+				parent.setChecked(true);
+				parent.setGrayed(false);
+				for (TreeItem item1 : parent.getItems()) {
+					if (!item1.getChecked() || item1.getGrayed()) {
+						parent.setGrayed(true);
+						break;
+					}
+				}
+			} else {
+				parent.setGrayed(true);
+				parent.setChecked(false);
+				for (TreeItem item1 : parent.getItems()) {
+					if (item1.getChecked()) {
+						parent.setChecked(true);
+						break;
+					}
+				}
+			}
+			head = parent;
+		}
 	}
 	
 	private ArrayList<Course> search(String name) {
@@ -333,31 +340,7 @@ public class CourseManager {
 						}
 						items.addAll(Arrays.asList(item1.getItems()));
 					}
-					
-					TreeItem parent;
-					TreeItem head = item;
-					while ((parent = head.getParentItem()) != null) {
-						if (checked) {
-							parent.setChecked(true);
-							parent.setGrayed(false);
-							for (TreeItem item1 : parent.getItems()) {
-								if (!item1.getChecked() || item1.getGrayed()) {
-									parent.setGrayed(true);
-									break;
-								}
-							}
-						} else {
-							parent.setGrayed(true);
-							parent.setChecked(false);
-							for (TreeItem item1 : parent.getItems()) {
-								if (item1.getChecked()) {
-									parent.setChecked(true);
-									break;
-								}
-							}
-						}
-						head = parent;
-					}
+					recurseParent(item, checked);
 				}
 			}
 		});
