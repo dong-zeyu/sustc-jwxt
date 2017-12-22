@@ -14,15 +14,23 @@ import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Sash;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -33,14 +41,18 @@ import per.dizzam.sustc.jwxt.CourseRepo;
 public class CourseManager {
 	
 	private static final String[] WEEK = new String[] { "", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+	private static final Font NORMAL_TREE = new Font(Display.getDefault(), "华文黑体", 12, SWT.NORMAL);
+	private static final Font BOLD_TREE = new Font(Display.getDefault(), "华文黑体", 12, SWT.BOLD);
+	private static final Font NORMAL = new Font(Display.getDefault(), "华文黑体", 12, SWT.NORMAL);
+	private static final Font ITALIC = new Font(Display.getDefault(), "华文黑体", 12, SWT.ITALIC);
 	
 	class Course {
 		
 		private ArrayList<Label> labels;
 		private JsonObject course;
 		private float hue = 0;
-		private boolean isSelected;
-		private boolean isChecked;
+		private boolean isSelected = false;
+		private boolean isChecked = false;
 		private TreeItem item;
 		private CourseRepo category;
 		
@@ -65,7 +77,19 @@ public class CourseManager {
 				Composite composite = weekList.get(week);
 				FormData fd_l = new FormData();
 				Label label = new Label(composite, SWT.WRAP);
-				label.setText(course.get("kcmc").getAsString());
+				label.setAlignment(SWT.CENTER);
+				String mc;
+				if (t.get("kkzc").getAsString().contains("单")) {
+					mc = "单  " + course.get("kcmc").getAsString();
+					label.setFont(ITALIC);
+				} else if (t.get("kkzc").getAsString().contains("双")) {
+					mc = "双  " + course.get("kcmc").getAsString();
+					label.setFont(ITALIC);
+				} else {
+					mc = course.get("kcmc").getAsString();
+					label.setFont(NORMAL);
+				}
+				label.setText(mc);
 				label.setData(this);
 				label.setBackground(color);
 				fd_l.top = new FormAttachment((from - 1) * 10, 2);
@@ -81,12 +105,9 @@ public class CourseManager {
 					}
 				}
 				fd_l.left = new FormAttachment(0, left);
-				fd_l.right = new FormAttachment(0, left + 15);
+				fd_l.right = new FormAttachment(0, left + 19);
 				label.setLayoutData(fd_l);
-//				FontData fd = new FontData("MyFont", 10, SWT.ITALIC);
-//				label.setFont(new Font(scroll.getDisplay(), fd));
 				label.moveAbove(null);
-				computeSize(composite);
 				label.requestLayout();
 				label.addMouseTrackListener(new MouseTrackAdapter() {
 
@@ -95,6 +116,8 @@ public class CourseManager {
 						if (!isSelected) {
 							lightenLable(true);
 						}
+						String infoText = info.getText();
+						info.setText(infoText.substring(0,infoText.indexOf("\n")) + "\n" + Course.this.toString());
 					}
 
 					@Override
@@ -111,10 +134,17 @@ public class CourseManager {
 						if (isSelected) {
 							isSelected = false;
 							selected.remove(Course.this);
+							if (item != null) {
+								item.setFont(0, NORMAL_TREE);
+							}
 						} else {
 							isSelected = true;
 							selected.add(Course.this);
+							if (item != null) {
+								item.setFont(0, BOLD_TREE);
+							}
 						}
+						info.setText(info.getText().replaceFirst("总学分：[0-9]*", "总学分：" + String.valueOf(computeMarks())));
 					}
 				});
 				labels.add(label);
@@ -160,6 +190,9 @@ public class CourseManager {
 			JsonElement e1 = element.getAsJsonObject().get("fzmc");
 			item.setText(0, element.getAsJsonObject().get("kcmc").getAsString()
 					+ (e1.isJsonNull() ? "" : "[" + e1.getAsString() + "]"));
+			if (isSelected) {
+				item.setFont(0, BOLD_TREE);
+			}
 			item.setText(1, String.valueOf(element.getAsJsonObject().get("xf").getAsInt()));
 			JsonElement e2 = element.getAsJsonObject().get("skls");
 			item.setText(2, e2.isJsonNull() ? "无" : e2.getAsString());
@@ -167,34 +200,14 @@ public class CourseManager {
 			item.setText(3, e3.isJsonNull() ? "无" : e3.getAsString());
 			item.setChecked(isChecked);
 			item.setGrayed(false);
-			TreeItem head = item;
-			while ((parent = head.getParentItem()) != null) {
-				if (isChecked) {
-					parent.setChecked(true);
-					parent.setGrayed(false);
-					for (TreeItem item1 : parent.getItems()) {
-						if (!item1.getChecked() || item1.getGrayed()) {
-							parent.setGrayed(true);
-							break;
-						}
-					}
-				} else {
-					parent.setGrayed(true);
-					parent.setChecked(false);
-					for (TreeItem item1 : parent.getItems()) {
-						if (item1.getChecked()) {
-							parent.setChecked(true);
-							break;
-						}
-					}
-				}
-				head = parent;
-			}
+			recurseParent(item, isChecked);
 			item.setData(this);
 		}
 		
 		public void disposeItem() {
 			if (item != null) {
+				item.setChecked(false);
+				recurseParent(item, false);
 				TreeItem parent = item.getParentItem();
 				item.dispose();
 				item = null;
@@ -203,44 +216,111 @@ public class CourseManager {
 				}
 			}
 		}
+		
+		@Override
+		public String toString() {
+			JsonElement e1 = course.getAsJsonObject().get("fzmc");
+			JsonArray times = course.get("kkapList").getAsJsonArray();
+			String arrengement = "";
+			for (JsonElement time : times) {
+				JsonObject t = time.getAsJsonObject();
+				arrengement += String.format("%s周\t%s %s节\t%s\r\n", 
+						t.get("kkzc").getAsString(), 
+						WEEK[t.get("xq").getAsInt()], 
+						t.get("skjcmc").getAsString(), 
+						t.get("jsmc").getAsString());
+			}
+			return String.format("课程名称：%s\r\n"
+					+ "学分：%d\t"
+					+ "上课老师：%s\r\n"
+					+ "课程安排：\r\n%s", 
+					course.getAsJsonObject().get("kcmc").getAsString() + (e1.isJsonNull() ? "" : "[" + e1.getAsString() + "]"),
+					course.getAsJsonObject().get("xf").getAsInt(), 
+					course.getAsJsonObject().get("skls").isJsonNull() ? "None" : course.getAsJsonObject().get("skls").getAsString(), 
+					arrengement);
+		}
 	}
 	
 	private CourseData courseData;
 	private Tree tree;
 	private ScrolledComposite scroll;
+	private Text info;
 	private ArrayList<Composite> weekList = new ArrayList<>();
 	private ArrayList<Course> courses = new ArrayList<>();
 	private ArrayList<Course> selected = new ArrayList<>();
 	private ColorPicker picker;
 
-	public CourseManager(ScrolledComposite scroll, Tree tree, CourseData courseData) {
+	public CourseManager(ScrolledComposite scroll, Tree tree, Text info, CourseData courseData) {
 		this.tree = tree;
 		this.scroll = scroll;
+		this.info = info;
 		this.courseData = courseData;
 		picker = new ColorPicker(scroll.getDisplay());
-		init();
 	}
 	
-	private void computeSize(Composite target) {
-		scroll.setMinWidth(target.computeSize(SWT.DEFAULT, SWT.DEFAULT).x * 7 + 20);
-//		int max = 0;
-//		for (Control control : target.getChildren()) {
-//			int tmp = ((FormData)control.getLayoutData()).right.offset;
-//			max = max < tmp ? tmp : max;
-//		}
-//		if (target.getBounds().width < max) {
-//			scroll.setMinWidth(max * 7 + 20);
-//		}
+	private int computeMarks() {
+		int total = 0;
+		for (Course course : selected) {
+			total += course.course.get("xf").getAsInt();
+		}
+		return total;
 	}
 	
-	private ArrayList<Course> search(String name) {
+	private void computeSize() {
+		SashForm parent = (SashForm) weekList.get(0).getParent().getParent();
+		double widthSum = 0;
+		int[] weight = new int[8];
+		Control[] controls = parent.getChildren();
+		for (int i = 1; i < WEEK.length; i++) {
+			if (controls[i] instanceof SashForm) {
+				Composite target = (Composite) controls[i];
+				double requiredWidth = target.getChildren()[1].computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+				weight[i] = (int) requiredWidth;
+				widthSum += requiredWidth;
+			}
+		}
+		weight[0] = 20;
+		widthSum += 20;
+		parent.setWeights(weight);
+		scroll.setMinWidth((int) widthSum + 50);
+	}
+	
+	private void recurseParent(TreeItem item, boolean state) {
+		TreeItem parent;
+		TreeItem head = item;
+		while ((parent = head.getParentItem()) != null) {
+			if (state) {
+				parent.setChecked(true);
+				parent.setGrayed(false);
+				for (TreeItem item1 : parent.getItems()) {
+					if (!item1.getChecked() || item1.getGrayed()) {
+						parent.setGrayed(true);
+						break;
+					}
+				}
+			} else {
+				parent.setGrayed(true);
+				parent.setChecked(false);
+				for (TreeItem item1 : parent.getItems()) {
+					if (item1.getChecked()) {
+						parent.setChecked(true);
+						break;
+					}
+				}
+			}
+			head = parent;
+		}
+	}
+	
+	private ArrayList<Course> search(String name, ArrayList<Course> source) {
 		if (name == null) {
-			return courses;
+			return source;
 		}
 		ArrayList<Course> target = new ArrayList<>();
-		for (Course course : courses) {
+		for (Course course : source) {
 			JsonObject jsonObject = course.course;
 			if (jsonObject.get("kcmc").getAsString().contains(name)
+					|| (!jsonObject.get("fzmc").isJsonNull() && jsonObject.get("fzmc").getAsString().contains(name))
 					|| jsonObject.get("kch").getAsString().contains(name) 
 					|| jsonObject.get("jx0404id").getAsString().equals(name)
 					|| (jsonObject.get("skls") == null ? false : jsonObject.get("skls").toString().contains(name))) {
@@ -250,29 +330,42 @@ public class CourseManager {
 		return target;
 	}
 	
-	public void searchCourse(String string) {
+	public void searchCourse(String string, boolean isFromSelected) {
 		for (Course course : courses) {
 			course.disposeItem();
 		}
 		
-		for (Course course : search(string)) {
+		ArrayList<Course> source;
+		if (isFromSelected) {
+			source = selected;
+		} else {
+			source = courses;
+		}
+		for (Course course : search(string, source)) {
 			course.displayItem();
 		}
 		
 		for (TreeItem item : tree.getItems()) {
 			item.setExpanded(true);
+			if (isFromSelected) {
+				for (TreeItem treeItem : item.getItems()) {
+					treeItem.setExpanded(true);
+				}
+			}
 		}
 	}
 	
 	public void updateData() {
 		tree.removeAll();
-		scroll.getContent().dispose();
+		if (scroll.getContent() != null) {
+			scroll.getContent().dispose();
+		}
 		courses = new ArrayList<>();
 		selected = new ArrayList<>();
 		weekList = new ArrayList<>();
 		System.gc();
 		init();
-		searchCourse(null);
+		searchCourse(null, false);
 	}
 	
 	private void init() {
@@ -284,13 +377,15 @@ public class CourseManager {
 		}
 		
 		for (JsonElement selected : courseData.getSelected()) {
-			for (Course target : search(selected.getAsString())) {
+			for (Course target : search(selected.getAsString(), courses)) {
 				target.isSelected = true;
 				target.isChecked = true;
 				this.selected.add(target);
 			}
 		}
 
+		tree.setFont(NORMAL_TREE);
+		
 		TreeColumn trclmnA = new TreeColumn(tree, SWT.NONE);
 		trclmnA.setWidth(275);
 		trclmnA.setText("课程名称");
@@ -333,31 +428,8 @@ public class CourseManager {
 						}
 						items.addAll(Arrays.asList(item1.getItems()));
 					}
-					
-					TreeItem parent;
-					TreeItem head = item;
-					while ((parent = head.getParentItem()) != null) {
-						if (checked) {
-							parent.setChecked(true);
-							parent.setGrayed(false);
-							for (TreeItem item1 : parent.getItems()) {
-								if (!item1.getChecked() || item1.getGrayed()) {
-									parent.setGrayed(true);
-									break;
-								}
-							}
-						} else {
-							parent.setGrayed(true);
-							parent.setChecked(false);
-							for (TreeItem item1 : parent.getItems()) {
-								if (item1.getChecked()) {
-									parent.setChecked(true);
-									break;
-								}
-							}
-						}
-						head = parent;
-					}
+					recurseParent(item, checked);
+					computeSize();
 				}
 			}
 		});
@@ -407,6 +479,8 @@ public class CourseManager {
 		scroll.setContent(ver);
 
 		ver.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
+		
+		info.setFont(NORMAL);
 		
 		for (Course course : selected) {
 			course.layoutLable();

@@ -12,6 +12,7 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -31,9 +32,11 @@ public class Main extends Shell {
 	private static Logger logger = Logger.getLogger("Main");
 
 	public static CourseData courseData;
-	private Text text;
-
 	private CourseManager timeTableManager;
+
+	private Text text;
+	private Button button_2;
+	private Text text_1;
 
 	/**
 	 * Launch the application.
@@ -106,7 +109,20 @@ public class Main extends Shell {
 		fd_sashForm_p.left = new FormAttachment(0, 20);
 		sashForm_p.setLayoutData(fd_sashForm_p);
 
-		Group group = new Group(sashForm_p, SWT.NONE);
+		SashForm sashForm = new SashForm(sashForm_p, SWT.VERTICAL);
+
+		Group group_1 = new Group(sashForm, SWT.NONE);
+		group_1.setText("信息");
+		FillLayout fl_group_1 = new FillLayout(SWT.HORIZONTAL);
+		fl_group_1.marginHeight = 3;
+		fl_group_1.marginWidth = 5;
+		group_1.setLayout(fl_group_1);
+
+		text_1 = new Text(group_1, SWT.MULTI);
+		text_1.setText("总学分：0\n");
+		text_1.setEnabled(false);
+
+		Group group = new Group(sashForm, SWT.NONE);
 		group.setLayout(new FormLayout());
 		group.setText("课程");
 
@@ -144,7 +160,8 @@ public class Main extends Shell {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.character == SWT.CR || e.character == SWT.LF) {
-					timeTableManager.searchCourse(text.getText().equals("") ? null : text.getText());
+					timeTableManager.searchCourse(text.getText().equals("") ? null : text.getText(),
+							button_2.getSelection());
 				}
 			}
 		});
@@ -157,7 +174,8 @@ public class Main extends Shell {
 		button_1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				timeTableManager.searchCourse(text.getText().equals("") ? null : text.getText());
+				timeTableManager.searchCourse(text.getText().equals("") ? null : text.getText(),
+						button_2.getSelection());
 			}
 		});
 		FormData fd_button_1 = new FormData();
@@ -176,25 +194,41 @@ public class Main extends Shell {
 		tree.setLinesVisible(true);
 		tree.setHeaderVisible(true);
 
+		button_2 = new Button(group, SWT.CHECK);
+		FormData fd_button_2 = new FormData();
+		fd_button_2.top = new FormAttachment(button_1, 0, SWT.CENTER);
+		fd_button_2.left = new FormAttachment(button_1, 10);
+		button_2.setLayoutData(fd_button_2);
+		button_2.setText("仅显示已选择");
+		button_2.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				if (button_2.getSelection()) {
+					timeTableManager.searchCourse(null, true);
+				} else {
+					timeTableManager.searchCourse(null, false);
+				}
+			}
+		});
+
 		ScrolledComposite scroll = new ScrolledComposite(sashForm_p, SWT.H_SCROLL | SWT.V_SCROLL);
 		scroll.setExpandHorizontal(true);
 		scroll.setExpandVertical(true);
 		scroll.setMinWidth(0);
 
-		timeTableManager = new CourseManager(scroll, tree, courseData);
-
-		sashForm_p.setWeights(new int[] { 6, 13 });
-
+		timeTableManager = new CourseManager(scroll, tree, text_1, courseData);
+		sashForm_p.setWeights(new int[] { 7, 13 });
+		sashForm.setWeights(new int[] { 1, 4 });
 	}
 
 	/**
 	 * Create contents of the shell.
 	 */
 	protected void createContents() {
-		setText("App");
+		setText("课表");
 		setMaximized(true);
 
-		timeTableManager.searchCourse(null);
+		timeTableManager.updateData();
 	}
 
 	@Override
