@@ -127,20 +127,26 @@ public class CourseManager {
 
 					@Override
 					public void mouseDown(MouseEvent e) {
-						if (isSelected) {
-							isSelected = false;
-							selected.remove(Course.this);
-							if (item != null) {
-								item.setFont(0, NORMAL_TREE);
+						if (e.button == 3) {
+							isChecked = false;
+							Course.this.checkItem(false);
+							Course.this.disposeLable();
+						} else if (e.button == 1){
+							if (isSelected) {
+								isSelected = false;
+								selected.remove(Course.this);
+								if (item != null) {
+									item.setFont(0, NORMAL_TREE);
+								}
+							} else {
+								isSelected = true;
+								selected.add(Course.this);
+								if (item != null) {
+									item.setFont(0, BOLD_TREE);
+								}
 							}
-						} else {
-							isSelected = true;
-							selected.add(Course.this);
-							if (item != null) {
-								item.setFont(0, BOLD_TREE);
-							}
+							info.setText(info.getText().replaceFirst("总学分：[0-9]*", "总学分：" + String.valueOf(computeMarks())));
 						}
-						info.setText(info.getText().replaceFirst("总学分：[0-9]*", "总学分：" + String.valueOf(computeMarks())));
 					}
 				});
 				labels.add(label);
@@ -194,16 +200,14 @@ public class CourseManager {
 			item.setText(2, e2.isJsonNull() ? "无" : e2.getAsString());
 			JsonElement e3 = element.getAsJsonObject().get("pgtj");
 			item.setText(3, e3.isJsonNull() ? "无" : e3.getAsString());
-			item.setChecked(isChecked);
-			item.setGrayed(false);
-			recurseParent(item, isChecked);
+			checkItem(isChecked);
 			item.setData(this);
 		}
 		
 		public void disposeItem() {
 			if (item != null) {
-				item.setChecked(false);
-				recurseParent(item, false);
+				item.setChecked(isChecked);
+				recurseParent(item, isChecked);
 				TreeItem parent = item.getParentItem();
 				item.dispose();
 				item = null;
@@ -211,6 +215,13 @@ public class CourseManager {
 					parent.dispose();
 				}
 			}
+		}
+		
+		public void checkItem(boolean isChecked) {
+			this.isChecked = isChecked;
+			item.setChecked(isChecked);
+			item.setGrayed(false);
+			recurseParent(item, isChecked);
 		}
 		
 		@Override
