@@ -62,6 +62,7 @@ public class Main extends Shell {
 					display.sleep();
 				}
 			}
+			shell.timeTableManager.save();
 			courseData.saveToFile();
 		} catch (Exception e) {
 			logger.fatal(e.getMessage(), e);

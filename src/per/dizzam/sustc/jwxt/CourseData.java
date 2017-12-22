@@ -30,7 +30,7 @@ public class CourseData extends NetworkConnection {
 	private Logger logger = Logger.getLogger("CourseCenter");
 	
 	JsonObject course;
-	JsonArray selected;
+	public JsonArray selected;
 	
 	private final String coursestorge = "course.json";
 	private final String selectedstorge = "selected.json";
@@ -154,8 +154,11 @@ public class CourseData extends NetworkConnection {
 			Document document = Jsoup.parse(string);
 			Elements courses = document.getElementsByTag("tbody").get(0).children();
 			for (int i = 0; i < courses.size(); i++) {
+				JsonObject jsonObject = new JsonObject();
 				String id = courses.get(i).child(10).child(0).id().split("_")[1];
-				array.add(id);
+				jsonObject.addProperty("id", id);
+				jsonObject.addProperty("status", true);
+				array.add(jsonObject);
 			}
 			selected = array;
 		} catch (ParseException | IOException | IndexOutOfBoundsException | NullPointerException e) {

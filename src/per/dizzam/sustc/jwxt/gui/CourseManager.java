@@ -49,6 +49,7 @@ public class CourseManager {
 		private float hue = 0;
 		private boolean isSelected = false;
 		private boolean isChecked = false;
+		private boolean status = false;
 		private TreeItem item;
 		private CourseRepo category;
 		
@@ -238,10 +239,12 @@ public class CourseManager {
 						t.get("jsmc").getAsString());
 			}
 			return String.format("课程名称：%s\r\n"
+					+ "状态：%s\t"
 					+ "学分：%d\t"
 					+ "上课老师：%s\r\n"
 					+ "课程安排：\r\n%s", 
 					course.getAsJsonObject().get("kcmc").getAsString() + (e1.isJsonNull() ? "" : "[" + e1.getAsString() + "]"),
+					Course.this.status ? "已选" : "待选", 
 					course.getAsJsonObject().get("xf").getAsInt(), 
 					course.getAsJsonObject().get("skls").isJsonNull() ? "None" : course.getAsJsonObject().get("skls").getAsString(), 
 					arrengement);
@@ -384,9 +387,10 @@ public class CourseManager {
 		}
 		
 		for (JsonElement selected : courseData.getSelected()) {
-			for (Course target : search(selected.getAsString(), courses)) {
+			for (Course target : search(selected.getAsJsonObject().get("id").getAsString(), courses)) {
 				target.isSelected = true;
 				target.isChecked = true;
+				target.status = selected.getAsJsonObject().get("status").getAsBoolean();
 				this.selected.add(target);
 			}
 		}
@@ -491,6 +495,16 @@ public class CourseManager {
 		
 		for (Course course : selected) {
 			course.layoutLable();
+		}
+	}
+
+	public void save() {
+		courseData.selected = new JsonArray();
+		for (Course course : selected) {
+			JsonObject jsonObject = new JsonObject();
+			jsonObject.addProperty("id", course.course.get("jx0404id").getAsString());
+			jsonObject.addProperty("status", course.status);
+			courseData.selected.add(jsonObject);
 		}
 	}
 }
