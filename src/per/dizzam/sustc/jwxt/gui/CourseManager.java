@@ -310,6 +310,7 @@ public class CourseManager {
 		for (Course course : source) {
 			JsonObject jsonObject = course.course;
 			if (jsonObject.get("kcmc").getAsString().contains(name)
+					|| (!jsonObject.get("fzmc").isJsonNull() && jsonObject.get("fzmc").getAsString().contains(name))
 					|| jsonObject.get("kch").getAsString().contains(name) 
 					|| jsonObject.get("jx0404id").getAsString().equals(name)
 					|| (jsonObject.get("skls") == null ? false : jsonObject.get("skls").toString().contains(name))) {
