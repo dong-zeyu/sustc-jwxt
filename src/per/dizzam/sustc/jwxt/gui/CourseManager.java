@@ -266,12 +266,12 @@ public class CourseManager {
 		}
 	}
 	
-	private ArrayList<Course> search(String name) {
+	private ArrayList<Course> search(String name, ArrayList<Course> source) {
 		if (name == null) {
-			return courses;
+			return source;
 		}
 		ArrayList<Course> target = new ArrayList<>();
-		for (Course course : courses) {
+		for (Course course : source) {
 			JsonObject jsonObject = course.course;
 			if (jsonObject.get("kcmc").getAsString().contains(name)
 					|| jsonObject.get("kch").getAsString().contains(name) 
@@ -283,17 +283,28 @@ public class CourseManager {
 		return target;
 	}
 	
-	public void searchCourse(String string) {
+	public void searchCourse(String string, boolean isFromSelected) {
 		for (Course course : courses) {
 			course.disposeItem();
 		}
 		
-		for (Course course : search(string)) {
+		ArrayList<Course> source;
+		if (isFromSelected) {
+			source = selected;
+		} else {
+			source = courses;
+		}
+		for (Course course : search(string, source)) {
 			course.displayItem();
 		}
 		
 		for (TreeItem item : tree.getItems()) {
 			item.setExpanded(true);
+			if (isFromSelected) {
+				for (TreeItem treeItem : item.getItems()) {
+					treeItem.setExpanded(true);
+				}
+			}
 		}
 	}
 	
@@ -305,7 +316,7 @@ public class CourseManager {
 		weekList = new ArrayList<>();
 		System.gc();
 		init();
-		searchCourse(null);
+		searchCourse(null, false);
 	}
 	
 	private void init() {
@@ -317,7 +328,7 @@ public class CourseManager {
 		}
 		
 		for (JsonElement selected : courseData.getSelected()) {
-			for (Course target : search(selected.getAsString())) {
+			for (Course target : search(selected.getAsString(), courses)) {
 				target.isSelected = true;
 				target.isChecked = true;
 				this.selected.add(target);

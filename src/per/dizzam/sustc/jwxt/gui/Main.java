@@ -32,6 +32,7 @@ public class Main extends Shell {
 
 	public static CourseData courseData;
 	private Text text;
+	private Button button_2;
 
 	private CourseManager timeTableManager;
 
@@ -144,7 +145,8 @@ public class Main extends Shell {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.character == SWT.CR || e.character == SWT.LF) {
-					timeTableManager.searchCourse(text.getText().equals("") ? null : text.getText());
+					timeTableManager.searchCourse(text.getText().equals("") ? null : text.getText(),
+							button_2.getSelection());
 				}
 			}
 		});
@@ -157,7 +159,8 @@ public class Main extends Shell {
 		button_1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				timeTableManager.searchCourse(text.getText().equals("") ? null : text.getText());
+				timeTableManager.searchCourse(text.getText().equals("") ? null : text.getText(),
+						button_2.getSelection());
 			}
 		});
 		FormData fd_button_1 = new FormData();
@@ -181,6 +184,23 @@ public class Main extends Shell {
 		scroll.setExpandVertical(true);
 		scroll.setMinWidth(0);
 
+		button_2 = new Button(group, SWT.CHECK);
+		FormData fd_button_2 = new FormData();
+		fd_button_2.top = new FormAttachment(button_1, 0, SWT.CENTER);
+		fd_button_2.left = new FormAttachment(button_1, 10);
+		button_2.setLayoutData(fd_button_2);
+		button_2.setText("仅显示已选择");
+		button_2.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				if (button_2.getSelection()) {
+					timeTableManager.searchCourse(null, true);
+				} else {
+					timeTableManager.searchCourse(null, false);
+				}
+			}
+		});
+
 		timeTableManager = new CourseManager(scroll, tree, courseData);
 
 		sashForm_p.setWeights(new int[] { 6, 13 });
@@ -194,7 +214,7 @@ public class Main extends Shell {
 		setText("App");
 		setMaximized(true);
 
-		timeTableManager.searchCourse(null);
+		timeTableManager.searchCourse(null, false);
 	}
 
 	@Override
