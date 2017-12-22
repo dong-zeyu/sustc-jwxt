@@ -14,15 +14,18 @@ import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -33,6 +36,10 @@ import per.dizzam.sustc.jwxt.CourseRepo;
 public class CourseManager {
 	
 	private static final String[] WEEK = new String[] { "", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+	private static final Font NORMAL_TREE = new Font(Display.getDefault(), "华文黑体", 12, SWT.NORMAL);
+	private static final Font BOLD_TREE = new Font(Display.getDefault(), "华文黑体", 12, SWT.BOLD);
+	private static final Font NORMAL = new Font(Display.getDefault(), "华文黑体", 12, SWT.NORMAL);
+	private static final Font ITALIC = new Font(Display.getDefault(), "华文黑体", 12, SWT.ITALIC);
 	
 	class Course {
 		
@@ -65,7 +72,19 @@ public class CourseManager {
 				Composite composite = weekList.get(week);
 				FormData fd_l = new FormData();
 				Label label = new Label(composite, SWT.WRAP);
-				label.setText(course.get("kcmc").getAsString());
+				label.setAlignment(SWT.CENTER);
+				String mc;
+				if (t.get("kkzc").getAsString().contains("单")) {
+					mc = "单  " + course.get("kcmc").getAsString();
+					label.setFont(ITALIC);
+				} else if (t.get("kkzc").getAsString().contains("双")) {
+					mc = "双  " + course.get("kcmc").getAsString();
+					label.setFont(ITALIC);
+				} else {
+					mc = course.get("kcmc").getAsString();
+					label.setFont(NORMAL);
+				}
+				label.setText(mc);
 				label.setData(this);
 				label.setBackground(color);
 				fd_l.top = new FormAttachment((from - 1) * 10, 2);
@@ -81,10 +100,8 @@ public class CourseManager {
 					}
 				}
 				fd_l.left = new FormAttachment(0, left);
-				fd_l.right = new FormAttachment(0, left + 15);
+				fd_l.right = new FormAttachment(0, left + 19);
 				label.setLayoutData(fd_l);
-//				FontData fd = new FontData("MyFont", 10, SWT.ITALIC);
-//				label.setFont(new Font(scroll.getDisplay(), fd));
 				label.moveAbove(null);
 				computeSize(composite);
 				label.requestLayout();
@@ -111,9 +128,15 @@ public class CourseManager {
 						if (isSelected) {
 							isSelected = false;
 							selected.remove(Course.this);
+							if (item != null) {
+								item.setFont(0, NORMAL_TREE);
+							}
 						} else {
 							isSelected = true;
 							selected.add(Course.this);
+							if (item != null) {
+								item.setFont(0, BOLD_TREE);
+							}
 						}
 					}
 				});
@@ -160,6 +183,9 @@ public class CourseManager {
 			JsonElement e1 = element.getAsJsonObject().get("fzmc");
 			item.setText(0, element.getAsJsonObject().get("kcmc").getAsString()
 					+ (e1.isJsonNull() ? "" : "[" + e1.getAsString() + "]"));
+			if (isSelected) {
+				item.setFont(0, BOLD_TREE);
+			}
 			item.setText(1, String.valueOf(element.getAsJsonObject().get("xf").getAsInt()));
 			JsonElement e2 = element.getAsJsonObject().get("skls");
 			item.setText(2, e2.isJsonNull() ? "无" : e2.getAsString());
@@ -298,6 +324,8 @@ public class CourseManager {
 			}
 		}
 
+		tree.setFont(NORMAL_TREE);
+		
 		TreeColumn trclmnA = new TreeColumn(tree, SWT.NONE);
 		trclmnA.setWidth(275);
 		trclmnA.setText("课程名称");
