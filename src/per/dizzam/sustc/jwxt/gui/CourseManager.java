@@ -18,14 +18,10 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Sash;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -53,6 +49,7 @@ public class CourseManager {
 		private float hue = 0;
 		private boolean isSelected = false;
 		private boolean isChecked = false;
+		private boolean status = false;
 		private TreeItem item;
 		private CourseRepo category;
 		
@@ -131,20 +128,26 @@ public class CourseManager {
 
 					@Override
 					public void mouseDown(MouseEvent e) {
-						if (isSelected) {
-							isSelected = false;
-							selected.remove(Course.this);
-							if (item != null) {
-								item.setFont(0, NORMAL_TREE);
+						if (e.button == 3) {
+							isChecked = false;
+							Course.this.checkItem(false);
+							Course.this.disposeLable();
+						} else if (e.button == 1){
+							if (isSelected) {
+								isSelected = false;
+								selected.remove(Course.this);
+								if (item != null) {
+									item.setFont(0, NORMAL_TREE);
+								}
+							} else {
+								isSelected = true;
+								selected.add(Course.this);
+								if (item != null) {
+									item.setFont(0, BOLD_TREE);
+								}
 							}
-						} else {
-							isSelected = true;
-							selected.add(Course.this);
-							if (item != null) {
-								item.setFont(0, BOLD_TREE);
-							}
+							info.setText(info.getText().replaceFirst("总学分：[0-9]*", "总学分：" + String.valueOf(computeMarks())));
 						}
-						info.setText(info.getText().replaceFirst("总学分：[0-9]*", "总学分：" + String.valueOf(computeMarks())));
 					}
 				});
 				labels.add(label);
@@ -198,16 +201,14 @@ public class CourseManager {
 			item.setText(2, e2.isJsonNull() ? "无" : e2.getAsString());
 			JsonElement e3 = element.getAsJsonObject().get("pgtj");
 			item.setText(3, e3.isJsonNull() ? "无" : e3.getAsString());
-			item.setChecked(isChecked);
-			item.setGrayed(false);
-			recurseParent(item, isChecked);
+			checkItem(isChecked);
 			item.setData(this);
 		}
 		
 		public void disposeItem() {
 			if (item != null) {
-				item.setChecked(false);
-				recurseParent(item, false);
+				item.setChecked(isChecked);
+				recurseParent(item, isChecked);
 				TreeItem parent = item.getParentItem();
 				item.dispose();
 				item = null;
@@ -215,6 +216,13 @@ public class CourseManager {
 					parent.dispose();
 				}
 			}
+		}
+		
+		public void checkItem(boolean isChecked) {
+			this.isChecked = isChecked;
+			item.setChecked(isChecked);
+			item.setGrayed(false);
+			recurseParent(item, isChecked);
 		}
 		
 		@Override
@@ -231,10 +239,12 @@ public class CourseManager {
 						t.get("jsmc").getAsString());
 			}
 			return String.format("课程名称：%s\r\n"
+					+ "状态：%s\t"
 					+ "学分：%d\t"
 					+ "上课老师：%s\r\n"
 					+ "课程安排：\r\n%s", 
 					course.getAsJsonObject().get("kcmc").getAsString() + (e1.isJsonNull() ? "" : "[" + e1.getAsString() + "]"),
+					Course.this.status ? "已选" : "待选", 
 					course.getAsJsonObject().get("xf").getAsInt(), 
 					course.getAsJsonObject().get("skls").isJsonNull() ? "None" : course.getAsJsonObject().get("skls").getAsString(), 
 					arrengement);
@@ -377,9 +387,10 @@ public class CourseManager {
 		}
 		
 		for (JsonElement selected : courseData.getSelected()) {
-			for (Course target : search(selected.getAsString(), courses)) {
+			for (Course target : search(selected.getAsJsonObject().get("id").getAsString(), courses)) {
 				target.isSelected = true;
 				target.isChecked = true;
+				target.status = selected.getAsJsonObject().get("status").getAsBoolean();
 				this.selected.add(target);
 			}
 		}
@@ -484,6 +495,16 @@ public class CourseManager {
 		
 		for (Course course : selected) {
 			course.layoutLable();
+		}
+	}
+
+	public void save() {
+		courseData.selected = new JsonArray();
+		for (Course course : selected) {
+			JsonObject jsonObject = new JsonObject();
+			jsonObject.addProperty("id", course.course.get("jx0404id").getAsString());
+			jsonObject.addProperty("status", course.status);
+			courseData.selected.add(jsonObject);
 		}
 	}
 }
