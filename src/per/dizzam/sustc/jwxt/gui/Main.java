@@ -214,7 +214,7 @@ public class Main extends Shell {
 		setText("App");
 		setMaximized(true);
 
-		timeTableManager.searchCourse(null, false);
+		timeTableManager.updateData();;
 	}
 
 	@Override

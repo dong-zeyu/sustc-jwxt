@@ -224,7 +224,6 @@ public class CourseManager {
 		this.scroll = scroll;
 		this.courseData = courseData;
 		picker = new ColorPicker(scroll.getDisplay());
-		init();
 	}
 	
 	private void computeSize(Composite target) {
@@ -310,7 +309,9 @@ public class CourseManager {
 	
 	public void updateData() {
 		tree.removeAll();
-		scroll.getContent().dispose();
+		if (scroll.getContent() != null) {
+			scroll.getContent().dispose();
+		}
 		courses = new ArrayList<>();
 		selected = new ArrayList<>();
 		weekList = new ArrayList<>();
