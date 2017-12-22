@@ -12,6 +12,7 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -31,10 +32,11 @@ public class Main extends Shell {
 	private static Logger logger = Logger.getLogger("Main");
 
 	public static CourseData courseData;
+	private CourseManager timeTableManager;
+
 	private Text text;
 	private Button button_2;
-
-	private CourseManager timeTableManager;
+	private Text text_1;
 
 	/**
 	 * Launch the application.
@@ -107,7 +109,20 @@ public class Main extends Shell {
 		fd_sashForm_p.left = new FormAttachment(0, 20);
 		sashForm_p.setLayoutData(fd_sashForm_p);
 
-		Group group = new Group(sashForm_p, SWT.NONE);
+		SashForm sashForm = new SashForm(sashForm_p, SWT.VERTICAL);
+
+		Group group_1 = new Group(sashForm, SWT.NONE);
+		group_1.setText("信息");
+		FillLayout fl_group_1 = new FillLayout(SWT.HORIZONTAL);
+		fl_group_1.marginHeight = 3;
+		fl_group_1.marginWidth = 5;
+		group_1.setLayout(fl_group_1);
+
+		text_1 = new Text(group_1, SWT.MULTI);
+		text_1.setText("总学分：0\n");
+		text_1.setEnabled(false);
+
+		Group group = new Group(sashForm, SWT.NONE);
 		group.setLayout(new FormLayout());
 		group.setText("课程");
 
@@ -179,11 +194,6 @@ public class Main extends Shell {
 		tree.setLinesVisible(true);
 		tree.setHeaderVisible(true);
 
-		ScrolledComposite scroll = new ScrolledComposite(sashForm_p, SWT.H_SCROLL | SWT.V_SCROLL);
-		scroll.setExpandHorizontal(true);
-		scroll.setExpandVertical(true);
-		scroll.setMinWidth(0);
-
 		button_2 = new Button(group, SWT.CHECK);
 		FormData fd_button_2 = new FormData();
 		fd_button_2.top = new FormAttachment(button_1, 0, SWT.CENTER);
@@ -201,20 +211,24 @@ public class Main extends Shell {
 			}
 		});
 
-		timeTableManager = new CourseManager(scroll, tree, courseData);
+		ScrolledComposite scroll = new ScrolledComposite(sashForm_p, SWT.H_SCROLL | SWT.V_SCROLL);
+		scroll.setExpandHorizontal(true);
+		scroll.setExpandVertical(true);
+		scroll.setMinWidth(0);
 
-		sashForm_p.setWeights(new int[] { 6, 13 });
-
+		timeTableManager = new CourseManager(scroll, tree, text_1, courseData);
+		sashForm_p.setWeights(new int[] { 7, 13 });
+		sashForm.setWeights(new int[] { 1, 4 });
 	}
 
 	/**
 	 * Create contents of the shell.
 	 */
 	protected void createContents() {
-		setText("App");
+		setText("课表");
 		setMaximized(true);
 
-		timeTableManager.updateData();;
+		timeTableManager.updateData();
 	}
 
 	@Override

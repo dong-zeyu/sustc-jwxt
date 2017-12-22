@@ -29,7 +29,7 @@ public class Login extends Dialog {
 	 */
 	public Login(Shell parent, int style) {
 		super(parent, style);
-		setText("SWT Dialog");
+		setText("CAS Login");
 	}
 
 	/**

@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
@@ -112,6 +113,8 @@ public class CourseManager {
 						if (!isSelected) {
 							lightenLable(true);
 						}
+						String infoText = info.getText();
+						info.setText(infoText.substring(0,infoText.indexOf("\n")) + "\n" + Course.this.toString());
 					}
 
 					@Override
@@ -138,6 +141,7 @@ public class CourseManager {
 								item.setFont(0, BOLD_TREE);
 							}
 						}
+						info.setText(info.getText().replaceFirst("总学分：[0-9]*", "总学分：" + String.valueOf(computeMarks())));
 					}
 				});
 				labels.add(label);
@@ -209,19 +213,44 @@ public class CourseManager {
 				}
 			}
 		}
+	
+		@Override
+		public String toString() {
+			JsonElement e1 = course.getAsJsonObject().get("fzmc");
+			JsonArray times = course.get("kkapList").getAsJsonArray();
+			String arrengement = "";
+			for (JsonElement time : times) {
+				JsonObject t = time.getAsJsonObject();
+				arrengement += String.format("%s周\t%s %s节\t%s\r\n", 
+						t.get("kkzc").getAsString(), 
+						WEEK[t.get("xq").getAsInt()], 
+						t.get("skjcmc").getAsString(), 
+						t.get("jsmc").getAsString());
+			}
+			return String.format("课程名称：%s\r\n"
+					+ "学分：%d\t"
+					+ "上课老师：%s\r\n"
+					+ "课程安排：\r\n%s", 
+					course.getAsJsonObject().get("kcmc").getAsString() + (e1.isJsonNull() ? "" : "[" + e1.getAsString() + "]"),
+					course.getAsJsonObject().get("xf").getAsInt(), 
+					course.getAsJsonObject().get("skls").isJsonNull() ? "None" : course.getAsJsonObject().get("skls").getAsString(), 
+					arrengement);
+		}
 	}
 	
 	private CourseData courseData;
 	private Tree tree;
 	private ScrolledComposite scroll;
+	private Text info;
 	private ArrayList<Composite> weekList = new ArrayList<>();
 	private ArrayList<Course> courses = new ArrayList<>();
 	private ArrayList<Course> selected = new ArrayList<>();
 	private ColorPicker picker;
 
-	public CourseManager(ScrolledComposite scroll, Tree tree, CourseData courseData) {
+	public CourseManager(ScrolledComposite scroll, Tree tree, Text info, CourseData courseData) {
 		this.tree = tree;
 		this.scroll = scroll;
+		this.info = info;
 		this.courseData = courseData;
 		picker = new ColorPicker(scroll.getDisplay());
 	}
@@ -236,6 +265,14 @@ public class CourseManager {
 //		if (target.getBounds().width < max) {
 //			scroll.setMinWidth(max * 7 + 20);
 //		}
+	}
+	
+	private int computeMarks() {
+		int total = 0;
+		for (Course course : selected) {
+			total += course.course.get("xf").getAsInt();
+		}
+		return total;
 	}
 	
 	private void recurseParent(TreeItem item, boolean state) {
@@ -430,6 +467,8 @@ public class CourseManager {
 		scroll.setContent(ver);
 
 		ver.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
+		
+		info.setFont(NORMAL);
 		
 		for (Course course : selected) {
 			course.layoutLable();
