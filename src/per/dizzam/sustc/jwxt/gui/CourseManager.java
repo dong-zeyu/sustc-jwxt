@@ -18,10 +18,14 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Sash;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -104,7 +108,6 @@ public class CourseManager {
 				fd_l.right = new FormAttachment(0, left + 19);
 				label.setLayoutData(fd_l);
 				label.moveAbove(null);
-				computeSize(composite);
 				label.requestLayout();
 				label.addMouseTrackListener(new MouseTrackAdapter() {
 
@@ -213,7 +216,7 @@ public class CourseManager {
 				}
 			}
 		}
-	
+		
 		@Override
 		public String toString() {
 			JsonElement e1 = course.getAsJsonObject().get("fzmc");
@@ -255,24 +258,31 @@ public class CourseManager {
 		picker = new ColorPicker(scroll.getDisplay());
 	}
 	
-	private void computeSize(Composite target) {
-		scroll.setMinWidth(target.computeSize(SWT.DEFAULT, SWT.DEFAULT).x * 7 + 20);
-//		int max = 0;
-//		for (Control control : target.getChildren()) {
-//			int tmp = ((FormData)control.getLayoutData()).right.offset;
-//			max = max < tmp ? tmp : max;
-//		}
-//		if (target.getBounds().width < max) {
-//			scroll.setMinWidth(max * 7 + 20);
-//		}
-	}
-	
 	private int computeMarks() {
 		int total = 0;
 		for (Course course : selected) {
 			total += course.course.get("xf").getAsInt();
 		}
 		return total;
+	}
+	
+	private void computeSize() {
+		SashForm parent = (SashForm) weekList.get(0).getParent().getParent();
+		double widthSum = 0;
+		int[] weight = new int[8];
+		Control[] controls = parent.getChildren();
+		for (int i = 1; i < WEEK.length; i++) {
+			if (controls[i] instanceof SashForm) {
+				Composite target = (Composite) controls[i];
+				double requiredWidth = target.getChildren()[1].computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+				weight[i] = (int) requiredWidth;
+				widthSum += requiredWidth;
+			}
+		}
+		weight[0] = 20;
+		widthSum += 20;
+		parent.setWeights(weight);
+		scroll.setMinWidth((int) widthSum + 50);
 	}
 	
 	private void recurseParent(TreeItem item, boolean state) {
@@ -419,6 +429,7 @@ public class CourseManager {
 						items.addAll(Arrays.asList(item1.getItems()));
 					}
 					recurseParent(item, checked);
+					computeSize();
 				}
 			}
 		});
