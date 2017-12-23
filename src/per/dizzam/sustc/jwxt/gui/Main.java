@@ -217,6 +217,19 @@ public class Main extends Shell {
 		scroll.setExpandVertical(true);
 		scroll.setMinWidth(0);
 
+		Button button_3 = new Button(group, SWT.NONE);
+		FormData fd_button_3 = new FormData();
+		fd_button_3.right = new FormAttachment(button, -10);
+		button_3.setLayoutData(fd_button_3);
+		button_3.setText("开始选课");
+		button_3.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseDown(MouseEvent e) {
+
+			}
+		});
+
 		timeTableManager = new CourseManager(scroll, tree, text_1, courseData);
 		sashForm_p.setWeights(new int[] { 7, 13 });
 		sashForm.setWeights(new int[] { 1, 4 });
