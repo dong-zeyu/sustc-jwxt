@@ -198,9 +198,9 @@ public class Main extends Shell {
 			@Override
 			public void mouseUp(MouseEvent e) {
 				if (button_2.getSelection()) {
-					timeTableManager.searchCourse(null, true);
+					timeTableManager.searchCourse(text.getText().equals("") ? null : text.getText(), true);
 				} else {
-					timeTableManager.searchCourse(null, false);
+					timeTableManager.searchCourse(text.getText().equals("") ? null : text.getText(), false);
 				}
 			}
 		});
