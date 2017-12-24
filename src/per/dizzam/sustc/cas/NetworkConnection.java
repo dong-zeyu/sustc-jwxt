@@ -178,7 +178,7 @@ public class NetworkConnection {
 		try {
 			loginCAS();
 			isLogin = true;
-			dataFetcher(Method.GET, "/", true);
+			dataFetcher(Method.GET, "/", true).close();;
 		} catch (IOException e) {
 			logger.warn("Network error! Please check you have access to the Internet.");
 			throw new AuthenticationException("Can't connect to Central Authentication Servives(CAS)", e);

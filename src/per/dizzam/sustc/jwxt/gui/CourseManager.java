@@ -422,6 +422,7 @@ public class CourseManager {
 				target.isChecked = true;
 				target.status = selected.getAsJsonObject().get("status").getAsBoolean();
 				this.selected.add(target);
+				break;
 			}
 		}
 
@@ -447,7 +448,7 @@ public class CourseManager {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (e.item instanceof TreeItem) {
+				if (e.item instanceof TreeItem && e.detail == SWT.CHECK) {
 					TreeItem item = (TreeItem) e.item;
 					boolean checked = item.getChecked();
 					item.setGrayed(false);
