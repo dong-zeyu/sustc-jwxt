@@ -59,6 +59,18 @@ public class CourseManager {
 			this.category = category;
 		}
 		
+		public JsonObject getCourse() {
+			return course;
+		}
+		
+		public CourseRepo getCategory() {
+			return category;
+		}
+		
+		public void setStatus(boolean status) {
+			this.status = status;
+		}
+		
 		public void layoutLable() {
 			if (!labels.isEmpty()) {
 				return;
@@ -266,6 +278,14 @@ public class CourseManager {
 		this.info = info;
 		this.courseData = courseData;
 		picker = new ColorPicker(scroll.getDisplay());
+	}
+	
+	public ArrayList<Course> getCourses() {
+		return courses;
+	}
+	
+	public ArrayList<Course> getSelected() {
+		return selected;
 	}
 	
 	private int computeMarks() {
