@@ -1,6 +1,16 @@
 package per.dizzam.sustc.jwxt.gui;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.function.Predicate;
 
 import org.apache.http.auth.AuthenticationException;
 import org.apache.log4j.Logger;
@@ -24,8 +34,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 
+import per.dizzam.sustc.cas.Method;
 import per.dizzam.sustc.jwxt.CourseData;
 import per.dizzam.sustc.jwxt.StatusException;
+import per.dizzam.sustc.jwxt.gui.CourseManager.Course;
 
 public class Main extends Shell {
 
@@ -224,9 +236,91 @@ public class Main extends Shell {
 		button_3.setText("开始选课");
 		button_3.addMouseListener(new MouseAdapter() {
 
+			private boolean isRunning = false;
+			private TimerTask run = new TimerTask() {
+
+				@Override
+				public void run() {
+					ArrayList<Course> courses = timeTableManager.getSelected();
+					try {
+						courseData.login();
+						logger.info("Begin!");
+						while (!courses.isEmpty() && isRunning) {
+							courses.removeIf(new Predicate<Course>() {
+
+								@Override
+								public boolean test(Course t) {
+									try {
+										boolean result = courseData.select(t.getCategory().name(),
+												t.getCourse().get("jx0404id").getAsString());
+										t.setStatus(result);
+										if (result) {
+											Display.getDefault().syncExec(new Runnable() {
+												
+												@Override
+												public void run() {
+													String infoText = text_1.getText();
+													text_1.setText(infoText + t.getCourse().get("kcmc").getAsString() + ": 选课成功");
+												}
+											});
+										}
+										return result;
+									} catch (Exception e) {
+										logger.error("Failed due to Execption: " + e.getMessage(), e);
+									}
+									return false;
+								}
+							});
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException e) { }
+						}
+						logger.info("Over!");
+					} catch (AuthenticationException e) {
+						Display.getDefault().syncExec(new Runnable() {
+
+							@Override
+							public void run() {
+								login(Main.this);
+							}
+						});
+					} finally {
+						Display.getDefault().syncExec(new Runnable() {
+
+							@Override
+							public void run() {
+								button_3.setText("开始选课");
+							}
+						});
+						isRunning = false;
+					}
+				}
+			};
+			Thread task = new Thread(run);
+			Timer timer = new Timer(true);
+			
 			@Override
 			public void mouseDown(MouseEvent e) {
-
+				if (isRunning) {
+					button_3.setText("开始选课");
+					timer.cancel();
+					isRunning = false;
+				} else {
+					try {
+						courseData.login();
+						SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
+						Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
+						calendar.set(2017, 11, 24, 20, 22, 59);
+						long shift = format.parse(courseData.dataFetcher(Method.GET, "/").getFirstHeader("Date").getValue()).getTime() - new Date().getTime();
+						timer.schedule(run, new Date(calendar.getTime().getTime() - shift));
+						button_3.setText("停止选课"); 
+						isRunning = true;
+					} catch (AuthenticationException e1) {
+						login(Main.this);
+					} catch (ParseException | IOException e1) {
+						logger.warn(e1.getMessage(), e1);
+					}
+				}
 			}
 		});
 
