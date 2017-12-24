@@ -45,6 +45,7 @@ public class CourseManager {
 	
 	class Course {
 		
+		private static final int LABLE_WIDTH = 19;
 		private ArrayList<Label> labels;
 		private JsonObject course;
 		private float hue = 0;
@@ -105,17 +106,23 @@ public class CourseManager {
 				fd_l.top = new FormAttachment((from - 1) * 10, 2);
 				fd_l.bottom = new FormAttachment(to * 10, -1);
 				int left = 0;
-				for (Control control : composite.getChildren()) {
-					if (control.getData() != null && control.getData() instanceof Course && !control.equals(label)) {
-						FormData data = (FormData) control.getLayoutData();
-						if (data.top.numerator < fd_l.bottom.numerator && data.bottom.numerator > fd_l.top.numerator
-								&& data.right.offset > left) {
-							left = data.right.offset;
+				for (left = 0; ; left+=LABLE_WIDTH) {
+					boolean available = true;
+					for (Control control : composite.getChildren()) {
+						if (control.getData() != null && control.getData() instanceof Course && !control.equals(label)) {
+							FormData data = (FormData) control.getLayoutData();
+							if (data.top.numerator < fd_l.bottom.numerator && data.bottom.numerator > fd_l.top.numerator
+									&& data.left.offset == left) {
+								available = false;
+							}
 						}
+					}
+					if (available) {
+						break;
 					}
 				}
 				fd_l.left = new FormAttachment(0, left);
-				fd_l.right = new FormAttachment(0, left + 19);
+				fd_l.right = new FormAttachment(0, left + LABLE_WIDTH);
 				label.setLayoutData(fd_l);
 				label.moveAbove(null);
 				label.requestLayout();
