@@ -158,18 +158,26 @@ public class CourseData extends NetworkConnection {
 		CloseableHttpResponse response;
 		try {
 			response = dataFetcher(Method.GET, Xkjglb, null);
-			JsonArray array = new JsonArray();
 			String string = EntityUtils.toString(response.getEntity());
 			Document document = Jsoup.parse(string);
 			Elements courses = document.getElementsByTag("tbody").get(0).children();
 			for (int i = 0; i < courses.size(); i++) {
-				JsonObject jsonObject = new JsonObject();
 				String id = courses.get(i).child(10).child(0).id().split("_")[1];
-				jsonObject.addProperty("id", id);
-				jsonObject.addProperty("status", true);
-				array.add(jsonObject);
+				boolean flag = false;
+				for (JsonElement jsonElement : selected) {
+					if (jsonElement.getAsJsonObject().get("id").getAsString().equals(id)) {
+						jsonElement.getAsJsonObject().addProperty("status", true);
+						flag = true;
+						break;
+					}
+				}
+				if (flag) {
+					JsonObject jsonObject = new JsonObject();
+					jsonObject.addProperty("id", id);
+					jsonObject.addProperty("status", true);
+					selected.add(jsonObject);
+				}
 			}
-			selected = array;
 		} catch (ParseException | IOException | IndexOutOfBoundsException | NullPointerException e) {
 			logger.error(e.getMessage(), e);
 		}
