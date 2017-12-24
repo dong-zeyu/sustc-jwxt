@@ -230,7 +230,7 @@ public class Main extends Shell {
 		button_3.addMouseListener(new MouseAdapter() {
 
 			private boolean isRunning = false;
-			private TimerTask run = new TimerTask() {
+			class Task extends TimerTask {
 
 				@Override
 				public void run() {
@@ -287,11 +287,12 @@ public class Main extends Shell {
 								button_3.setText("开始选课");
 							}
 						});
+						timer.cancel();
 						isRunning = false;
 					}
 				}
 			};
-			Timer timer = new Timer(true);
+			Timer timer;
 
 			@Override
 			public void mouseDown(MouseEvent e) {
@@ -304,11 +305,13 @@ public class Main extends Shell {
 						courseData.login();
 						SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 						Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
-						calendar.set(2017, 11, 24, 20, 22, 59);
+						calendar.set(2017, 11, 25, 12, 59, 59);
 						long shift = format
 								.parse(courseData.dataFetcher(Method.GET, "/").getFirstHeader("Date").getValue())
 								.getTime() - new Date().getTime();
-						timer.schedule(run, new Date(calendar.getTime().getTime() - shift));
+						logger.info(shift);
+						timer = new Timer(true);
+						timer.schedule(new Task(), new Date(calendar.getTime().getTime() - shift));
 						button_3.setText("停止选课");
 						isRunning = true;
 					} catch (AuthenticationException e1) {
