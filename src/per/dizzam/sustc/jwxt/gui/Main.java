@@ -22,13 +22,13 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -126,14 +126,7 @@ public class Main extends Shell {
 
 		Group group_1 = new Group(sashForm, SWT.NONE);
 		group_1.setText("信息");
-		FillLayout fl_group_1 = new FillLayout(SWT.HORIZONTAL);
-		fl_group_1.marginHeight = 3;
-		fl_group_1.marginWidth = 5;
-		group_1.setLayout(fl_group_1);
-
-		text_1 = new Text(group_1, SWT.MULTI);
-		text_1.setText("总学分：0\n");
-		text_1.setEnabled(false);
+		group_1.setLayout(new FormLayout());
 
 		Group group = new Group(sashForm, SWT.NONE);
 		group.setLayout(new FormLayout());
@@ -256,11 +249,12 @@ public class Main extends Shell {
 										t.setStatus(result);
 										if (result) {
 											Display.getDefault().syncExec(new Runnable() {
-												
+
 												@Override
 												public void run() {
 													String infoText = text_1.getText();
-													text_1.setText(infoText + t.getCourse().get("kcmc").getAsString() + ": 选课成功");
+													text_1.setText(infoText + t.getCourse().get("kcmc").getAsString()
+															+ ": 选课成功");
 												}
 											});
 										}
@@ -273,7 +267,8 @@ public class Main extends Shell {
 							});
 							try {
 								Thread.sleep(100);
-							} catch (InterruptedException e) { }
+							} catch (InterruptedException e) {
+							}
 						}
 						logger.info("Over!");
 					} catch (AuthenticationException e) {
@@ -296,9 +291,8 @@ public class Main extends Shell {
 					}
 				}
 			};
-			Thread task = new Thread(run);
 			Timer timer = new Timer(true);
-			
+
 			@Override
 			public void mouseDown(MouseEvent e) {
 				if (isRunning) {
@@ -311,9 +305,11 @@ public class Main extends Shell {
 						SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 						Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
 						calendar.set(2017, 11, 24, 20, 22, 59);
-						long shift = format.parse(courseData.dataFetcher(Method.GET, "/").getFirstHeader("Date").getValue()).getTime() - new Date().getTime();
+						long shift = format
+								.parse(courseData.dataFetcher(Method.GET, "/").getFirstHeader("Date").getValue())
+								.getTime() - new Date().getTime();
 						timer.schedule(run, new Date(calendar.getTime().getTime() - shift));
-						button_3.setText("停止选课"); 
+						button_3.setText("停止选课");
 						isRunning = true;
 					} catch (AuthenticationException e1) {
 						login(Main.this);
@@ -324,7 +320,23 @@ public class Main extends Shell {
 			}
 		});
 
-		timeTableManager = new CourseManager(scroll, tree, text_1, courseData);
+		Label lblNewLabel = new Label(group_1, SWT.NONE);
+		FormData fd_lblNewLabel = new FormData();
+		fd_lblNewLabel.left = new FormAttachment(0, 3);
+		fd_lblNewLabel.top = new FormAttachment(0, 3);
+		lblNewLabel.setLayoutData(fd_lblNewLabel);
+		lblNewLabel.setText("总学分：0");
+
+		text_1 = new Text(group_1, SWT.READ_ONLY | SWT.MULTI);
+		FormData fd_text_1 = new FormData();
+		fd_text_1.top = new FormAttachment(lblNewLabel, 3);
+		fd_text_1.right = new FormAttachment(100);
+		fd_text_1.bottom = new FormAttachment(100);
+		fd_text_1.left = new FormAttachment(0);
+		text_1.setLayoutData(fd_text_1);
+
+		timeTableManager = new CourseManager(scroll, tree, group_1, courseData);
+
 		sashForm_p.setWeights(new int[] { 7, 13 });
 		sashForm.setWeights(new int[] { 1, 4 });
 	}

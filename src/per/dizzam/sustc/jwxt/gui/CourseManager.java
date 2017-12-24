@@ -21,6 +21,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
@@ -125,8 +126,12 @@ public class CourseManager {
 						if (!isSelected) {
 							lightenLable(true);
 						}
-						String infoText = info.getText();
-						info.setText(infoText.substring(0,infoText.indexOf("\n")) + "\n" + Course.this.toString());
+						for (Control control : info.getChildren()) {
+							if (control instanceof Text) {
+								Text text = (Text) control;
+								text.setText(Course.this.toString());								
+							}
+						}
 					}
 
 					@Override
@@ -158,7 +163,12 @@ public class CourseManager {
 									item.setFont(0, BOLD_TREE);
 								}
 							}
-							info.setText(info.getText().replaceFirst("总学分：[0-9]*", "总学分：" + String.valueOf(computeMarks())));
+							for (Control control : info.getChildren()) {
+								if (control instanceof Label) {
+									Label label = (Label) control;
+									label.setText("总学分：" + String.valueOf(computeMarks()));
+								}
+							}
 						}
 					}
 				});
@@ -266,16 +276,16 @@ public class CourseManager {
 	private CourseData courseData;
 	private Tree tree;
 	private ScrolledComposite scroll;
-	private Text info;
+	private Group info;
 	private ArrayList<Composite> weekList = new ArrayList<>();
 	private ArrayList<Course> courses = new ArrayList<>();
 	private ArrayList<Course> selected = new ArrayList<>();
 	private ColorPicker picker;
 
-	public CourseManager(ScrolledComposite scroll, Tree tree, Text info, CourseData courseData) {
+	public CourseManager(ScrolledComposite scroll, Tree tree, Group group, CourseData courseData) {
 		this.tree = tree;
 		this.scroll = scroll;
-		this.info = info;
+		this.info = group;
 		this.courseData = courseData;
 		picker = new ColorPicker(scroll.getDisplay());
 	}
@@ -511,7 +521,13 @@ public class CourseManager {
 
 		ver.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
 		
-		info.setFont(NORMAL);
+		for (Control control : info.getChildren()) {
+			if (control instanceof Label) {
+				Label label = (Label) control;
+				label.setText("总学分：" + String.valueOf(computeMarks()));
+			}
+			control.setFont(NORMAL);
+		}
 		
 		for (Course course : selected) {
 			course.layoutLable();
