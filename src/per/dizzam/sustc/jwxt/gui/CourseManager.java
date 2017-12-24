@@ -242,9 +242,11 @@ public class CourseManager {
 		
 		public void checkItem(boolean isChecked) {
 			this.isChecked = isChecked;
-			item.setChecked(isChecked);
-			item.setGrayed(false);
-			recurseParent(item, isChecked);
+			if (item != null) {
+				item.setChecked(isChecked);
+				item.setGrayed(false);
+				recurseParent(item, isChecked);				
+			}
 		}
 		
 		@Override
