@@ -124,6 +124,7 @@ public class Main extends Shell {
 		button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
+				timeTableManager.save();
 				do {
 					try {
 						courseData.updateCourseData();
