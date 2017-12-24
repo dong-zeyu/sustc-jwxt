@@ -422,6 +422,7 @@ public class CourseManager {
 				target.isChecked = true;
 				target.status = selected.getAsJsonObject().get("status").getAsBoolean();
 				this.selected.add(target);
+				break;
 			}
 		}
 
