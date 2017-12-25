@@ -1,6 +1,5 @@
 ﻿package per.dizzam.sustc.cas;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyManagementException;
@@ -52,11 +51,7 @@ public class NetworkConnection {
 	private void setupSSL() {
 		try {
 			SSLContext sslContext;
-			try {
-				sslContext = SSLContexts.custom().loadTrustMaterial(this.getClass().getResource("/cas.keystore"), "123456".toCharArray()).build();
-			} catch (IllegalArgumentException e) {
-				sslContext = SSLContexts.custom().loadTrustMaterial(new File("cas.keystore"), "123456".toCharArray()).build();
-			}
+			sslContext = SSLContexts.custom().loadTrustMaterial(this.getClass().getResource("/cas.keystore"), "123456".toCharArray()).build();
 			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
 					sslContext,
 					new String[] { "TLSv1" },
