@@ -45,11 +45,7 @@ public class Main extends Shell {
 	 */
 	public static void main(String args[]) {
 		try {
-			try {
-				PropertyConfigurator.configure(Main.class.getResourceAsStream("/log4j.properties"));
-			} catch (NullPointerException e) {
-				PropertyConfigurator.configure("log4j.properties");
-			}
+			PropertyConfigurator.configure(Main.class.getResourceAsStream("/log4j.properties"));
 			courseData = new CourseData();
 			Display display = Display.getDefault();
 			Main shell = new Main(display);
