@@ -233,6 +233,7 @@ public class Main extends Shell {
 		button_3.addMouseListener(new MouseAdapter() {
 
 			private boolean isRunning = false;
+
 			class Task extends TimerTask {
 
 				@Override
@@ -252,8 +253,11 @@ public class Main extends Shell {
 
 								@Override
 								public boolean test(Course t) {
+									if (t.getStatus()) {
+										return true;
+									}
 									try {
-										JsonObject result = courseData.select0(t.getCategory().name(),
+										JsonObject result = courseData.select(t.getCategory().name(),
 												t.getCourse().get("jx0404id").getAsString());
 										boolean success = result.get("success").getAsBoolean();
 										t.setStatus(success);
@@ -315,6 +319,7 @@ public class Main extends Shell {
 					}
 				}
 			};
+
 			Timer timer;
 
 			@Override
@@ -330,9 +335,15 @@ public class Main extends Shell {
 				} else {
 					try {
 						courseData.login();
+						timeTableManager.save();
+						try {
+							courseData.updateSelected();
+						} catch (StatusException e1) {
+						}
+						timeTableManager.updateData();
 						SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 						Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
-						calendar.set(2017, 11, 25, 12, 59, 59);
+						calendar.set(2017, 11, 25, 12, 59, 56);
 						long shift = format
 								.parse(courseData.dataFetcher(Method.GET, "/").getFirstHeader("Date").getValue())
 								.getTime() - new Date().getTime();

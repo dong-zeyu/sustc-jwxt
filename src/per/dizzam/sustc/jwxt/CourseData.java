@@ -220,7 +220,7 @@ public class CourseData extends NetworkConnection {
 		}
 	}
 	
-	public JsonObject select0(String base, String id) throws AuthenticationException, IOException, StatusException {
+	public JsonObject select(String base, String id) throws AuthenticationException, IOException, StatusException {
 		getIn();
 		HttpResponse response = dataFetcher(Method.GET, 
 				String.format(xsskOper, base.toLowerCase(), id));
@@ -251,32 +251,6 @@ public class CourseData extends NetworkConnection {
 			logger.error(String.format("Failed in %s: Unknown error!", id), e);
 			return msg;
 		}
-	}
-	
-	public boolean select(String base, String id) throws AuthenticationException, StatusException, IOException { //选课操作
-		getIn();
-		HttpResponse response = dataFetcher(Method.GET, 
-				String.format(xsskOper, base.toLowerCase(), id));
-		JsonParser jsonParser = new JsonParser();
-		try {
-			String string = EntityUtils.toString(response.getEntity());
-			JsonObject source = (JsonObject) jsonParser
-					.parse(new StringReader(string));//创建jsonObject对象
-			JsonElement m = source.get("message");
-			String msg = m == null ? "null" : m.getAsString();
-			if (source.get("success").getAsBoolean() || msg.contains("已选择")) {
-				logger.info(String.format("Success in %s: %s", id, msg));
-				return true;
-			} else {
-				logger.info(String.format("Failed in %s: %s", id, msg));
-				return false;				
-			}
-		} catch (JsonSyntaxException e) {
-			logger.warn(String.format("Failed in %s: Internal server error!", id));
-		} catch (ParseException | IOException | NullPointerException e) {
-			logger.error(e.getMessage(), e);
-		}
-		return false;
 	}
 	
 	public boolean quit(String id) throws AuthenticationException, StatusException, IOException { //退课操作
