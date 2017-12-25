@@ -328,10 +328,10 @@ public class CourseManager {
 				widthSum += requiredWidth;
 			}
 		}
-		weight[0] = 20;
-		widthSum += 20;
+		weight[0] = 10;
+		widthSum += 10;
 		parent.setWeights(weight);
-		scroll.setMinWidth((int) widthSum + 50);
+		scroll.setMinWidth((int) widthSum + 60);
 	}
 	
 	private void recurseParent(TreeItem item, boolean state) {
@@ -529,7 +529,7 @@ public class CourseManager {
 
 		scroll.setContent(ver);
 
-		ver.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
+		ver.setWeights(new int[] { 5, 32, 32, 32, 32, 32, 32, 32 });
 		
 		for (Control control : info.getChildren()) {
 			if (control instanceof Label) {
