@@ -379,6 +379,7 @@ public class Main extends Shell {
 
 		Label lblNewLabel = new Label(group_1, SWT.NONE);
 		FormData fd_lblNewLabel = new FormData();
+		fd_lblNewLabel.right = new FormAttachment(100, -3);
 		fd_lblNewLabel.left = new FormAttachment(0, 3);
 		fd_lblNewLabel.top = new FormAttachment(0, 3);
 		lblNewLabel.setLayoutData(fd_lblNewLabel);
@@ -395,7 +396,7 @@ public class Main extends Shell {
 		timeTableManager = new CourseManager(scroll, tree, group_1, courseData);
 
 		sashForm_p.setWeights(new int[] { 7, 13 });
-		sashForm.setWeights(new int[] { 1, 4 });
+		sashForm.setWeights(new int[] { 5, 16 });
 	}
 
 	/**
