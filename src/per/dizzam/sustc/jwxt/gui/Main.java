@@ -213,6 +213,7 @@ public class Main extends Shell {
 
 		Label lblNewLabel = new Label(group_1, SWT.NONE);
 		FormData fd_lblNewLabel = new FormData();
+		fd_lblNewLabel.right = new FormAttachment(100, -3);
 		fd_lblNewLabel.left = new FormAttachment(0, 3);
 		fd_lblNewLabel.top = new FormAttachment(0, 3);
 		lblNewLabel.setLayoutData(fd_lblNewLabel);
