@@ -393,7 +393,7 @@ public class Main extends Shell {
 						stopTimer.setDaemon(true);
 						button_3.setText("停止选课");
 						scroll.setEnabled(false);
-						sashForm.setWeights(new int[] { 10, 1 });
+						sashForm.setWeights(new int[] { 12, 1 });
 					} catch (AuthenticationException e1) {
 						login(Main.this);
 					} catch (ParseException | IOException e1) {
