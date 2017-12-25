@@ -219,7 +219,7 @@ public class Main extends Shell {
 		lblNewLabel.setLayoutData(fd_lblNewLabel);
 		lblNewLabel.setText("总学分：0");
 
-		text_1 = new Text(group_1, SWT.READ_ONLY | SWT.MULTI);
+		text_1 = new Text(group_1, SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		FormData fd_text_1 = new FormData();
 		fd_text_1.top = new FormAttachment(lblNewLabel, 3);
 		fd_text_1.right = new FormAttachment(100);
@@ -228,6 +228,7 @@ public class Main extends Shell {
 		text_1.setLayoutData(fd_text_1);
 
 		timeTableManager = new CourseManager(scroll, tree, group_1, courseData);
+
 		sashForm_p.setWeights(new int[] { 7, 13 });
 		sashForm.setWeights(new int[] { 5, 16 });
 	}
