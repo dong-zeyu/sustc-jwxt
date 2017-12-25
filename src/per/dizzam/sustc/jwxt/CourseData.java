@@ -161,6 +161,9 @@ public class CourseData extends NetworkConnection {
 			String string = EntityUtils.toString(response.getEntity());
 			Document document = Jsoup.parse(string);
 			Elements courses = document.getElementsByTag("tbody").get(0).children();
+			for (JsonElement element : selected) {
+				element.getAsJsonObject().addProperty("status", false);
+			}
 			for (int i = 0; i < courses.size(); i++) {
 				String id = courses.get(i).child(10).child(0).id().split("_")[1];
 				boolean flag = false;
@@ -171,7 +174,7 @@ public class CourseData extends NetworkConnection {
 						break;
 					}
 				}
-				if (flag) {
+				if (!flag) {
 					JsonObject jsonObject = new JsonObject();
 					jsonObject.addProperty("id", id);
 					jsonObject.addProperty("status", true);
