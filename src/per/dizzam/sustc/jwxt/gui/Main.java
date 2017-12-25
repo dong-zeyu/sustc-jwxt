@@ -281,7 +281,10 @@ public class Main extends Shell {
 											public void run() {
 												text_1.setText(
 														text_1.getText() + t.getCourse().get("kcmc").getAsString()
-																+ ": " + result.get("message").getAsString() + "\r\n");
+																+ ": " + (success ? "选课成功" : "选课失败")
+																+ (result.get("message") == null ? ""
+																		: (": " + result.get("message").getAsString()))
+																+ "\r\n");
 												text_1.setTopIndex(Integer.MAX_VALUE);
 											}
 										});
