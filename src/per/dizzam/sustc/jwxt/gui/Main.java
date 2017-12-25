@@ -69,7 +69,7 @@ public class Main extends Shell {
 		}
 	}
 
-	private static boolean login(Shell shell) {
+	public static boolean login(Shell shell) {
 		Login dialog = new Login(shell, SWT.PRIMARY_MODAL);
 		do {
 			try {
