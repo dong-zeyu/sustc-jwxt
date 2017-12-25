@@ -1,5 +1,6 @@
 package per.dizzam.sustc.jwxt.gui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map.Entry;
@@ -225,6 +226,11 @@ public class CourseManager {
 										if (!Main.login(scroll.getShell())) {
 											break;
 										}
+									} catch (IOException e2) {
+										MessageBox info = new MessageBox(scroll.getShell(), SWT.OK);
+										info.setMessage("退课失败：网络错误");
+										info.open();
+										break;
 									} catch (Exception e2) {
 										MessageBox info = new MessageBox(scroll.getShell(), SWT.OK);
 										info.setMessage("退课失败：" + e2.getMessage());
