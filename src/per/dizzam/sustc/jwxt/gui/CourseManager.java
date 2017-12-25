@@ -69,6 +69,10 @@ public class CourseManager {
 			return category;
 		}
 		
+		public boolean getStatus() {
+			return status;
+		}
+		
 		public void setStatus(boolean status) {
 			this.status = status;
 		}
