@@ -200,6 +200,17 @@ public class CourseManager {
 					public void mouseDown(MouseEvent e) {
 						if (e.button == 3) {
 							isChecked = false;
+							isSelected = false;
+							if (Course.this.item != null) {
+								item.setFont(0, NORMAL_TREE);
+							}
+							selected.remove(Course.this);
+							for (Control control : info.getChildren()) {
+								if (control instanceof Label) {
+									Label label = (Label) control;
+									label.setText("总学分：" + String.valueOf(computeMarks()));
+								}
+							};
 							Course.this.checkItem(false);
 							Course.this.disposeLable();
 						} else if (e.button == 1){
