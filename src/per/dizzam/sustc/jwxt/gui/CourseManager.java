@@ -45,6 +45,7 @@ public class CourseManager {
 	
 	class Course {
 		
+		private static final int LABLE_WIDTH = 19;
 		private ArrayList<Label> labels;
 		private JsonObject course;
 		private float hue = 0;
@@ -105,17 +106,23 @@ public class CourseManager {
 				fd_l.top = new FormAttachment((from - 1) * 10, 2);
 				fd_l.bottom = new FormAttachment(to * 10, -1);
 				int left = 0;
-				for (Control control : composite.getChildren()) {
-					if (control.getData() != null && control.getData() instanceof Course && !control.equals(label)) {
-						FormData data = (FormData) control.getLayoutData();
-						if (data.top.numerator < fd_l.bottom.numerator && data.bottom.numerator > fd_l.top.numerator
-								&& data.right.offset > left) {
-							left = data.right.offset;
+				for (left = 0; ; left+=LABLE_WIDTH) {
+					boolean available = true;
+					for (Control control : composite.getChildren()) {
+						if (control.getData() != null && control.getData() instanceof Course && !control.equals(label)) {
+							FormData data = (FormData) control.getLayoutData();
+							if (data.top.numerator < fd_l.bottom.numerator && data.bottom.numerator > fd_l.top.numerator
+									&& data.left.offset == left) {
+								available = false;
+							}
 						}
+					}
+					if (available) {
+						break;
 					}
 				}
 				fd_l.left = new FormAttachment(0, left);
-				fd_l.right = new FormAttachment(0, left + 19);
+				fd_l.right = new FormAttachment(0, left + LABLE_WIDTH);
 				label.setLayoutData(fd_l);
 				label.moveAbove(null);
 				label.requestLayout();
@@ -321,10 +328,10 @@ public class CourseManager {
 				widthSum += requiredWidth;
 			}
 		}
-		weight[0] = 20;
-		widthSum += 20;
+		weight[0] = 10;
+		widthSum += 10;
 		parent.setWeights(weight);
-		scroll.setMinWidth((int) widthSum + 50);
+		scroll.setMinWidth((int) widthSum + 60);
 	}
 	
 	private void recurseParent(TreeItem item, boolean state) {
@@ -522,7 +529,7 @@ public class CourseManager {
 
 		scroll.setContent(ver);
 
-		ver.setWeights(new int[] { 2, 9, 9, 9, 9, 9, 9, 9 });
+		ver.setWeights(new int[] { 5, 32, 32, 32, 32, 32, 32, 32 });
 		
 		for (Control control : info.getChildren()) {
 			if (control instanceof Label) {
