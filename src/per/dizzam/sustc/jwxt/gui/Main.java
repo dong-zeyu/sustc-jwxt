@@ -376,7 +376,10 @@ public class Main extends Shell {
 						SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 						Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
 						Calendar now = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
-						if (now.get(Calendar.HOUR_OF_DAY) < 13) {
+						MessageBox box = new MessageBox(Main.this, SWT.OK | SWT.CANCEL);
+						box.setMessage("是否立即开始选课");
+						if (box.open() == SWT.OK) {
+						} else if (now.get(Calendar.HOUR_OF_DAY) < 13) {
 							calendar.set(now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DATE), 12,
 									59, 55);
 						} else {
