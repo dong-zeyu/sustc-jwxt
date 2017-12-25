@@ -306,6 +306,10 @@ public class Main extends Shell {
 									return false;
 								}
 							});
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException e) {
+							}
 						}
 						logger.info("Over!");
 					} catch (AuthenticationException e) {
@@ -356,7 +360,9 @@ public class Main extends Shell {
 						timeTableManager.updateData();
 						SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 						Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
-						calendar.set(2017, 11, 25, 12, 59, 50);
+						Calendar now = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
+						calendar.set(now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DATE), 12, 59,
+								55);
 						long shift = format
 								.parse(courseData.dataFetcher(Method.GET, "/").getFirstHeader("Date").getValue())
 								.getTime() - new Date().getTime();
