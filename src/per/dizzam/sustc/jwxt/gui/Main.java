@@ -252,6 +252,8 @@ public class Main extends Shell {
 								courseData.getIn();
 								break;
 							} catch (StatusException | InterruptedException e) {
+							} catch (IOException e) {
+								logger.warn("Please check your internet connection");
 							}
 						}
 						Display.getDefault().asyncExec(new Runnable() {
