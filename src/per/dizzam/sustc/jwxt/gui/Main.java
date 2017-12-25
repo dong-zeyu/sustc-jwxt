@@ -275,16 +275,17 @@ public class Main extends Shell {
 												t.getCourse().get("jx0404id").getAsString());
 										boolean success = result.get("success").getAsBoolean();
 										t.setStatus(success);
+										String info = t.getCourse().get("kcmc").getAsString() + ": "
+												+ (success ? "选课成功" : "选课失败")
+												+ (result.get("message") == null
+														|| !result.get("message").isJsonPrimitive() ? ""
+																: (": " + result.get("message").getAsString()))
+												+ "\r\n";
 										Display.getDefault().syncExec(new Runnable() {
 
 											@Override
 											public void run() {
-												text_1.setText(
-														text_1.getText() + t.getCourse().get("kcmc").getAsString()
-																+ ": " + (success ? "选课成功" : "选课失败")
-																+ (result.get("message") == null ? ""
-																		: (": " + result.get("message").getAsString()))
-																+ "\r\n");
+												text_1.setText(text_1.getText() + info);
 												text_1.setTopIndex(Integer.MAX_VALUE);
 											}
 										});
@@ -292,13 +293,13 @@ public class Main extends Shell {
 									} catch (Exception e) {
 										logger.warn(String.format("Failed in %s: %s", t.getCourse().get("jx0404id"),
 												e.getMessage()));
+										String info = t.getCourse().get("kcmc").getAsString() + ": 选课失败: "
+												+ e.getMessage() + "\r\n";
 										Display.getDefault().syncExec(new Runnable() {
 
 											@Override
 											public void run() {
-												text_1.setText(
-														text_1.getText() + t.getCourse().get("kcmc").getAsString()
-																+ ": " + e.getMessage() + "\r\n");
+												text_1.setText(text_1.getText() + info);
 												text_1.setTopIndex(Integer.MAX_VALUE);
 											}
 										});
