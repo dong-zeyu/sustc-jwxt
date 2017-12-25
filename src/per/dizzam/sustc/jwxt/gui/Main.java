@@ -359,6 +359,7 @@ public class Main extends Shell {
 				if (isBegin) {
 					button_3.setText("开始选课");
 					scroll.setEnabled(true);
+					button.setEnabled(true);
 					sashForm.setWeights(new int[] { 5, 16 });
 					text_1.setText(text_1.getText() + "Cancled!\r\n");
 					text_1.setTopIndex(Integer.MAX_VALUE);
@@ -398,6 +399,7 @@ public class Main extends Shell {
 						stopTimer.setDaemon(true);
 						button_3.setText("停止选课");
 						scroll.setEnabled(false);
+						button.setEnabled(false);
 						sashForm.setWeights(new int[] { 12, 1 });
 					} catch (AuthenticationException e1) {
 						login(Main.this);
