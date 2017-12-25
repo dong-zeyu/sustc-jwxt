@@ -109,7 +109,7 @@ public class CourseData extends NetworkConnection {
 		try {
 			getIn();
 		} catch (IOException e) {
-			logger.warn("Fail to update course data: " + e.getMessage());
+			logger.warn("Failed to update selected data: Network IO error");
 			return course;
 		}
 		for (CourseRepo repo : CourseRepo.values()) {
@@ -154,7 +154,7 @@ public class CourseData extends NetworkConnection {
 		try {
 			getIn();
 		} catch (IOException e1) {
-			logger.warn("Failed to update selected data: " + e1.getMessage());
+			logger.warn("Failed to update selected data: Network IO error");
 			return selected;
 		}
 		CloseableHttpResponse response;
