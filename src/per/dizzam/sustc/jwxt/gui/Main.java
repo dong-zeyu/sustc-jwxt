@@ -34,6 +34,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 
+import com.google.gson.JsonObject;
+
 import per.dizzam.sustc.cas.Method;
 import per.dizzam.sustc.jwxt.CourseData;
 import per.dizzam.sustc.jwxt.StatusException;
@@ -238,30 +240,47 @@ public class Main extends Shell {
 					ArrayList<Course> courses = timeTableManager.getSelected();
 					try {
 						courseData.login();
-						logger.info("Begin!");
+						Display.getDefault().syncExec(new Runnable() {
+
+							@Override
+							public void run() {
+								text_1.setText(text_1.getText() + "Begin\r\n");
+							}
+						});
 						while (!courses.isEmpty() && isRunning) {
 							courses.removeIf(new Predicate<Course>() {
 
 								@Override
 								public boolean test(Course t) {
 									try {
-										boolean result = courseData.select(t.getCategory().name(),
+										JsonObject result = courseData.select0(t.getCategory().name(),
 												t.getCourse().get("jx0404id").getAsString());
-										t.setStatus(result);
-										if (result) {
-											Display.getDefault().syncExec(new Runnable() {
+										boolean success = result.get("success").getAsBoolean();
+										t.setStatus(success);
+										Display.getDefault().syncExec(new Runnable() {
 
-												@Override
-												public void run() {
-													String infoText = text_1.getText();
-													text_1.setText(infoText + t.getCourse().get("kcmc").getAsString()
-															+ ": 选课成功");
-												}
-											});
-										}
-										return result;
+											@Override
+											public void run() {
+												text_1.setText(
+														text_1.getText() + t.getCourse().get("kcmc").getAsString()
+																+ ": " + result.get("message").getAsString() + "\r\n");
+												text_1.setTopIndex(Integer.MAX_VALUE);
+											}
+										});
+										return success;
 									} catch (Exception e) {
-										logger.error("Failed due to Execption: " + e.getMessage(), e);
+										logger.warn(String.format("Failed in %s: %s", t.getCourse().get("jx0404id"),
+												e.getMessage()));
+										Display.getDefault().syncExec(new Runnable() {
+
+											@Override
+											public void run() {
+												text_1.setText(
+														text_1.getText() + t.getCourse().get("kcmc").getAsString()
+																+ ": " + e.getMessage() + "\r\n");
+												text_1.setTopIndex(Integer.MAX_VALUE);
+											}
+										});
 									}
 									return false;
 								}
@@ -286,6 +305,9 @@ public class Main extends Shell {
 							@Override
 							public void run() {
 								button_3.setText("开始选课");
+								scroll.setEnabled(true);
+								text_1.setText(text_1.getText() + "Over!");
+								text_1.setTopIndex(Integer.MAX_VALUE);
 							}
 						});
 						timer.cancel();
@@ -299,6 +321,10 @@ public class Main extends Shell {
 			public void mouseDown(MouseEvent e) {
 				if (isRunning) {
 					button_3.setText("开始选课");
+					scroll.setEnabled(true);
+					sashForm.setWeights(new int[] { 1, 4 });
+					text_1.setText(text_1.getText() + "Cancled!\r\n");
+					text_1.setTopIndex(Integer.MAX_VALUE);
 					timer.cancel();
 					isRunning = false;
 				} else {
@@ -310,10 +336,13 @@ public class Main extends Shell {
 						long shift = format
 								.parse(courseData.dataFetcher(Method.GET, "/").getFirstHeader("Date").getValue())
 								.getTime() - new Date().getTime();
-						logger.info(shift);
+						text_1.setText("Selection scheduled at: "
+								+ new Date(calendar.getTime().getTime() - shift).toString() + "\r\n");
 						timer = new Timer(true);
 						timer.schedule(new Task(), new Date(calendar.getTime().getTime() - shift));
 						button_3.setText("停止选课");
+						scroll.setEnabled(false);
+						sashForm.setWeights(new int[] { 4, 1 });
 						isRunning = true;
 					} catch (AuthenticationException e1) {
 						login(Main.this);
@@ -331,7 +360,7 @@ public class Main extends Shell {
 		lblNewLabel.setLayoutData(fd_lblNewLabel);
 		lblNewLabel.setText("总学分：0");
 
-		text_1 = new Text(group_1, SWT.READ_ONLY | SWT.MULTI);
+		text_1 = new Text(group_1, SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
 		FormData fd_text_1 = new FormData();
 		fd_text_1.top = new FormAttachment(lblNewLabel, 3);
 		fd_text_1.right = new FormAttachment(100);
