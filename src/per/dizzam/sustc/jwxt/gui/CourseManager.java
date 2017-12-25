@@ -465,30 +465,43 @@ public class CourseManager {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (e.item instanceof TreeItem && e.detail == SWT.CHECK) {
+				if (e.item instanceof TreeItem) {
 					TreeItem item = (TreeItem) e.item;
-					boolean checked = item.getChecked();
-					item.setGrayed(false);
-					Stack<TreeItem> items = new Stack<>();
-					items.push(item);
-					while (!items.isEmpty()) {
-						TreeItem item1 = items.pop();
-						item1.setChecked(checked);
-						item1.setGrayed(false);
-						if (item1.getData() instanceof Course) {
-							if (checked) {
-								((Course) item1.getData()).layoutLable();
-								((Course) item1.getData()).isChecked = true;
-							} else {
-								((Course) item1.getData()).disposeLable();
-								((Course) item1.getData()).isChecked = false;
-//								((Course) item1.getData()).isSelected = false;
+					if (e.detail == SWT.CHECK) {
+						boolean checked = item.getChecked();
+						item.setGrayed(false);
+						Stack<TreeItem> items = new Stack<>();
+						items.push(item);
+						while (!items.isEmpty()) {
+							TreeItem item1 = items.pop();
+							item1.setChecked(checked);
+							item1.setGrayed(false);
+							if (item1.getData() instanceof Course) {
+								if (checked) {
+									((Course) item1.getData()).layoutLable();
+									((Course) item1.getData()).isChecked = true;
+								} else {
+									((Course) item1.getData()).disposeLable();
+									((Course) item1.getData()).isChecked = false;
+//									((Course) item1.getData()).isSelected = false;
+								}
 							}
+							items.addAll(Arrays.asList(item1.getItems()));
 						}
-						items.addAll(Arrays.asList(item1.getItems()));
+						recurseParent(item, checked);
+						computeSize();
 					}
-					recurseParent(item, checked);
-					computeSize();
+					Text text = null;
+					for (Control control : info.getChildren()) {
+						if (control instanceof Text) {
+							text = (Text) control;
+						}
+					}
+					if (item.getData() instanceof Course) {
+						text.setText(item.getData().toString());
+					} else {
+						text.setText("");
+					}
 				}
 			}
 		});
