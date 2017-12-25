@@ -236,7 +236,7 @@ public class Main extends Shell {
 				public void run() {
 					ArrayList<Course> courses = (ArrayList<Course>) timeTableManager.getSelected().clone();
 					try {
-						Display.getDefault().syncExec(new Runnable() {
+						Display.getDefault().asyncExec(new Runnable() {
 
 							@Override
 							public void run() {
@@ -251,7 +251,7 @@ public class Main extends Shell {
 							} catch (StatusException | InterruptedException e) {
 							}
 						}
-						Display.getDefault().syncExec(new Runnable() {
+						Display.getDefault().asyncExec(new Runnable() {
 
 							@Override
 							public void run() {
@@ -277,7 +277,7 @@ public class Main extends Shell {
 														|| !result.get("message").isJsonPrimitive() ? ""
 																: (": " + result.get("message").getAsString()))
 												+ "\r\n";
-										Display.getDefault().syncExec(new Runnable() {
+										Display.getDefault().asyncExec(new Runnable() {
 
 											@Override
 											public void run() {
@@ -291,7 +291,7 @@ public class Main extends Shell {
 												e.getMessage()));
 										String info = t.getCourse().get("kcmc").getAsString() + ": 选课失败: "
 												+ e.getMessage() + "\r\n";
-										Display.getDefault().syncExec(new Runnable() {
+										Display.getDefault().asyncExec(new Runnable() {
 
 											@Override
 											public void run() {
@@ -310,7 +310,7 @@ public class Main extends Shell {
 						}
 						logger.info("Over!");
 					} catch (AuthenticationException e) {
-						Display.getDefault().syncExec(new Runnable() {
+						Display.getDefault().asyncExec(new Runnable() {
 
 							@Override
 							public void run() {
@@ -318,7 +318,7 @@ public class Main extends Shell {
 							}
 						});
 					} finally {
-						Display.getDefault().syncExec(new Runnable() {
+						Display.getDefault().asyncExec(new Runnable() {
 
 							@Override
 							public void run() {
@@ -366,11 +366,11 @@ public class Main extends Shell {
 						text_1.setText("Selection scheduled at: "
 								+ new Date(calendar.getTime().getTime() - shift).toString() + "\r\n");
 						timer = new Timer(true);
+						isRunning = true;
 						timer.schedule(new Task(), new Date(calendar.getTime().getTime() - shift));
 						button_3.setText("停止选课");
 						scroll.setEnabled(false);
 						sashForm.setWeights(new int[] { 4, 1 });
-						isRunning = true;
 					} catch (AuthenticationException e1) {
 						login(Main.this);
 					} catch (ParseException | IOException e1) {
