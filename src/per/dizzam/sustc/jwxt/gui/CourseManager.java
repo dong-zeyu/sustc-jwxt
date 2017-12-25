@@ -37,7 +37,7 @@ import per.dizzam.sustc.jwxt.CourseRepo;
 
 public class CourseManager {
 	
-	private static final String[] WEEK = new String[] { "", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+	private static final String[] WEEK = new String[] { "", "周一", "周二", "周三", "周四", "周五", "周六", "周日" };
 	private static final Font NORMAL_TREE = new Font(Display.getDefault(), "华文黑体", 12, SWT.NORMAL);
 	private static final Font BOLD_TREE = new Font(Display.getDefault(), "华文黑体", 12, SWT.BOLD);
 	private static final Font NORMAL = new Font(Display.getDefault(), "华文黑体", 12, SWT.NORMAL);
@@ -274,14 +274,18 @@ public class CourseManager {
 						t.get("jsmc").getAsString());
 			}
 			return String.format("课程名称：%s\r\n"
-					+ "状态：%s\t"
+					+ "课程号： %s\t"
 					+ "学分：%d\t"
 					+ "上课老师：%s\r\n"
+					+ "状态：%s\t"
+					+ "剩余人数： %s\r\n"
 					+ "课程安排：\r\n%s", 
 					course.getAsJsonObject().get("kcmc").getAsString() + (e1.isJsonNull() ? "" : "[" + e1.getAsString() + "]"),
-					Course.this.status ? "已选" : "待选", 
+					course.getAsJsonObject().get("kch").getAsString(),
 					course.getAsJsonObject().get("xf").getAsInt(), 
 					course.getAsJsonObject().get("skls").isJsonNull() ? "None" : course.getAsJsonObject().get("skls").getAsString(), 
+					Course.this.status ? "已选" : "待选", 
+					course.getAsJsonObject().get("syrs").isJsonNull() ? "NaN" : course.getAsJsonObject().get("syrs").getAsString(), 
 					arrengement);
 		}
 	}

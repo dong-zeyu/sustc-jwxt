@@ -229,7 +229,7 @@ public class Main extends Shell {
 
 		timeTableManager = new CourseManager(scroll, tree, group_1, courseData);
 		sashForm_p.setWeights(new int[] { 7, 13 });
-		sashForm.setWeights(new int[] { 1, 4 });
+		sashForm.setWeights(new int[] { 5, 16 });
 	}
 
 	/**
