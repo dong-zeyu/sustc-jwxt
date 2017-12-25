@@ -173,46 +173,6 @@ public class CourseManager {
 						Course.this.checkItem(false);
 						Course.this.disposeLable();
 					}
-
-					@Override
-					public void mouseDoubleClick(MouseEvent e) {
-						MessageBox box = new MessageBox(scroll.getShell(), SWT.OK | SWT.CANCEL);
-						box.setText("警告！！");
-						box.setMessage("确认退课？");
-						int result = box.open();
-						if (result == SWT.OK) {
-							String id = Course.this.course.get("jx0404id").getAsString();
-							while (true) {
-								try {
-									if (courseData.quit(id)) {
-										isSelected = false;
-										selected.remove(Course.this);
-										lightenLable(false);
-										Course.this.status = false;
-										save();
-										MessageBox info = new MessageBox(scroll.getShell(), SWT.OK);
-										info.setMessage("退课成功");
-										info.open();
-										break;
-									} else {
-										MessageBox info = new MessageBox(scroll.getShell(), SWT.OK);
-										info.setMessage("退课失败");
-										info.open();
-										break;
-									}
-								} catch (AuthenticationException e1) {
-									if (!Main.login(scroll.getShell())) {
-										break;
-									}
-								} catch (Exception e2) {
-									MessageBox info = new MessageBox(scroll.getShell(), SWT.OK);
-									info.setMessage("退课失败：" + e2.getMessage());
-									info.open();
-									break;
-								}
-							}
-						}
-					}
 					
 					@Override
 					public void mouseDown(MouseEvent e) {
@@ -236,6 +196,44 @@ public class CourseManager {
 									label.setText("总学分：" + String.valueOf(computeMarks()));
 								}
 							}
+						} else if (e.button == 3) {
+							MessageBox box = new MessageBox(scroll.getShell(), SWT.OK | SWT.CANCEL);
+							box.setText("警告！！");
+							box.setMessage("确认退课？");
+							int result = box.open();
+							if (result == SWT.OK) {
+								String id = Course.this.course.get("jx0404id").getAsString();
+								while (true) {
+									try {
+										if (courseData.quit(id)) {
+											isSelected = false;
+											selected.remove(Course.this);
+											lightenLable(false);
+											Course.this.status = false;
+											save();
+											MessageBox info = new MessageBox(scroll.getShell(), SWT.OK);
+											info.setMessage("退课成功");
+											info.open();
+											break;
+										} else {
+											MessageBox info = new MessageBox(scroll.getShell(), SWT.OK);
+											info.setMessage("退课失败");
+											info.open();
+											break;
+										}
+									} catch (AuthenticationException e1) {
+										if (!Main.login(scroll.getShell())) {
+											break;
+										}
+									} catch (Exception e2) {
+										MessageBox info = new MessageBox(scroll.getShell(), SWT.OK);
+										info.setMessage("退课失败：" + e2.getMessage());
+										info.open();
+										break;
+									}
+								}
+							}
+
 						}
 					}
 				});
