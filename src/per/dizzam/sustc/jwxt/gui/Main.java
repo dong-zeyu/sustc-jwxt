@@ -240,12 +240,26 @@ public class Main extends Shell {
 				public void run() {
 					ArrayList<Course> courses = timeTableManager.getSelected();
 					try {
-						courseData.login();
 						Display.getDefault().syncExec(new Runnable() {
 
 							@Override
 							public void run() {
-								text_1.setText(text_1.getText() + "Begin\r\n");
+								text_1.setText(text_1.getText() + "Waiting for open...\r\n");
+							}
+						});
+						while (isRunning) {
+							try {
+								Thread.sleep(50);
+								courseData.getIn();
+								break;
+							} catch (StatusException | InterruptedException e) {
+							}
+						}
+						Display.getDefault().syncExec(new Runnable() {
+
+							@Override
+							public void run() {
+								text_1.setText(text_1.getText() + "Begin!\r\n");
 							}
 						});
 						while (!courses.isEmpty() && isRunning) {
@@ -343,7 +357,7 @@ public class Main extends Shell {
 						timeTableManager.updateData();
 						SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 						Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
-						calendar.set(2017, 11, 25, 12, 59, 56);
+						calendar.set(2017, 11, 25, 12, 59, 50);
 						long shift = format
 								.parse(courseData.dataFetcher(Method.GET, "/").getFirstHeader("Date").getValue())
 								.getTime() - new Date().getTime();
