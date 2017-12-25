@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Stack;
 
+import org.apache.http.auth.AuthenticationException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -23,6 +24,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -154,6 +156,46 @@ public class CourseManager {
 				});
 				label.addMouseListener(new MouseAdapter() {
 
+					@Override
+					public void mouseDoubleClick(MouseEvent e) {
+						MessageBox box = new MessageBox(scroll.getShell(), SWT.OK | SWT.CANCEL);
+						box.setText("警告！！");
+						box.setMessage("确认退课？");
+						int result = box.open();
+						if (result == SWT.OK) {
+							String id = Course.this.course.get("jx0404id").getAsString();
+							while (true) {
+								try {
+									if (courseData.quit(id)) {
+										isSelected = false;
+										selected.remove(Course.this);
+										lightenLable(false);
+										Course.this.status = false;
+										save();
+										MessageBox info = new MessageBox(scroll.getShell(), SWT.OK);
+										info.setMessage("退课成功");
+										info.open();
+										break;
+									} else {
+										MessageBox info = new MessageBox(scroll.getShell(), SWT.OK);
+										info.setMessage("退课失败");
+										info.open();
+										break;
+									}
+								} catch (AuthenticationException e1) {
+									if (!Main.login(scroll.getShell())) {
+										break;
+									}
+								} catch (Exception e2) {
+									MessageBox info = new MessageBox(scroll.getShell(), SWT.OK);
+									info.setMessage("退课失败：" + e2.getMessage());
+									info.open();
+									break;
+								}
+							}
+						}
+					}
+					
 					@Override
 					public void mouseDown(MouseEvent e) {
 						if (e.button == 3) {
