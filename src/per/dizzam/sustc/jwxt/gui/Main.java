@@ -238,7 +238,7 @@ public class Main extends Shell {
 
 				@Override
 				public void run() {
-					ArrayList<Course> courses = timeTableManager.getSelected();
+					ArrayList<Course> courses = (ArrayList<Course>) timeTableManager.getSelected().clone();
 					try {
 						Display.getDefault().syncExec(new Runnable() {
 
