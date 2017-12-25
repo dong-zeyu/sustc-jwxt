@@ -229,11 +229,14 @@ public class Main extends Shell {
 		button_3.addMouseListener(new MouseAdapter() {
 
 			private boolean isRunning = false;
+			private boolean isBegin = false;
+			Thread stopTimer;
 
 			class Task extends TimerTask {
 
 				@Override
 				public void run() {
+					isRunning = true;
 					ArrayList<Course> courses = (ArrayList<Course>) timeTableManager.getSelected().clone();
 					try {
 						Display.getDefault().asyncExec(new Runnable() {
@@ -258,7 +261,8 @@ public class Main extends Shell {
 								text_1.setText(text_1.getText() + "Begin!\r\n");
 							}
 						});
-						while (!courses.isEmpty() && isRunning) {
+						stopTimer.start();
+						while (!courses.isEmpty() && isRunning && isBegin) {
 							courses.removeIf(new Predicate<Course>() {
 
 								@Override
@@ -322,30 +326,42 @@ public class Main extends Shell {
 
 							@Override
 							public void run() {
-								button_3.setText("开始选课");
-								scroll.setEnabled(true);
-								text_1.setText(text_1.getText() + "Over!");
+								text_1.setText(text_1.getText() + "Over!\r\n");
 								text_1.setTopIndex(Integer.MAX_VALUE);
 							}
 						});
-						timer.cancel();
+						stopTimer.interrupt();
+						stopTimer = new Thread(stop);
+						stopTimer.setDaemon(true);
 						isRunning = false;
 					}
 				}
 			};
 
+			Runnable stop = new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(15000);
+						isRunning = false;
+					} catch (InterruptedException e) {
+						return;
+					}
+				}
+			};
 			Timer timer;
 
 			@Override
 			public void mouseDown(MouseEvent e) {
-				if (isRunning) {
+				if (isBegin) {
 					button_3.setText("开始选课");
 					scroll.setEnabled(true);
 					sashForm.setWeights(new int[] { 1, 4 });
 					text_1.setText(text_1.getText() + "Cancled!\r\n");
 					text_1.setTopIndex(Integer.MAX_VALUE);
 					timer.cancel();
-					isRunning = false;
+					isBegin = false;
 				} else {
 					try {
 						courseData.login();
@@ -358,16 +374,23 @@ public class Main extends Shell {
 						SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 						Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
 						Calendar now = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
-						calendar.set(now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DATE), 12, 59,
-								55);
+						if (now.get(Calendar.HOUR_OF_DAY) < 13) {
+							calendar.set(now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DATE), 12,
+									59, 55);
+						} else {
+							calendar.set(now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DATE) + 1,
+									12, 59, 55);
+						}
 						long shift = format
 								.parse(courseData.dataFetcher(Method.GET, "/").getFirstHeader("Date").getValue())
 								.getTime() - new Date().getTime();
 						text_1.setText("Selection scheduled at: "
 								+ new Date(calendar.getTime().getTime() - shift).toString() + "\r\n");
 						timer = new Timer(true);
-						isRunning = true;
-						timer.schedule(new Task(), new Date(calendar.getTime().getTime() - shift));
+						isBegin = true;
+						timer.schedule(new Task(), new Date(calendar.getTime().getTime() - shift), 86400000l);
+						stopTimer = new Thread(stop);
+						stopTimer.setDaemon(true);
 						button_3.setText("停止选课");
 						scroll.setEnabled(false);
 						sashForm.setWeights(new int[] { 4, 1 });
