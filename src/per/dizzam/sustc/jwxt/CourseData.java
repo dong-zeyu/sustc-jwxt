@@ -74,7 +74,7 @@ public class CourseData extends NetworkConnection {
 		}
 	}
 		
-	public void getIn() throws AuthenticationException, StatusException {//获取选课权限
+	public void getIn() throws AuthenticationException, StatusException, IOException {//获取选课权限
 		if (isLogin()) {
  			try {
  				getIndex(); // XXX it's a very bad idea to put getIndex here
@@ -83,7 +83,7 @@ public class CourseData extends NetworkConnection {
 					response.close();
  					throw new StatusException("尚未开放选课");
  				}
- 			} catch (IOException | ParseException e) {
+ 			} catch (ParseException e) {
  				logger.error(e.getMessage(), e);
  			}
 		} else {
@@ -114,14 +114,19 @@ public class CourseData extends NetworkConnection {
 	}
 	
 	public JsonObject updateCourseData() throws AuthenticationException, StatusException {//更新课程数据
-		getIn();
+		try {
+			getIn();
+		} catch (IOException e) {
+			logger.warn("Fail to update course data: " + e.getMessage());
+			return course;
+		}
 		for (CourseRepo repo : CourseRepo.values()) {
 			course.add(repo.name(), updateCourseData1(repo));		
 		}
 		return course;
 	}
 	
-	private JsonArray updateCourseData1(CourseRepo repo) throws AuthenticationException { //获取课程数据
+	private JsonElement updateCourseData1(CourseRepo repo) throws AuthenticationException { //获取课程数据
 		try {
 			CloseableHttpResponse response;
 			JsonParser parse;
@@ -145,16 +150,21 @@ public class CourseData extends NetworkConnection {
 				return source.get("aaData").getAsJsonArray();
 			} else {
 				logger.error(String.format("Failed to update %s, ignore it.\n", repo));
-				return null;
+				return course.get(repo.name());
 			}
 		} catch (ParseException | IOException | NullPointerException e) {
 			logger.error(e.getMessage(), e);
 		}
-		return null;
+		return course.get(repo.name());
 	}
 	
 	public JsonArray updateSelected() throws AuthenticationException, StatusException { //更新已选课程数据
-		getIn();
+		try {
+			getIn();
+		} catch (IOException e1) {
+			logger.warn("Failed to update selected data: " + e1.getMessage());
+			return selected;
+		}
 		CloseableHttpResponse response;
 		try {
 			response = dataFetcher(Method.GET, Xkjglb, null);
