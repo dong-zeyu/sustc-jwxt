@@ -117,7 +117,7 @@ public class CourseData extends NetworkConnection {
 		try {
 			getIn();
 		} catch (IOException e) {
-			logger.warn("Fail to update course data: " + e.getMessage());
+			logger.warn("Failed to update selected data: Network IO error");
 			return course;
 		}
 		for (CourseRepo repo : CourseRepo.values()) {
@@ -149,7 +149,7 @@ public class CourseData extends NetworkConnection {
 				response.close();//获取全部课程并写入source
 				return source.get("aaData").getAsJsonArray();
 			} else {
-				logger.error(String.format("Failed to update %s, ignore it.\n", repo));
+				logger.error(String.format("Failed to update %s, ignore it.", repo));
 				return course.get(repo.name());
 			}
 		} catch (ParseException | IOException | NullPointerException e) {
@@ -162,7 +162,7 @@ public class CourseData extends NetworkConnection {
 		try {
 			getIn();
 		} catch (IOException e1) {
-			logger.warn("Failed to update selected data: " + e1.getMessage());
+			logger.warn("Failed to update selected data: Network IO error");
 			return selected;
 		}
 		CloseableHttpResponse response;
