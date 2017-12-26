@@ -253,7 +253,14 @@ public class Main extends Shell {
 								break;
 							} catch (StatusException | InterruptedException e) {
 							} catch (IOException e) {
-								logger.warn("Please check your internet connection");
+								logger.warn("Please check your internet connection!");
+								Display.getDefault().asyncExec(new Runnable() {
+
+									@Override
+									public void run() {
+										text_1.setText(text_1.getText() + "Please check your internet connection!\r\n");
+									}
+								});
 							}
 						}
 						Display.getDefault().asyncExec(new Runnable() {
@@ -314,7 +321,6 @@ public class Main extends Shell {
 							} catch (InterruptedException e) {
 							}
 						}
-						logger.info("Over!");
 					} catch (AuthenticationException e) {
 						Display.getDefault().asyncExec(new Runnable() {
 
@@ -404,7 +410,7 @@ public class Main extends Shell {
 					} catch (AuthenticationException e1) {
 						login(Main.this);
 					} catch (ParseException | IOException e1) {
-						logger.warn(e1.getMessage(), e1);
+						logger.error(e1.getMessage(), e1);
 					}
 				}
 			}
