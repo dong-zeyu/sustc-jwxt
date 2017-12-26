@@ -102,7 +102,6 @@ public class NetworkConnection {
 			}
 		} catch (ClientProtocolException | UnsupportedEncodingException e) {
 			logger.fatal(e.getMessage(), e);
-			System.exit(-1);
 		}
 	}
 	
@@ -162,9 +161,8 @@ public class NetworkConnection {
 			return response;
 		} catch (ClientProtocolException | UnsupportedEncodingException e) {
 			logger.fatal(e.getMessage(), e);
-			System.exit(-1);
+			throw e;
 		}
-		return null;
 	}
 	
 	protected void login() throws AuthenticationException {
