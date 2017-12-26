@@ -141,7 +141,7 @@ public class CourseData extends NetworkConnection {
 				response.close();//获取全部课程并写入source
 				return source.get("aaData").getAsJsonArray();
 			} else {
-				logger.error(String.format("Failed to update %s, ignore it.\n", repo));
+				logger.error(String.format("Failed to update %s, ignore it.", repo));
 				return course.get(repo.name());
 			}
 		} catch (ParseException | IOException | NullPointerException e) {
