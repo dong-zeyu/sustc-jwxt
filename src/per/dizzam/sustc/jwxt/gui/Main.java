@@ -246,6 +246,7 @@ public class Main extends Shell {
 								text_1.setText(text_1.getText() + "Waiting for open...\r\n");
 							}
 						});
+						logger.info("Waiting for open...");
 						while (isRunning) {
 							try {
 								Thread.sleep(50);
@@ -263,6 +264,7 @@ public class Main extends Shell {
 								});
 							}
 						}
+						logger.info("Begin!");
 						Display.getDefault().asyncExec(new Runnable() {
 
 							@Override
@@ -343,6 +345,7 @@ public class Main extends Shell {
 						stopTimer.setDaemon(true);
 						isRunning = false;
 					}
+					logger.info("Over!");
 				}
 			};
 
