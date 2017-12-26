@@ -117,7 +117,7 @@ public class CourseData extends NetworkConnection {
 		try {
 			getIn();
 		} catch (IOException e) {
-			logger.warn("Failed to update selected data: Network IO error");
+			logger.warn(String.format("Failed to update selected data: %s(%s)", e.getClass().getName(), e.getMessage()));
 			return course;
 		}
 		for (CourseRepo repo : CourseRepo.values()) {
@@ -149,7 +149,7 @@ public class CourseData extends NetworkConnection {
 				response.close();//获取全部课程并写入source
 				return source.get("aaData").getAsJsonArray();
 			} else {
-				logger.error(String.format("Failed to update %s, ignore it.", repo));
+				logger.warn(String.format("Failed to update %s, ignore it.", repo.getName()));
 				return course.get(repo.name());
 			}
 		} catch (ParseException | IOException | NullPointerException e) {
@@ -161,8 +161,8 @@ public class CourseData extends NetworkConnection {
 	public JsonArray updateSelected() throws AuthenticationException, StatusException { //更新已选课程数据
 		try {
 			getIn();
-		} catch (IOException e1) {
-			logger.warn("Failed to update selected data: Network IO error");
+		} catch (IOException e) {
+			logger.warn(String.format("Failed to update selected data: %s(%s)", e.getClass().getName(), e.getMessage()));
 			return selected;
 		}
 		CloseableHttpResponse response;
