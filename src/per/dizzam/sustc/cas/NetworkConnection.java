@@ -106,7 +106,7 @@ public class NetworkConnection {
 	}
 	
 	public CloseableHttpResponse dataFetcher(Method type, String suburl) throws AuthenticationException, IOException {
-		return dataFetcher(type, suburl, null);
+		return dataFetcher(type, suburl, null, false);
 	}
 	
 	public CloseableHttpResponse dataFetcher(Method type, String suburl, boolean setRedirect) throws AuthenticationException, IOException {
@@ -171,7 +171,7 @@ public class NetworkConnection {
 		try {
 			loginCAS();
 			isLogin = true;
-			dataFetcher(Method.GET, "/", true).close();;
+			dataFetcher(Method.GET, "/", true).close();
 		} catch (IOException e) {
 			logger.warn("Network error! Please check you have access to the Internet.");
 			throw new AuthenticationException("Can't connect to Central Authentication Servives(CAS)", e);
