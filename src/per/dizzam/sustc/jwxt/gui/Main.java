@@ -354,7 +354,7 @@ public class Main extends Shell {
 				@Override
 				public void run() {
 					try {
-						Thread.sleep(15000);
+						Thread.sleep(25000);
 						isRunning = false;
 					} catch (InterruptedException e) {
 						return;
