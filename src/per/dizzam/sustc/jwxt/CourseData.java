@@ -68,16 +68,17 @@ public class CourseData extends NetworkConnection {
 		
 	public void getIn() throws AuthenticationException, StatusException, IOException {//获取选课权限
 		if (isLogin()) {
+			getIndex(); // XXX it's a very bad idea to put getIndex here
+			CloseableHttpResponse response = dataFetcher(Method.GET, Xsxk);
  			try {
- 				getIndex(); // XXX it's a very bad idea to put getIndex here
-				CloseableHttpResponse response = dataFetcher(Method.GET, Xsxk);
  				if (EntityUtils.toString(response.getEntity()).contains("不在选课时间范围内")) {
-					response.close();
  					throw new StatusException("尚未开放选课");
  				}
  			} catch (ParseException e) {
  				logger.error(e.getMessage(), e);
- 			}
+ 			} finally {
+				response.close();
+			}
 		} else {
 			login();
 			getIn();
@@ -95,13 +96,16 @@ public class CourseData extends NetworkConnection {
 	public void getIndex(int index) throws NullPointerException, IndexOutOfBoundsException, AuthenticationException, IOException {
 		if (!isChoose) {
 			CloseableHttpResponse response = dataFetcher(Method.GET, xklc_list);
-			Document document = Jsoup.parse(EntityUtils.toString(response.getEntity()));
-			response.close();
-			String id = document.getElementById("tbKxkc").child(0)
-					.child(index + 1).child(0).lastElementSibling()
-					.child(0).attr("href").split("=")[1];
-			Xsxk += id;
-			isChoose = true;			
+			try {
+				Document document = Jsoup.parse(EntityUtils.toString(response.getEntity()));
+				String id = document.getElementById("tbKxkc").child(0)
+						.child(index + 1).child(0).lastElementSibling()
+						.child(0).attr("href").split("=")[1];
+				Xsxk += id;
+				isChoose = true;
+			} finally {
+				response.close();
+			}
 		}
 	}
 	
@@ -120,29 +124,33 @@ public class CourseData extends NetworkConnection {
 	
 	private JsonElement updateCourseData1(CourseRepo repo) throws AuthenticationException { //获取课程数据
 		try {
-			CloseableHttpResponse response;
 			JsonParser parse;
 			JsonObject source;
-			response = dataFetcher(Method.POST, 
+			//获取总课程数
+			CloseableHttpResponse response = dataFetcher(Method.POST, 
 					String.format(query, repo.name()),
 					new String[] { "iDisplayStart=0", 
 							"iDisplayLength=0" });
-			if (response.getStatusLine().getStatusCode() == 200) {
-				parse = new JsonParser(); //创建json解析器
-				source = (JsonObject) parse
-					.parse(new StringReader(EntityUtils.toString(response.getEntity()))); //创建jsonObject对象
-				response.close();//获取总课程数
-				response = dataFetcher(Method.POST, 
-						String.format(query, repo.name()),
-						new String[] {
-								"iDisplayStart=0", 
-								"iDisplayLength=" + source.get("iTotalRecords").getAsString() });
-				source = (JsonObject) parse.parse(new StringReader(EntityUtils.toString(response.getEntity()))); //创建jsonObject对象
-				response.close();//获取全部课程并写入source
-				return source.get("aaData").getAsJsonArray();
-			} else {
-				logger.warn(String.format("Failed to update %s, ignore it.", repo.getName()));
-				return course.get(repo.name());
+			try {
+				if (response.getStatusLine().getStatusCode() == 200) {
+					parse = new JsonParser(); //创建json解析器
+					source = (JsonObject) parse.parse(new StringReader(EntityUtils.toString(response.getEntity()))); //创建jsonObject对象
+					//获取全部课程并写入source
+					CloseableHttpResponse response2 = dataFetcher(Method.POST, String.format(query, repo.name()), new String[] {
+							"iDisplayStart=0", "iDisplayLength=" + source.get("iTotalRecords").getAsString() });
+					try {
+						source = (JsonObject) parse
+								.parse(new StringReader(EntityUtils.toString(response2.getEntity()))); //创建jsonObject对象
+						return source.get("aaData").getAsJsonArray();
+					} finally {
+						response2.close();
+					}
+				} else {
+					logger.warn(String.format("Failed to update %s, ignore it.", repo.getName()));
+					return course.get(repo.name());
+				} 
+			} finally {
+				response.close();
 			}
 		} catch (ParseException | IOException | NullPointerException e) {
 			logger.error(e.getMessage(), e);
@@ -157,34 +165,44 @@ public class CourseData extends NetworkConnection {
 			logger.warn(String.format("Failed to update selected data: %s(%s)", e.getClass().getName(), e.getMessage()));
 			return selected;
 		}
-		CloseableHttpResponse response;
 		try {
-			response = dataFetcher(Method.GET, Xkjglb, null);
-			String string = EntityUtils.toString(response.getEntity());
-			Document document = Jsoup.parse(string);
-			Elements courses = document.getElementsByTag("tbody").get(0).children();
-			for (JsonElement element : selected) {
-				element.getAsJsonObject().addProperty("status", false);
-			}
-			for (int i = 0; i < courses.size(); i++) {
-				String id = courses.get(i).child(10).child(0).id().split("_")[1];
-				boolean flag = false;
-				for (JsonElement jsonElement : selected) {
-					if (jsonElement.getAsJsonObject().get("id").getAsString().equals(id)) {
-						jsonElement.getAsJsonObject().addProperty("status", true);
-						flag = true;
-						break;
+			CloseableHttpResponse response = dataFetcher(Method.GET, Xkjglb, null);
+			try {
+				String string = EntityUtils.toString(response.getEntity());
+				Document document = Jsoup.parse(string);
+				Elements courses = document.getElementsByTag("tbody").get(0).children();
+				for (JsonElement element : selected) {
+					element.getAsJsonObject().addProperty("status", false);
+				}
+				for (int i = 0; i < courses.size(); i++) {
+					String id = courses.get(i).child(10).child(0).id().split("_")[1];
+					boolean flag = false;
+					for (JsonElement jsonElement : selected) {
+						if (jsonElement.getAsJsonObject().get("id").getAsString().equals(id)) {
+							jsonElement.getAsJsonObject().addProperty("status", true);
+							flag = true;
+							break;
+						}
+					}
+					if (!flag) {
+						JsonObject jsonObject = new JsonObject();
+						jsonObject.addProperty("id", id);
+						jsonObject.addProperty("status", true);
+						selected.add(jsonObject);
 					}
 				}
-				if (!flag) {
-					JsonObject jsonObject = new JsonObject();
-					jsonObject.addProperty("id", id);
-					jsonObject.addProperty("status", true);
-					selected.add(jsonObject);
+			} catch (ParseException | IOException | IndexOutOfBoundsException | NullPointerException e) {
+				logger.error(e.getMessage(), e);
+			} finally {
+				try {
+					response.close();
+				} catch (IOException e) {
+					logger.error(e.getMessage(), e);
 				}
 			}
-		} catch (ParseException | IOException | IndexOutOfBoundsException | NullPointerException e) {
-			logger.error(e.getMessage(), e);
+
+		} catch (IOException e1) {
+			logger.error(e1.getMessage(), e1);
 		}
 		return selected;
 	}
