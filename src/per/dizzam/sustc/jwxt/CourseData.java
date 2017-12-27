@@ -256,7 +256,7 @@ public class CourseData extends NetworkConnection {
 				reader.close();
 			}
 			else {
-				throw new FileNotFoundException(String.format("Can't find '%s'\n", FilePath));
+				throw new FileNotFoundException(String.format("Can't find '%s'", FilePath));
 			}
 		}
 	}
