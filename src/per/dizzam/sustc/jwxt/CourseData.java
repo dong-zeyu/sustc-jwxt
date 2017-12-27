@@ -288,10 +288,9 @@ public class CourseData extends NetworkConnection {
 		getIn();
 		CloseableHttpResponse response = dataFetcher(Method.GET, 
 				XstkOper + id);
-		JsonParser jsonParser = new JsonParser();
 		try {
+			JsonParser jsonParser = new JsonParser();
 			String string = EntityUtils.toString(response.getEntity());
-			response.close();
 			JsonObject source = (JsonObject) jsonParser.parse(new StringReader(string));//创建jsonObject对象
 			
 			if (source.get("success").getAsBoolean()) {
@@ -305,6 +304,8 @@ public class CourseData extends NetworkConnection {
 			logger.warn(String.format("Failed in %s: Internal server error!", id));		
 		} catch (IOException | ParseException | NullPointerException e) {
 			logger.error(e.getMessage(), e);
+		} finally {
+			response.close();
 		}
 		return false;
 	}
