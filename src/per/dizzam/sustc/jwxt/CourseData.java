@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 
 import org.apache.http.ParseException;
 import org.apache.http.auth.AuthenticationException;
@@ -14,6 +15,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.google.gson.JsonArray;
@@ -36,7 +38,9 @@ public class CourseData extends NetworkConnection {
 	private final String coursestorge = "course.json";
 	private final String selectedstorge = "selected.json";
 	
+	private ArrayList<String> id = new ArrayList<String>();
 	private String Xsxk = "/xsxk/xsxk_index?jx0502zbid=";
+	private int index = 0;
 	private String xklc_list = "/xsxk/xklc_list";
 	private boolean isChoose = false;
 	
@@ -65,15 +69,23 @@ public class CourseData extends NetworkConnection {
 			System.exit(-1);
 		}
 	}
-		
-	public void getIn() throws AuthenticationException, StatusException, IOException {//获取选课权限
+	
+	public void getIn() throws AuthenticationException, StatusException, IOException {
+		getIn(index);
+	}
+	
+	public void getIn(int index) throws AuthenticationException, StatusException, IOException {//获取选课权限
 		if (isLogin()) {
-			getIndex(); // XXX it's a very bad idea to put getIndex here
-			CloseableHttpResponse response = dataFetcher(Method.GET, Xsxk);
+			getIndex();
+			if (index >= id.size()) {
+				throw new StatusException("No such selection open!");
+			}
+			CloseableHttpResponse response = dataFetcher(Method.GET, Xsxk + id.get(index));
  			try {
  				if (EntityUtils.toString(response.getEntity()).contains("不在选课时间范围内")) {
  					throw new StatusException("尚未开放选课");
  				}
+ 				this.index = index;
  			} catch (ParseException e) {
  				logger.error(e.getMessage(), e);
  			} finally {
@@ -81,31 +93,37 @@ public class CourseData extends NetworkConnection {
 			}
 		} else {
 			login();
-			getIn();
+			getIn(index);
 		}
 	}
 	
-	public void getIndex() throws StatusException, AuthenticationException, IOException {
-		try {
-			getIndex(0);
-		} catch (IndexOutOfBoundsException | NullPointerException e) {
-			throw new StatusException("尚未开放选课", e);
-		}
-	}
-	
-	public void getIndex(int index) throws NullPointerException, IndexOutOfBoundsException, AuthenticationException, IOException {
+	public void getIndex() throws AuthenticationException, IOException, StatusException {
 		if (!isChoose) {
 			CloseableHttpResponse response = dataFetcher(Method.GET, xklc_list);
 			try {
 				Document document = Jsoup.parse(EntityUtils.toString(response.getEntity()));
-				String id = document.getElementById("tbKxkc").child(0)
-						.child(index + 1).child(0).lastElementSibling()
-						.child(0).attr("href").split("=")[1];
-				Xsxk += id;
+				Elements elements = document.getElementById("tbKxkc").getElementsByTag("a");
+				if (elements.isEmpty()) {
+					throw new StatusException("尚未开放选课");
+				}
+				for (Element element : elements) {
+					id.add(element.attr("href").split("=")[1]);
+				}
 				isChoose = true;
+			} catch (IndexOutOfBoundsException | NullPointerException e) {
+				throw new StatusException("尚未开放选课", e);
 			} finally {
 				response.close();
 			}
+		}
+	}
+	
+	public int getCoursesNumber() throws AuthenticationException, IOException, StatusException {
+		if (isChoose) {
+			return id.size();			
+		} else {
+			getIndex();
+			return getCoursesNumber();
 		}
 	}
 	
@@ -170,12 +188,12 @@ public class CourseData extends NetworkConnection {
 			try {
 				String string = EntityUtils.toString(response.getEntity());
 				Document document = Jsoup.parse(string);
-				Elements courses = document.getElementsByTag("tbody").get(0).children();
+				Elements courses = document.getElementsByTag("tbody").get(0).getElementsByTag("div");
 				for (JsonElement element : selected) {
 					element.getAsJsonObject().addProperty("status", false);
 				}
 				for (int i = 0; i < courses.size(); i++) {
-					String id = courses.get(i).child(10).child(0).id().split("_")[1];
+					String id = courses.get(i).id().split("_")[1];
 					boolean flag = false;
 					for (JsonElement jsonElement : selected) {
 						if (jsonElement.getAsJsonObject().get("id").getAsString().equals(id)) {
