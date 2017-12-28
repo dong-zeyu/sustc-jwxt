@@ -162,7 +162,7 @@ public class NetworkConnection {
 				response1.close();
 			}
 		} catch (ClientProtocolException | UnsupportedEncodingException e) {
-			logger.fatal(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -289,7 +289,7 @@ public class NetworkConnection {
 			}
 			return response;
 		} catch (ClientProtocolException | UnsupportedEncodingException e) {
-			logger.fatal(e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 			throw e;
 		}
 	}
