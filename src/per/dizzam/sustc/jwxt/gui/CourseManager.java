@@ -278,7 +278,7 @@ public class CourseManager {
 			if (parent == null) {
 				TreeItem newItem = new TreeItem(root, SWT.NONE);
 				newItem.setText(0, element.getAsJsonObject().get("kcmc").getAsString());
-				newItem.setText(1, String.valueOf(element.getAsJsonObject().get("xf").getAsInt()));
+				newItem.setText(1, String.valueOf(element.getAsJsonObject().get("xf").getAsFloat()));
 				JsonElement e = element.getAsJsonObject().get("pgtj");
 				newItem.setText(3, e.isJsonNull() ? "无" : e.getAsString());
 				parent = newItem;
@@ -290,7 +290,7 @@ public class CourseManager {
 			if (isSelected) {
 				item.setFont(0, BOLD_TREE);
 			}
-			item.setText(1, String.valueOf(element.getAsJsonObject().get("xf").getAsInt()));
+			item.setText(1, String.valueOf(element.getAsJsonObject().get("xf").getAsFloat()));
 			JsonElement e2 = element.getAsJsonObject().get("skls");
 			item.setText(2, e2.isJsonNull() ? "无" : e2.getAsString());
 			JsonElement e3 = element.getAsJsonObject().get("pgtj");
@@ -336,14 +336,14 @@ public class CourseManager {
 			}
 			return String.format("课程名称：%s\r\n"
 					+ "课程号： %s\t"
-					+ "学分：%d\t"
+					+ "学分：%.1f\t"
 					+ "上课老师：%s\r\n"
 					+ "状态：%s\t"
 					+ "剩余人数： %s\r\n"
 					+ "课程安排：\r\n%s", 
 					course.getAsJsonObject().get("kcmc").getAsString() + (e1.isJsonNull() ? "" : "[" + e1.getAsString() + "]"),
 					course.getAsJsonObject().get("kch").getAsString(),
-					course.getAsJsonObject().get("xf").getAsInt(), 
+					course.getAsJsonObject().get("xf").getAsFloat(), 
 					course.getAsJsonObject().get("skls").isJsonNull() ? "None" : course.getAsJsonObject().get("skls").getAsString(), 
 					Course.this.status ? "已选" : "待选", 
 					course.getAsJsonObject().get("syrs").isJsonNull() ? "NaN" : course.getAsJsonObject().get("syrs").getAsString(), 
@@ -376,10 +376,10 @@ public class CourseManager {
 		return selected;
 	}
 
-	private int computeMarks() {
-		int total = 0;
+	private float computeMarks() {
+		float total = 0;
 		for (Course course : selected) {
-			total += course.course.get("xf").getAsInt();
+			total += course.course.get("xf").getAsFloat();
 		}
 		return total;
 	}
