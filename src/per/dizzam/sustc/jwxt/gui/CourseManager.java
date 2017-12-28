@@ -39,15 +39,15 @@ import per.dizzam.sustc.jwxt.CourseData;
 import per.dizzam.sustc.jwxt.CourseRepo;
 
 public class CourseManager {
-	
+
 	private static final String[] WEEK = new String[] { "", "周一", "周二", "周三", "周四", "周五", "周六", "周日" };
 	private static final Font NORMAL_TREE = new Font(Display.getDefault(), "华文黑体", 12, SWT.NORMAL);
 	private static final Font BOLD_TREE = new Font(Display.getDefault(), "华文黑体", 12, SWT.BOLD);
 	private static final Font NORMAL = new Font(Display.getDefault(), "华文黑体", 12, SWT.NORMAL);
 	private static final Font ITALIC = new Font(Display.getDefault(), "华文黑体", 12, SWT.ITALIC);
-	
+
 	class Course {
-		
+
 		private static final int LABLE_WIDTH = 19;
 		private ArrayList<Label> labels;
 		private JsonObject course;
@@ -57,29 +57,29 @@ public class CourseManager {
 		private boolean status = false;
 		private TreeItem item;
 		private CourseRepo category;
-		
+
 		public Course(JsonObject course, CourseRepo category) {
 			labels = new ArrayList<>();
 			this.course = course;
 			this.category = category;
 		}
-		
+
 		public JsonObject getCourse() {
 			return course;
 		}
-		
+
 		public CourseRepo getCategory() {
 			return category;
 		}
-		
+
 		public boolean getStatus() {
 			return status;
 		}
-		
+
 		public void setStatus(boolean status) {
 			this.status = status;
 		}
-		
+
 		public void layoutLable() {
 			if (!labels.isEmpty()) {
 				return;
@@ -113,10 +113,11 @@ public class CourseManager {
 				fd_l.top = new FormAttachment((from - 1) * 10, 2);
 				fd_l.bottom = new FormAttachment(to * 10, -1);
 				int left = 0;
-				for (left = 0; ; left+=LABLE_WIDTH) {
+				for (left = 0;; left += LABLE_WIDTH) {
 					boolean available = true;
 					for (Control control : composite.getChildren()) {
-						if (control.getData() != null && control.getData() instanceof Course && !control.equals(label)) {
+						if (control.getData() != null && control.getData() instanceof Course
+								&& !control.equals(label)) {
 							FormData data = (FormData) control.getLayoutData();
 							if (data.top.numerator < fd_l.bottom.numerator && data.bottom.numerator > fd_l.top.numerator
 									&& data.left.offset == left) {
@@ -143,7 +144,7 @@ public class CourseManager {
 						for (Control control : info.getChildren()) {
 							if (control instanceof Text) {
 								Text text = (Text) control;
-								text.setText(Course.this.toString());								
+								text.setText(Course.this.toString());
 							}
 						}
 					}
@@ -156,7 +157,7 @@ public class CourseManager {
 					}
 				});
 				label.addMouseListener(new MouseAdapter() {
-					
+
 					@Override
 					public void mouseDoubleClick(MouseEvent e) {
 						isChecked = false;
@@ -170,14 +171,14 @@ public class CourseManager {
 								Label label = (Label) control;
 								label.setText("总学分：" + String.valueOf(computeMarks()));
 							}
-						};
+						}
 						Course.this.checkItem(false);
 						Course.this.disposeLable();
 					}
-					
+
 					@Override
 					public void mouseDown(MouseEvent e) {
-						if (e.button == 1){
+						if (e.button == 1) {
 							if (isSelected) {
 								isSelected = false;
 								selected.remove(Course.this);
@@ -246,20 +247,20 @@ public class CourseManager {
 				labels.add(label);
 			}
 		}
-		
+
 		public void disposeLable() {
 			for (Label label : labels) {
 				label.dispose();
 			}
 			labels.removeAll(labels);
 		}
-		
+
 		public void lightenLable(boolean light) {
 			for (Label l : labels) {
-				l.setBackground(picker.changeLighten(hue, light));							
+				l.setBackground(picker.changeLighten(hue, light));
 			}
 		}
-		
+
 		public void displayItem() {
 			TreeItem root = null;
 			for (TreeItem item : tree.getItems()) {
@@ -297,7 +298,7 @@ public class CourseManager {
 			checkItem(isChecked);
 			item.setData(this);
 		}
-		
+
 		public void disposeItem() {
 			if (item != null) {
 				item.setChecked(isChecked);
@@ -310,16 +311,16 @@ public class CourseManager {
 				}
 			}
 		}
-		
+
 		public void checkItem(boolean isChecked) {
 			this.isChecked = isChecked;
 			if (item != null) {
 				item.setChecked(isChecked);
 				item.setGrayed(false);
-				recurseParent(item, isChecked);				
+				recurseParent(item, isChecked);
 			}
 		}
-		
+
 		@Override
 		public String toString() {
 			JsonElement e1 = course.getAsJsonObject().get("fzmc");
@@ -349,7 +350,7 @@ public class CourseManager {
 					arrengement);
 		}
 	}
-	
+
 	private CourseData courseData;
 	private Tree tree;
 	private ScrolledComposite scroll;
@@ -366,15 +367,15 @@ public class CourseManager {
 		this.courseData = courseData;
 		picker = new ColorPicker(scroll.getDisplay());
 	}
-	
+
 	public ArrayList<Course> getCourses() {
 		return courses;
 	}
-	
+
 	public ArrayList<Course> getSelected() {
 		return selected;
 	}
-	
+
 	private int computeMarks() {
 		int total = 0;
 		for (Course course : selected) {
@@ -382,7 +383,7 @@ public class CourseManager {
 		}
 		return total;
 	}
-	
+
 	private void computeSize() {
 		SashForm parent = (SashForm) weekList.get(0).getParent().getParent();
 		double widthSum = 0;
@@ -401,7 +402,7 @@ public class CourseManager {
 		parent.setWeights(weight);
 		scroll.setMinWidth((int) widthSum + 60);
 	}
-	
+
 	private void recurseParent(TreeItem item, boolean state) {
 		TreeItem parent;
 		TreeItem head = item;
@@ -428,7 +429,7 @@ public class CourseManager {
 			head = parent;
 		}
 	}
-	
+
 	private ArrayList<Course> search(String name, ArrayList<Course> source) {
 		if (name == null) {
 			return source;
@@ -438,7 +439,7 @@ public class CourseManager {
 			JsonObject jsonObject = course.course;
 			if (jsonObject.get("kcmc").getAsString().contains(name)
 					|| (!jsonObject.get("fzmc").isJsonNull() && jsonObject.get("fzmc").getAsString().contains(name))
-					|| jsonObject.get("kch").getAsString().contains(name) 
+					|| jsonObject.get("kch").getAsString().contains(name)
 					|| jsonObject.get("jx0404id").getAsString().equals(name)
 					|| (jsonObject.get("skls") == null ? false : jsonObject.get("skls").toString().contains(name))) {
 				target.add(course);
@@ -446,12 +447,12 @@ public class CourseManager {
 		}
 		return target;
 	}
-	
+
 	public void searchCourse(String string, boolean isFromSelected) {
 		for (Course course : courses) {
 			course.disposeItem();
 		}
-		
+
 		ArrayList<Course> source;
 		if (isFromSelected) {
 			source = selected;
@@ -461,7 +462,7 @@ public class CourseManager {
 		for (Course course : search(string, source)) {
 			course.displayItem();
 		}
-		
+
 		for (TreeItem item : tree.getItems()) {
 			item.setExpanded(true);
 			if (isFromSelected) {
@@ -471,7 +472,7 @@ public class CourseManager {
 			}
 		}
 	}
-	
+
 	public void updateData() {
 		tree.removeAll();
 		if (scroll.getContent() != null) {
@@ -484,7 +485,7 @@ public class CourseManager {
 		init();
 		searchCourse(null, false);
 	}
-	
+
 	private void init() {
 		for (Entry<String, JsonElement> entry : courseData.getCourse().entrySet()) {
 			for (JsonElement course : entry.getValue().getAsJsonArray()) {
@@ -492,7 +493,7 @@ public class CourseManager {
 				courses.add(newCourse);
 			}
 		}
-		
+
 		for (JsonElement selected : courseData.getSelected()) {
 			for (Course target : search(selected.getAsJsonObject().get("id").getAsString(), courses)) {
 				target.isSelected = true;
@@ -504,7 +505,7 @@ public class CourseManager {
 		}
 
 		tree.setFont(NORMAL_TREE);
-		
+
 		TreeColumn trclmnA = new TreeColumn(tree, SWT.NONE);
 		trclmnA.setWidth(275);
 		trclmnA.setText("课程名称");
@@ -520,7 +521,7 @@ public class CourseManager {
 		TreeColumn trlclmn_pgtj = new TreeColumn(tree, SWT.NONE);
 		trlclmn_pgtj.setWidth(275);
 		trlclmn_pgtj.setText("先修课程");
-		
+
 		tree.addSelectionListener(new SelectionAdapter() {
 
 			@Override
@@ -571,13 +572,13 @@ public class CourseManager {
 			item.setData(repo);
 			item.setText(repo.getName());
 		}
-		
+
 		SashForm ver = new SashForm(scroll, SWT.HORIZONTAL | SWT.BORDER);
-//		ver.setEnabled(false);
+		// ver.setEnabled(false);
 
 		for (String string : WEEK) {
 			SashForm hor = new SashForm(ver, SWT.VERTICAL);
-//			hor.setEnabled(false);
+			// hor.setEnabled(false);
 
 			Label lbl = new Label(hor, SWT.CENTER);
 			lbl.setText(string);
@@ -588,7 +589,7 @@ public class CourseManager {
 			for (int i = 0; i < 10; i++) {
 				Label line = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 				line.setData("static");
-				
+
 				FormData fd_line = new FormData();
 				fd_line.left = new FormAttachment(0, 0);
 				fd_line.right = new FormAttachment(100, 0);
@@ -611,7 +612,7 @@ public class CourseManager {
 		scroll.setContent(ver);
 
 		ver.setWeights(new int[] { 5, 32, 32, 32, 32, 32, 32, 32 });
-		
+
 		for (Control control : info.getChildren()) {
 			if (control instanceof Label) {
 				Label label = (Label) control;
@@ -619,7 +620,7 @@ public class CourseManager {
 			}
 			control.setFont(NORMAL);
 		}
-		
+
 		for (Course course : selected) {
 			course.layoutLable();
 		}
