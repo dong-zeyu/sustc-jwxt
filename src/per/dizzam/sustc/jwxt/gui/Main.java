@@ -58,20 +58,11 @@ public class Main extends Shell {
 	 * @param args
 	 */
 	public static void main(String args[]) {
-		PropertyConfigurator.configure(Main.class.getResourceAsStream("/log4j.properties"));
-		courseData = new CourseData();
-		GUI();
 		try {
-			courseData.saveToFile();
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-	}
-
-	public static void GUI() {
-		Display display = Display.getDefault();
-		Main shell = new Main(display);
-		try {
+			PropertyConfigurator.configure(Main.class.getResourceAsStream("/log4j.properties"));
+			courseData = new CourseData();
+			Display display = Display.getDefault();
+			Main shell = new Main(display);
 			login(shell);
 			shell.createContents();
 			shell.open();
@@ -85,12 +76,10 @@ public class Main extends Shell {
 					logger.error(e.getMessage(), e);
 				}
 			}
+			shell.timeTableManager.save();
+			courseData.saveToFile();
 		} catch (Exception e) {
 			logger.fatal(e.getMessage(), e);
-			shell.dispose();
-			GUI();
-		} finally {
-			shell.timeTableManager.save();
 		}
 	}
 
