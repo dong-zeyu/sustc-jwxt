@@ -328,7 +328,7 @@ public class CourseData extends NetworkConnection {
 		}
 	}
 
-	public void saveToFile() throws IOException, AuthenticationException, StatusException {
+	public void saveToFile() throws IOException {
 		fileOper(coursestorge, true);
 		fileOper(selectedstorge, true);
 	}
