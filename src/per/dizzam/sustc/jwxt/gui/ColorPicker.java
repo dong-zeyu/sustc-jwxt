@@ -13,7 +13,7 @@ public class ColorPicker {
 		this.device = device;
 		hue = 0;
 	}
-	
+
 	public Color pick(boolean isLight) {
 		float saturation;
 		float light;
@@ -26,13 +26,13 @@ public class ColorPicker {
 		}
 		return new Color(device, new RGB(getCurrentHue(), saturation, light));
 	}
-	
+
 	public float getCurrentHue() {
 		hue += 30 * Math.PI;
 		hue = hue % 360;
 		return hue;
 	}
-	
+
 	public Color changeLighten(float hue, boolean isLight) {
 		float saturation;
 		float light;
