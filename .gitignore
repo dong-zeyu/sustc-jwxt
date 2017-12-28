@@ -16,6 +16,7 @@ hs_err_pid*
 *.json
 
 # logs
+debug.log*
 *.log
 
 # test file
