@@ -70,6 +70,7 @@ public class NetworkConnection {
 	 *            set field of {@link #url}
 	 */
 	public NetworkConnection(String url) {
+		this.url = url;
 		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
 		cookieStore = new BasicCookieStore();
 		setupSSL();// 建立通过SSL的httpclient
