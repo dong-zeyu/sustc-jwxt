@@ -54,8 +54,12 @@ public class Main extends Shell {
 			shell.open();
 			shell.layout();
 			while (!shell.isDisposed()) {
-				if (!display.readAndDispatch()) {
-					display.sleep();
+				try {
+					if (!display.readAndDispatch()) {
+						display.sleep();
+					}
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
 				}
 			}
 			shell.timeTableManager.save();
