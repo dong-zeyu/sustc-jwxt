@@ -20,6 +20,5 @@ debug.log*
 *.log
 
 # test file
-run.*
-*Test*.java
-test/
+*Test*.bat
+/src/test/
