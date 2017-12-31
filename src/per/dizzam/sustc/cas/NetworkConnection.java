@@ -1,4 +1,4 @@
-﻿package per.dizzam.sustc.cas;
+package per.dizzam.sustc.cas;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

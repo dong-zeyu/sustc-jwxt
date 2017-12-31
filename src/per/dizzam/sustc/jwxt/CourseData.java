@@ -1,4 +1,4 @@
-﻿package per.dizzam.sustc.jwxt;
+package per.dizzam.sustc.jwxt;
 
 import java.io.File;
 import java.io.FileNotFoundException;
