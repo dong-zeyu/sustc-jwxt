@@ -241,6 +241,7 @@ public class Main extends Shell {
 				@Override
 				public void run() {
 					isRunning = true;
+					@SuppressWarnings("unchecked")
 					ArrayList<Course> courses = (ArrayList<Course>) timeTableManager.getSelected().clone();
 					try {
 						Display.getDefault().asyncExec(new Runnable() {
