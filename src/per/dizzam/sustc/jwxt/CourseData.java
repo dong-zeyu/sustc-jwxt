@@ -76,7 +76,7 @@ public class CourseData extends NetworkConnection {
 			fileOper(selectedstorge, false);
 			logger.info("Load storage.");
 		} catch (FileNotFoundException e) {
-			logger.warn("Update Data Failed: " + e.getMessage());
+			logger.warn("Load Storage Failed: " + e.getMessage());
 		} catch (IOException e) {
 			logger.fatal(e.getMessage(), e);
 			System.exit(-1);
