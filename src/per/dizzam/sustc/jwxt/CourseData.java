@@ -37,8 +37,8 @@ public class CourseData extends NetworkConnection {
 	JsonObject course;
 	public JsonArray selected;
 
-	private final String coursestorge = "course.json";
-	private final String selectedstorge = "selected.json";
+	private final File coursestorge = new File("course.json");
+	private final File selectedstorge = new File("selected.json");
 
 	private ArrayList<String> id = new ArrayList<String>();
 	/** 选课主页 */
@@ -84,7 +84,7 @@ public class CourseData extends NetworkConnection {
 			fileOper(selectedstorge, false);
 			logger.info("Load storage.");
 		} catch (FileNotFoundException e) {
-			logger.warn("Update Data Failed: " + e.getMessage());
+			logger.warn("Load Storage Failed: " + e.getMessage());
 		} catch (IOException e) {
 			logger.fatal(e.getMessage(), e);
 			System.exit(-1);
@@ -302,20 +302,19 @@ public class CourseData extends NetworkConnection {
 		return selected;
 	}
 
-	private void fileOper(String FilePath, boolean work) throws FileNotFoundException, IOException {
-		File file = new File(FilePath);
+	private void fileOper(File file, boolean work) throws FileNotFoundException, IOException {
 		if (work) {
 			if (!file.exists()) {
 				file.createNewFile();
 			}
 			// true = append file
-			FileWriter fileWritter = new FileWriter(file.getName(), false);
+			FileWriter fileWritter = new FileWriter(file, false);
 			JsonWriter writer = new JsonWriter(fileWritter);
 			writer.setLenient(true);
 			writer.setIndent("  ");
-			if (FilePath.equals(coursestorge)) {
+			if (file.equals(coursestorge)) {
 				Streams.write(course, writer);
-			} else if (FilePath.equals(selectedstorge)) {
+			} else if (file.equals(selectedstorge)) {
 				Streams.write(selected, writer);
 			}
 			writer.flush();
@@ -324,14 +323,14 @@ public class CourseData extends NetworkConnection {
 			if (file.exists()) {
 				FileReader reader = new FileReader(file);
 				JsonParser parse = new JsonParser(); // 创建json解析器
-				if (FilePath.equals(coursestorge)) {
+				if (file.equals(coursestorge)) {
 					course = parse.parse(reader).getAsJsonObject(); // 创建jsonObject对象
-				} else if (FilePath.equals(selectedstorge)) {
+				} else if (file.equals(selectedstorge)) {
 					selected = parse.parse(reader).getAsJsonArray();
 				}
 				reader.close();
 			} else {
-				throw new FileNotFoundException(String.format("Can't find '%s'", FilePath));
+				throw new FileNotFoundException(String.format("Can't find '%s'", file.getName()));
 			}
 		}
 	}
