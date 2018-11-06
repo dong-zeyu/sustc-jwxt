@@ -20,5 +20,6 @@ debug.log*
 *.log
 
 # test file
+test*
 *Test*.bat
 /src/test/
