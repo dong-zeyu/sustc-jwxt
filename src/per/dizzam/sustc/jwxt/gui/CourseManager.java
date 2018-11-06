@@ -494,11 +494,11 @@ public class CourseManager {
 			}
 		}
 
-		for (JsonElement selected : courseData.getSelected()) {
-			for (Course target : search(selected.getAsJsonObject().get("id").getAsString(), courses)) {
+		for (Entry<String, JsonElement> selected : courseData.getSelected().entrySet()) {
+			for (Course target : search(selected.getKey(), courses)) {
 				target.isSelected = true;
 				target.isChecked = true;
-				target.status = selected.getAsJsonObject().get("status").getAsBoolean();
+				target.status = selected.getValue().getAsBoolean();
 				this.selected.add(target);
 				break;
 			}
@@ -627,12 +627,9 @@ public class CourseManager {
 	}
 
 	public void save() {
-		courseData.selected = new JsonArray();
+		courseData.selected = new JsonObject();
 		for (Course course : selected) {
-			JsonObject jsonObject = new JsonObject();
-			jsonObject.addProperty("id", course.course.get("jx0404id").getAsString());
-			jsonObject.addProperty("status", course.status);
-			courseData.selected.add(jsonObject);
+			courseData.selected.addProperty(course.course.get("jx0404id").getAsString(), course.status);
 		}
 	}
 }

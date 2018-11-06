@@ -19,6 +19,10 @@ hs_err_pid*
 debug.log*
 *.log
 
+# Lib file
+/lib
+
 # test file
+test*
 *Test*.bat
 /src/test/
