@@ -2,19 +2,19 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="../lib/gson-2.8.0.jar" sourcepath="C:/Users/lenove/WorkPlace/JAVA/lib/gson-2.8.0.zip"/>
-	<classpathentry kind="lib" path="../lib/jsoup-1.10.2.jar" sourcepath="C:/Users/lenove/WorkPlace/JAVA/lib/jsoup-1.10.2.zip"/>
-	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/commons-codec-1.9.jar"/>
-	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/commons-logging-1.2.jar"/>
-	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/fluent-hc-4.5.3.jar"/>
-	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/httpclient-4.5.3.jar" sourcepath="C:/Users/lenove/WorkPlace/JAVA/lib/httpcomponents-client-4.5.3-src.zip"/>
-	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/httpclient-cache-4.5.3.jar"/>
-	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/httpclient-win-4.5.3.jar"/>
-	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/httpcore-4.4.6.jar" sourcepath="C:/Users/lenove/WorkPlace/JAVA/lib/httpcomponents-core-4.4.6-src.zip"/>
-	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/httpmime-4.5.3.jar"/>
-	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/jna-4.1.0.jar"/>
-	<classpathentry kind="lib" path="../lib/httpcomponents-client-4.5.3/jna-platform-4.1.0.jar"/>
-	<classpathentry kind="lib" path="../lib/swt-win.jar" sourcepath="C:/Users/lenove/WorkPlace/JAVA/lib/swt-win.zip"/>
-	<classpathentry kind="lib" path="../lib/log4j-1.2.17.jar" sourcepath="C:/Users/lenove/WorkPlace/JAVA/lib/log4j-1.2.17.zip"/>
+	<classpathentry kind="lib" path="./lib/gson-2.8.0.jar" sourcepath="C:/Users/lenove/WorkPlace/sustc-jwxt/lib/gson-2.8.0.zip"/>
+	<classpathentry kind="lib" path="./lib/jsoup-1.10.2.jar" sourcepath="C:/Users/lenove/WorkPlace/sustc-jwxt/lib/jsoup-1.10.2.zip"/>
+	<classpathentry kind="lib" path="./lib/httpcomponents-client-4.5.3/commons-codec-1.9.jar"/>
+	<classpathentry kind="lib" path="./lib/httpcomponents-client-4.5.3/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="./lib/httpcomponents-client-4.5.3/fluent-hc-4.5.3.jar"/>
+	<classpathentry kind="lib" path="./lib/httpcomponents-client-4.5.3/httpclient-4.5.3.jar" sourcepath="C:/Users/lenove/WorkPlace/sustc-jwxt/lib/httpcomponents-client-4.5.3-src.zip"/>
+	<classpathentry kind="lib" path="./lib/httpcomponents-client-4.5.3/httpclient-cache-4.5.3.jar"/>
+	<classpathentry kind="lib" path="./lib/httpcomponents-client-4.5.3/httpclient-win-4.5.3.jar"/>
+	<classpathentry kind="lib" path="./lib/httpcomponents-client-4.5.3/httpcore-4.4.6.jar" sourcepath="C:/Users/lenove/WorkPlace/sustc-jwxt/lib/httpcomponents-core-4.4.6-src.zip"/>
+	<classpathentry kind="lib" path="./lib/httpcomponents-client-4.5.3/httpmime-4.5.3.jar"/>
+	<classpathentry kind="lib" path="./lib/httpcomponents-client-4.5.3/jna-4.1.0.jar"/>
+	<classpathentry kind="lib" path="./lib/httpcomponents-client-4.5.3/jna-platform-4.1.0.jar"/>
+	<classpathentry kind="lib" path="./lib/swt-win.jar" sourcepath="C:/Users/lenove/WorkPlace/sustc-jwxt/lib/swt-win.zip"/>
+	<classpathentry kind="lib" path="./lib/log4j-1.2.17.jar" sourcepath="C:/Users/lenove/WorkPlace/sustc-jwxt/lib/log4j-1.2.17.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
