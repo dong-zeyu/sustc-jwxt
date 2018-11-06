@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Map.Entry;
 
 import org.apache.http.ParseException;
 import org.apache.http.auth.AuthenticationException;
@@ -33,10 +34,9 @@ public class CourseData extends NetworkConnection {
 	private Logger logger = Logger.getLogger("CourseCenter");
 
 	JsonObject course;
-	public JsonArray selected;
+	public JsonObject selected;
 
-	private final File coursestorge = new File("course.json");
-	private final File selectedstorge = new File("selected.json");
+	private final File storage = new File("data.json");
 
 	private ArrayList<String> id = new ArrayList<String>();
 	/** 选课主页 */
@@ -67,13 +67,12 @@ public class CourseData extends NetworkConnection {
 	 */
 	public CourseData(String user, String pass) {
 		course = new JsonObject();
-		selected = new JsonArray();
+		selected = new JsonObject();
 		url = "http://jwxt.sustc.edu.cn/jsxsd";
 		username = user;
 		password = pass;
 		try {
-			fileOper(coursestorge, false);
-			fileOper(selectedstorge, false);
+			loadData();
 			logger.info("Load storage.");
 		} catch (FileNotFoundException e) {
 			logger.warn("Load Storage Failed: " + e.getMessage());
@@ -244,7 +243,7 @@ public class CourseData extends NetworkConnection {
 	 * @throws StatusException
 	 *             When no selection is available
 	 */
-	public JsonArray updateSelected() throws AuthenticationException, StatusException {
+	public JsonObject updateSelected() throws AuthenticationException, StatusException {
 		try {
 			getIn();
 		} catch (IOException e) {
@@ -258,24 +257,21 @@ public class CourseData extends NetworkConnection {
 				String string = EntityUtils.toString(response.getEntity());
 				Document document = Jsoup.parse(string);
 				Elements courses = document.getElementsByTag("tbody").get(0).getElementsByTag("div");
-				for (JsonElement element : selected) {
-					element.getAsJsonObject().addProperty("status", false);
+				for (Entry<String, JsonElement> element : selected.entrySet()) {
+					selected.addProperty(element.getKey(), false);
 				}
 				for (int i = 0; i < courses.size(); i++) {
 					String id = courses.get(i).id().split("_")[1];
 					boolean flag = false;
-					for (JsonElement jsonElement : selected) {
-						if (jsonElement.getAsJsonObject().get("id").getAsString().equals(id)) {
-							jsonElement.getAsJsonObject().addProperty("status", true);
+					for (Entry<String, JsonElement> element : selected.entrySet()) {
+						if (element.getKey().equals(id)) {
+							selected.addProperty(element.getKey(), false);
 							flag = true;
 							break;
 						}
 					}
 					if (!flag) {
-						JsonObject jsonObject = new JsonObject();
-						jsonObject.addProperty("id", id);
-						jsonObject.addProperty("status", true);
-						selected.add(jsonObject);
+						selected.addProperty(id, true);
 					}
 				}
 			} catch (ParseException | IOException | IndexOutOfBoundsException | NullPointerException e) {
@@ -294,49 +290,40 @@ public class CourseData extends NetworkConnection {
 		return selected;
 	}
 
-	private void fileOper(File file, boolean work) throws FileNotFoundException, IOException {
-		if (work) {
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-			// true = append file
-			FileWriter fileWritter = new FileWriter(file, false);
-			JsonWriter writer = new JsonWriter(fileWritter);
-			writer.setLenient(true);
-			writer.setIndent("  ");
-			if (file.equals(coursestorge)) {
-				Streams.write(course, writer);
-			} else if (file.equals(selectedstorge)) {
-				Streams.write(selected, writer);
-			}
-			writer.flush();
-			writer.close();
+	private void loadData() throws FileNotFoundException, IOException {
+		if (storage.exists()) {
+			FileReader reader = new FileReader(storage);
+			JsonParser parse = new JsonParser(); // 创建json解析器
+			JsonObject store = parse.parse(reader).getAsJsonObject();
+			course = (JsonObject) store.get("courses");
+			selected = (JsonObject) store.get("selected");
+			reader.close();
 		} else {
-			if (file.exists()) {
-				FileReader reader = new FileReader(file);
-				JsonParser parse = new JsonParser(); // 创建json解析器
-				if (file.equals(coursestorge)) {
-					course = parse.parse(reader).getAsJsonObject(); // 创建jsonObject对象
-				} else if (file.equals(selectedstorge)) {
-					selected = parse.parse(reader).getAsJsonArray();
-				}
-				reader.close();
-			} else {
-				throw new FileNotFoundException(String.format("Can't find '%s'", file.getName()));
-			}
+			throw new FileNotFoundException(String.format("Can't find '%s'", storage.getName()));
 		}
 	}
 
 	public void saveToFile() throws IOException {
-		fileOper(coursestorge, true);
-		fileOper(selectedstorge, true);
+		if (!storage.exists()) {
+			storage.createNewFile();
+		}
+		JsonObject store = new JsonObject();
+		store.add("courses", course);
+		store.add("selected", selected);
+		FileWriter fileWritter = new FileWriter(storage, false);
+		JsonWriter writer = new JsonWriter(fileWritter);
+		writer.setLenient(true);
+		writer.setIndent("  ");
+		Streams.write(store, writer);
+		writer.flush();
+		writer.close();
 	}
 
 	public JsonObject getCourse() {
 		return course;
 	}
 
-	public JsonArray getSelected() {
+	public JsonObject getSelected() {
 		return selected;
 	}
 
