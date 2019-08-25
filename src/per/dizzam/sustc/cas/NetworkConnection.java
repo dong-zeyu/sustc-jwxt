@@ -41,7 +41,7 @@ import org.jsoup.nodes.Document;
 public class NetworkConnection {
 
 	/** This is the default CAS login page: {@value} */
-	public static final String URL_CAS = "https://cas.sustc.edu.cn/cas/login";
+	public static final String URL_CAS = "https://cas.sustech.edu.cn/cas/login";
 
 	/**
 	 * This is the url of service. It must be set before using this class

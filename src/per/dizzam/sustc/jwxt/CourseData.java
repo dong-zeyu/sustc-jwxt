@@ -19,7 +19,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -68,7 +67,7 @@ public class CourseData extends NetworkConnection {
 	public CourseData(String user, String pass) {
 		course = new JsonObject();
 		selected = new JsonObject();
-		url = "http://jwxt.sustc.edu.cn/jsxsd";
+		url = "http://jwxt.sustech.edu.cn/jsxsd";
 		username = user;
 		password = pass;
 		try {
