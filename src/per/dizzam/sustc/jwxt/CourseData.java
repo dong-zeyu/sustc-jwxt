@@ -148,7 +148,8 @@ public class CourseData extends NetworkConnection {
 				}
 				isChoose = true;
 			} catch (IndexOutOfBoundsException | NullPointerException e) {
-				throw new StatusException("尚未开放选课", e);
+				logger.error(e.getMessage(), e);
+				throw new StatusException("未知错误", e);
 			} finally {
 				response.close();
 			}
